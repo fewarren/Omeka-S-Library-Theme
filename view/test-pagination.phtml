@@ -1,0 +1,172 @@
+<?php
+/**
+ * Pagination Button Test View
+ * This view tests pagination button styling within the Omeka theme
+ */
+
+$this->headTitle('Pagination Button Test');
+?>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h1>🔘 Pagination Button Test</h1>
+    <p><strong>Testing theme settings application to pagination buttons</strong></p>
+    
+    <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h2>Current Theme Settings</h2>
+        <ul>
+            <li><strong>Pagination Background:</strong> <?php echo $this->themeSetting('pagination_background_color', '#2c5aa0'); ?></li>
+            <li><strong>Pagination Font Color:</strong> <?php echo $this->themeSetting('pagination_font_color', '#ffffff'); ?></li>
+            <li><strong>Button Size:</strong> <?php echo $this->themeSetting('pagination_button_size', 'medium'); ?></li>
+            <li><strong>Primary Color:</strong> <?php echo $this->themeSetting('library_primary_color', '#2c5aa0'); ?></li>
+        </ul>
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>Standard Pagination Buttons</h2>
+    <div class="pagination">
+        <a href="#" class="button">Previous</a>
+        <a href="#" class="button">1</a>
+        <a href="#" class="button">2</a>
+        <a href="#" class="button">3</a>
+        <a href="#" class="button">Next</a>
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>Omeka Pagination</h2>
+    <div class="omeka-pagination">
+        <a href="#" class="button">← Previous</a>
+        <a href="#" class="button">Next →</a>
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>Prev-Next Navigation</h2>
+    <div class="prev-next-nav">
+        <a href="#">← Previous Page</a>
+        <a href="#">Next Page →</a>
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>Navigation Buttons</h2>
+    <div class="navigation">
+        <a href="#" class="button">Back</a>
+        <a href="#" class="button">Forward</a>
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>CSS Variables Visual Test</h2>
+    <div style="background: var(--pagination-background-color, red); color: var(--pagination-font-color, white); padding: 15px; margin: 10px 0; border-radius: 5px; text-align: center; font-weight: bold;">
+        This box should use pagination background color from settings
+    </div>
+    <div style="background: var(--pagination-hover-color, blue); color: var(--pagination-font-color, white); padding: 15px; margin: 10px 0; border-radius: 5px; text-align: center; font-weight: bold;">
+        This box should use pagination hover color from settings
+    </div>
+    <div style="background: var(--sr-primary-color, green); color: white; padding: 15px; margin: 10px 0; border-radius: 5px; text-align: center; font-weight: bold;">
+        This box should use primary color from settings
+    </div>
+</div>
+
+<div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+    <h2>Debug Information</h2>
+    <div id="debug-info" style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 14px;"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔘 Pagination Test Page Loaded');
+    
+    // Debug CSS variables
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    
+    const cssVariables = [
+        '--pagination-font-color',
+        '--pagination-background-color',
+        '--pagination-hover-color',
+        '--pagination-button-padding',
+        '--pagination-button-font-size',
+        '--sr-primary-color',
+        '--sr-secondary-color',
+        '--sr-accent-color'
+    ];
+    
+    let debugHTML = '<h3>CSS Variables Status:</h3><ul>';
+    cssVariables.forEach(variable => {
+        const value = computedStyle.getPropertyValue(variable).trim();
+        const status = value ? '✅' : '❌';
+        debugHTML += `<li>${status} <strong>${variable}:</strong> ${value || 'NOT SET'}</li>`;
+    });
+    debugHTML += '</ul>';
+    
+    // Count pagination buttons
+    const paginationButtons = document.querySelectorAll('.pagination .button, .pagination a, .prev-next-nav a, .navigation a, .omeka-pagination .button');
+    debugHTML += `<h3>Pagination Buttons Found:</h3><p><strong>${paginationButtons.length}</strong> buttons detected</p>`;
+    
+    if (paginationButtons.length > 0) {
+        const firstButton = paginationButtons[0];
+        const buttonStyle = getComputedStyle(firstButton);
+        debugHTML += '<h3>First Button Computed Styles:</h3><ul>';
+        debugHTML += `<li><strong>Background Color:</strong> ${buttonStyle.backgroundColor}</li>`;
+        debugHTML += `<li><strong>Color:</strong> ${buttonStyle.color}</li>`;
+        debugHTML += `<li><strong>Padding:</strong> ${buttonStyle.padding}</li>`;
+        debugHTML += `<li><strong>Font Size:</strong> ${buttonStyle.fontSize}</li>`;
+        debugHTML += `<li><strong>Border:</strong> ${buttonStyle.border}</li>`;
+        debugHTML += '</ul>';
+    }
+    
+    // jQuery status
+    debugHTML += '<h3>JavaScript Status:</h3><ul>';
+    debugHTML += `<li><strong>jQuery:</strong> ${typeof jQuery !== 'undefined' ? '✅ Loaded' : '❌ Not Loaded'}</li>`;
+    debugHTML += `<li><strong>Foundation:</strong> ${typeof Foundation !== 'undefined' ? '✅ Available' : '❌ Not Available'}</li>`;
+    debugHTML += '</ul>';
+    
+    document.getElementById('debug-info').innerHTML = debugHTML;
+    
+    console.log(`🔘 Found ${paginationButtons.length} pagination buttons`);
+    console.log('CSS Variables check complete - see debug section on page');
+});
+</script>
+
+<style>
+/* Ensure pagination button styles are applied with high specificity */
+body .test-container .pagination .button,
+body .test-container .omeka-pagination .button,
+body .test-container .pagination a,
+body .test-container .prev-next-nav a,
+body .test-container .navigation a,
+body .test-container .navigation .button {
+    font-size: var(--pagination-button-font-size, 1rem) !important;
+    color: var(--pagination-font-color, #ffffff) !important;
+    background-color: var(--pagination-background-color, #2c5aa0) !important;
+    border: 2px solid var(--pagination-background-color, #2c5aa0) !important;
+    padding: var(--pagination-button-padding, 0.75rem 1.5rem) !important;
+    text-decoration: none !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+    margin: 0.5rem 0.25rem !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    min-width: 100px !important;
+    box-sizing: border-box !important;
+}
+
+body .test-container .pagination .button:hover,
+body .test-container .omeka-pagination .button:hover,
+body .test-container .pagination a:hover,
+body .test-container .prev-next-nav a:hover,
+body .test-container .navigation a:hover,
+body .test-container .navigation .button:hover {
+    background-color: var(--pagination-hover-color, #1a365d) !important;
+    border-color: var(--pagination-hover-color, #1a365d) !important;
+    color: var(--pagination-font-color, #ffffff) !important;
+    text-decoration: none !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+</style>

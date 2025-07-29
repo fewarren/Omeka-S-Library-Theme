@@ -1,0 +1,1220 @@
+<?php
+// Font family mapping function - MUST be defined first
+function getFontFamily($fontKey) {
+    // Handle null or empty values
+    if (empty($fontKey)) {
+        return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    }
+
+    $fontMap = [
+        // Sans-Serif Fonts
+        'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+        'roboto' => 'Roboto, Arial, sans-serif',
+        'open_sans' => 'Open Sans, Arial, sans-serif',
+        'lato' => 'Lato, Arial, sans-serif',
+        'montserrat' => 'Montserrat, Arial, sans-serif',
+        'source_sans' => 'Source Sans Pro, Arial, sans-serif',
+        'nunito' => 'Nunito, Arial, sans-serif',
+        'poppins' => 'Poppins, Arial, sans-serif',
+        'inter' => 'Inter, Arial, sans-serif',
+        'work_sans' => 'Work Sans, Arial, sans-serif',
+        'fira_sans' => 'Fira Sans, Arial, sans-serif',
+        'arial' => 'Arial, sans-serif',
+        // Serif Fonts
+        'merriweather' => 'Merriweather, Georgia, serif',
+        'playfair' => 'Playfair Display, Georgia, serif',
+        'crimson' => 'Crimson Text, Georgia, serif',
+        'libre_baskerville' => 'Libre Baskerville, Georgia, serif',
+        'lora' => 'Lora, Georgia, serif',
+        'pt_serif' => 'PT Serif, Georgia, serif',
+        'source_serif' => 'Source Serif Pro, Georgia, serif',
+        'georgia' => 'Georgia, serif',
+        'times' => 'Times New Roman, serif',
+        // Display Fonts
+        'oswald' => 'Oswald, Arial, sans-serif',
+        'raleway' => 'Raleway, Arial, sans-serif',
+        'bebas_neue' => 'Bebas Neue, Arial, sans-serif',
+        'anton' => 'Anton, Arial, sans-serif',
+        'dancing_script' => 'Dancing Script, cursive',
+        'pacifico' => 'Pacifico, cursive',
+        // Monospace Fonts
+        'fira_code' => 'Fira Code, Consolas, monospace',
+        'source_code' => 'Source Code Pro, Consolas, monospace',
+        'courier' => 'Courier New, monospace',
+        // System Default
+        'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    ];
+    return $fontMap[$fontKey] ?? $fontMap['system'];
+}
+
+// SIMPLIFIED SUFISM REORIENTED THEME
+// Get site information
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Murshids of Sufism Reoriented';
+
+// Get theme settings with safe fallbacks
+try {
+    // Logo and branding settings
+    $siteLogo = $this->themeSetting('site_logo', '');
+    $logoLinkPage = $this->themeSetting('logo_link_page', '/');
+    $tagline = $this->themeSetting('site_tagline', 'Menu');
+    $taglineFont = $this->themeSetting('tagline_font_family', 'Georgia');
+    $taglineColor = $this->themeSetting('tagline_font_color', '#f7c97f');
+    $logoHeight = $this->themeSetting('logo_height', '100px');
+    $headerHeight = $this->themeSetting('header_height', '100px');
+    $headerLayout = $this->themeSetting('header_layout', 'logo_with_tagline');
+
+    // Typography settings
+    $h1FontFamily = $this->themeSetting('h1_font_family', 'Helvetica Neue');
+    $h1FontSize = $this->themeSetting('h1_font_size', '2.5rem');
+    $h1FontColor = $this->themeSetting('h1_font_color', '#2c5aa0');
+    $h1FontWeight = $this->themeSetting('h1_font_weight', '600');
+    $h1FontStyle = $this->themeSetting('h1_font_style', 'normal');
+
+    // TEMPORARILY COMMENTED OUT NEW FONT SETTINGS
+    // $h2FontFamily = $this->themeSetting('h2_font_family', 'Helvetica Neue');
+    // $h2FontSize = $this->themeSetting('h2_font_size', '2rem');
+    // $h2FontColor = $this->themeSetting('h2_font_color', '#2c5aa0');
+    // $h2FontWeight = $this->themeSetting('h2_font_weight', '600');
+    // $h2FontStyle = $this->themeSetting('h2_font_style', 'normal');
+
+    // $h3FontFamily = $this->themeSetting('h3_font_family', 'Helvetica Neue');
+    // $h3FontSize = $this->themeSetting('h3_font_size', '1.5rem');
+    // $h3FontColor = $this->themeSetting('h3_font_color', '#2c5aa0');
+    // $h3FontWeight = $this->themeSetting('h3_font_weight', '500');
+    // $h3FontStyle = $this->themeSetting('h3_font_style', 'normal');
+
+    // $bodyFontFamily = $this->themeSetting('body_font_family', 'Helvetica Neue');
+    // $bodyFontSize = $this->themeSetting('body_font_size', '1rem');
+    // $bodyFontColor = $this->themeSetting('body_font_color', '#4a5568');
+    // $bodyFontWeight = $this->themeSetting('body_font_weight', '400');
+    // $bodyFontStyle = $this->themeSetting('body_font_style', 'normal');
+
+    // $taglineFontWeight = $this->themeSetting('tagline_font_weight', '400');
+    // $taglineFontStyle = $this->themeSetting('tagline_font_style', 'normal');
+
+    // Pagination settings
+    $paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
+    $paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
+    $paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
+    $paginationFontSize = $this->themeSetting('pagination_font_size', '1rem');
+    $paginationButtonSize = $this->themeSetting('pagination_button_size', 'extra_small');
+
+    // Footer settings
+    $footerBackgroundColor = $this->themeSetting('footer_background_color', '#4a6fa5');
+    $footerTextColor = $this->themeSetting('footer_text_color', '#ffffff');
+    $footerCopyrightText = $this->themeSetting('footer_copyright_text', '© ' . date('Y') . ' The Library. All rights reserved.');
+    $footerPoweredByText = $this->themeSetting('footer_powered_by_text', 'Powered by Omeka S');
+    $footerBannerHeight = $this->themeSetting('footer_banner_height', 'standard');
+
+    // Sophisticated Color Palette
+    $primaryColor = $this->themeSetting('primary_color', '#2C4A6B');
+    $sacredGold = $this->themeSetting('sacred_gold', '#D4AF37');
+    $warmEarth = $this->themeSetting('warm_earth', '#8B4513');
+    $softSage = $this->themeSetting('soft_sage', '#9CAF88');
+    $warmCream = $this->themeSetting('warm_cream', '#F5F5DC');
+    $gentleLavender = $this->themeSetting('gentle_lavender', '#E6E6FA');
+    $sunsetOrange = $this->themeSetting('sunset_orange', '#FF8C42');
+    $deepBurgundy = $this->themeSetting('deep_burgundy', '#800020');
+    $charcoal = $this->themeSetting('charcoal', '#36454F');
+    $lightGray = $this->themeSetting('light_gray', '#F8F9FA');
+    $mediumGray = $this->themeSetting('medium_gray', '#6C757D');
+
+    // Legacy compatibility
+    $secondaryColor = $sacredGold;
+    $accentColor = $warmCream;
+} catch (Exception $e) {
+    // Fallback values if theme settings fail
+    $siteLogo = '';
+    $logoLinkPage = '/';
+    $tagline = 'Menu';
+    $taglineFont = 'Georgia';
+    $taglineColor = '#f7c97f';
+    $logoHeight = '100px';
+    $headerHeight = '100px';
+    $headerLayout = 'logo_with_tagline';
+    $h1FontFamily = 'Helvetica Neue';
+    $h1FontSize = '2.5rem';
+    $h1FontColor = '#2c5aa0';
+    $h1FontWeight = '600';
+    $h1FontStyle = 'normal';
+    // TEMPORARILY COMMENTED OUT NEW FONT FALLBACKS
+    // $h2FontFamily = 'Helvetica Neue';
+    // $h2FontSize = '2rem';
+    // $h2FontColor = '#2c5aa0';
+    // $h2FontWeight = '600';
+    // $h2FontStyle = 'normal';
+    // $h3FontFamily = 'Helvetica Neue';
+    // $h3FontSize = '1.5rem';
+    // $h3FontColor = '#2c5aa0';
+    // $h3FontWeight = '500';
+    // $h3FontStyle = 'normal';
+    // $bodyFontFamily = 'Helvetica Neue';
+    // $bodyFontSize = '1rem';
+    // $bodyFontColor = '#4a5568';
+    // $bodyFontWeight = '400';
+    // $bodyFontStyle = 'normal';
+    // $taglineFontWeight = '400';
+    // $taglineFontStyle = 'normal';
+    $paginationFontColor = $paginationFontColor ?? '#ffffff';
+    $paginationBackgroundColor = $paginationBackgroundColor ?? '#2c5aa0';
+    $paginationHoverColor = $paginationHoverColor ?? '#1a365d';
+    $paginationFontSize = $paginationFontSize ?? '1rem';
+    $paginationButtonSize = $paginationButtonSize ?? 'extra_small';
+    $footerBackgroundColor = $footerBackgroundColor ?? '#4a6fa5';
+    $footerTextColor = $footerTextColor ?? '#ffffff';
+    $footerCopyrightText = $footerCopyrightText ?? '© ' . date('Y') . ' The Library. All rights reserved.';
+    $footerPoweredByText = $footerPoweredByText ?? 'Powered by Omeka S';
+    $footerBannerHeight = $footerBannerHeight ?? 'standard';
+    $primaryColor = '#f7c97f';
+    $secondaryColor = '#f7c97f';
+    $accentColor = '#fffaf7';
+
+    // Convert footer banner height setting to padding value
+    $footerPaddingMap = [
+        'compact' => '20px 0',
+        'standard' => '30px 0',
+        'spacious' => '40px 0',
+        'extra_spacious' => '50px 0'
+    ];
+    $footerPadding = $footerPaddingMap[$footerBannerHeight] ?? '30px 0';
+}
+
+// Convert button size setting to CSS values
+$buttonSizeMap = [
+    'extra_small' => ['padding' => '8px 16px', 'font-size' => '12px'],
+    'small' => ['padding' => '10px 20px', 'font-size' => '14px'],
+    'medium' => ['padding' => '12px 24px', 'font-size' => '16px'],
+    'large' => ['padding' => '16px 32px', 'font-size' => '18px'],
+    'extra_large' => ['padding' => '20px 40px', 'font-size' => '20px']
+];
+$buttonStyles = $buttonSizeMap[$paginationButtonSize] ?? $buttonSizeMap['medium'];
+
+// Add basic head elements
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle);
+
+// Add minimal CSS - only what's essential
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+// Add jQuery safely
+$this->headScript()->prependFile('https://code.jquery.com/jquery-3.6.0.min.js');
+
+$this->trigger('view.layout.head');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <?php echo $this->headMeta() ?>
+    <?php echo $this->headTitle() ?>
+    <title>Sufism Library - Professional Theme</title>
+
+    <!-- Optimized Google Fonts for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Load only essential fonts for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Performance and Accessibility Meta Tags -->
+    <meta name="theme-color" content="<?php echo $primaryColor; ?>">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preload" as="style" href="<?php echo $this->assetUrl('css/app.css', 'Omeka'); ?>">
+
+    <!-- Accessibility Enhancements -->
+    <meta name="description" content="<?php echo $this->escapeHtml($site ? $site->summary() : 'Sufism Reoriented Digital Library - A comprehensive collection of spiritual teachings and resources'); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <style>
+        /* SOPHISTICATED SPIRITUAL DESIGN SYSTEM */
+        :root {
+            /* Sophisticated Color Palette */
+            --primary-color: <?php echo $primaryColor; ?>;
+            --sacred-gold: <?php echo $sacredGold; ?>;
+            --warm-earth: <?php echo $warmEarth; ?>;
+            --soft-sage: <?php echo $softSage; ?>;
+            --warm-cream: <?php echo $warmCream; ?>;
+            --gentle-lavender: <?php echo $gentleLavender; ?>;
+            --sunset-orange: <?php echo $sunsetOrange; ?>;
+            --deep-burgundy: <?php echo $deepBurgundy; ?>;
+            --charcoal: <?php echo $charcoal; ?>;
+            --light-gray: <?php echo $lightGray; ?>;
+            --medium-gray: <?php echo $mediumGray; ?>;
+
+            /* Typography Scale */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+
+            /* Spacing Scale */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+
+            /* Shadows for Depth */
+            --shadow-sm: 0 1px 2px 0 rgba(44, 74, 107, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(44, 74, 107, 0.1), 0 2px 4px -1px rgba(44, 74, 107, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(44, 74, 107, 0.1), 0 4px 6px -2px rgba(44, 74, 107, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(44, 74, 107, 0.1), 0 10px 10px -5px rgba(44, 74, 107, 0.04);
+
+            /* Border Radius */
+            --radius-sm: 0.125rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+
+            /* Legacy Theme Settings */
+            --pagination-background-color: <?php echo $paginationBackgroundColor; ?>;
+            --pagination-font-color: <?php echo $paginationFontColor; ?>;
+            --pagination-hover-color: <?php echo $paginationHoverColor; ?>;
+            --pagination-button-padding: <?php echo $buttonStyles['padding']; ?>;
+            --pagination-button-font-size: <?php echo $buttonStyles['font-size']; ?>;
+        }
+
+        /* SOPHISTICATED BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--charcoal);
+            background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-gray) 100%);
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            min-height: 100vh;
+        }
+
+        /* ELEGANT TYPOGRAPHY SYSTEM */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', 'Georgia', serif;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--primary-color);
+            margin-bottom: var(--space-4);
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: var(--space-6);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+            color: var(--warm-earth);
+            margin-bottom: var(--space-5);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+            color: var(--deep-burgundy);
+            margin-bottom: var(--space-4);
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            line-height: 1.8;
+            color: var(--charcoal);
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition-normal);
+            border-bottom: 1px solid transparent;
+        }
+
+        a:hover {
+            color: var(--sacred-gold);
+            border-bottom-color: var(--sacred-gold);
+            transform: translateY(-1px);
+        }
+
+        /* HIDE DEFAULT OMEKA NAVIGATION AND HEADERS */
+
+        /* SHOW CONTENT NAVIGATION */
+        nav.sub-menu, .sub-menu {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* STYLE CONTENT NAVIGATION PROPERLY - FORCE OVERRIDE */
+        main nav ul, main nav ol, .sub-menu ul, .sub-menu ol,
+        main navigation ul, main navigation ol,
+        nav.sub-menu ul, nav.sub-menu ol,
+        ul.navigation, ol.navigation {
+            list-style: none !important;
+            list-style-type: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-left: none !important; /* Remove the gray vertical bar */
+        }
+
+        /* SPECIFIC FIX FOR VERTICAL BAR ISSUE - HIGH SPECIFICITY */
+        html body main ul.navigation,
+        html body main div ul.navigation,
+        html body .main-content-wrapper ul.navigation,
+        html body div main ul.navigation {
+            border-left: none !important;
+            border: none !important;
+        }
+
+        /* ADDITIONAL OVERRIDE FOR OMEKA DEFAULT STYLES */
+        ul.navigation {
+            border-left: none !important;
+            border: none !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        main nav li, .sub-menu li,
+        main navigation li,
+        nav.sub-menu li {
+            list-style: none !important;
+            list-style-type: none !important;
+            margin: 10px 0 !important;
+            padding: 0 !important;
+            padding-left: 0 !important;
+        }
+
+        main nav li::before, .sub-menu li::before,
+        main navigation li::before,
+        nav.sub-menu li::before {
+            content: none !important;
+            display: none !important;
+        }
+
+        /* ADDITIONAL FORCE OVERRIDES */
+        body main nav ul li,
+        body main navigation ul li,
+        body nav.sub-menu ul li {
+            list-style: none !important;
+            list-style-type: none !important;
+        }
+
+        /* REMOVE ALL BULLETS FROM MAIN CONTENT LISTS */
+        main ul, main ol,
+        body main ul, body main ol,
+        .main-content ul, .main-content ol {
+            list-style: none !important;
+            list-style-type: none !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        main li, body main li,
+        .main-content li {
+            list-style: none !important;
+            list-style-type: none !important;
+            margin: 10px 0 !important;
+            padding-left: 0 !important;
+        }
+
+        main li::before, body main li::before,
+        .main-content li::before {
+            content: none !important;
+            display: none !important;
+        }
+        .top-bar, #navigation, .title-bar, .site-title, .user-bar,
+        main h1:first-child, .page-header h1,
+        .top-bar-left, .top-bar-right, #responsive-menu {
+            display: none !important;
+        }
+
+        /* Hide the duplicate page title that appears in main content */
+        main > div > h1:first-child {
+            display: none !important;
+        }
+
+        /* SUFISM REORIENTED INSPIRED DESIGN */
+        body {
+            background: #ffffff;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* SOPHISTICATED HEADER STYLING */
+        .site-header {
+            background: linear-gradient(135deg, var(--warm-cream) 0%, rgba(255, 255, 255, 0.95) 100%);
+            padding: var(--space-8) 0;
+            text-align: center;
+            border-bottom: 3px solid var(--sacred-gold);
+            position: relative;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, var(--gentle-lavender) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, var(--soft-sage) 0%, transparent 50%);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .site-logo {
+            margin-bottom: var(--space-4);
+            position: relative;
+            z-index: 2;
+            transition: var(--transition-normal);
+        }
+
+        .site-logo:hover {
+            transform: translateY(-2px);
+            filter: drop-shadow(var(--shadow-lg));
+        }
+
+        .site-logo .logo-image {
+            max-height: <?php echo $logoHeight; ?>;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+            background: transparent !important;
+            border-radius: var(--radius-lg);
+            transition: var(--transition-normal);
+        }
+
+        /* FIX LOGO BACKGROUND - ENSURE IT MATCHES HEADER */
+        .site-header, .site-header .logo-container {
+            background: #ffffff !important;
+        }
+
+        /* FIX LOGO LINK BACKGROUND - REMOVE BLUE BACKGROUND */
+        .site-logo .logo-link,
+        .logo-link {
+            background: transparent !important;
+            background-color: transparent !important;
+            padding: 0 !important;
+        }
+
+        .site-logo {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* APPLY THEME SETTINGS */
+        .site-header {
+            height: <?php echo $headerHeight; ?>;
+            background: #ffffff !important;
+        }
+
+        .site-tagline {
+            color: <?php echo $taglineColor; ?>;
+            font-size: 16px;
+            font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif;
+            font-weight: 400;
+            font-style: normal;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        /* TYPOGRAPHY SETTINGS FROM ADMIN */
+        body {
+            font-family: <?php echo $bodyFontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
+            font-size: <?php echo $bodyFontSize; ?>;
+            color: <?php echo $bodyFontColor; ?>;
+        }
+
+        h1 {
+            font-family: <?php echo $h1FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
+            font-size: <?php echo $h1FontSize; ?>;
+            color: <?php echo $h1FontColor; ?>;
+            font-weight: <?php echo $h1FontWeight; ?>;
+        }
+
+        /* TEMPORARILY COMMENTED OUT NEW FONT CSS */
+        /*
+        h2 {
+            font-family: <?php echo $h2FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
+            font-size: <?php echo $h2FontSize; ?>;
+            color: <?php echo $h2FontColor; ?>;
+            font-weight: <?php echo $h2FontWeight; ?>;
+            font-style: <?php echo $h2FontStyle; ?>;
+        }
+
+        h3 {
+            font-family: <?php echo $h3FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
+            font-size: <?php echo $h3FontSize; ?>;
+            color: <?php echo $h3FontColor; ?>;
+            font-weight: <?php echo $h3FontWeight; ?>;
+            font-style: <?php echo $h3FontStyle; ?>;
+        }
+        */
+
+        /* SOPHISTICATED MAIN CONTENT AREA */
+        .main-content-wrapper {
+            max-width: 900px;
+            margin: var(--space-8) auto;
+            padding: var(--space-16) var(--space-8);
+            text-align: center;
+            background: var(--warm-cream);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-content-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 0%, rgba(212, 175, 55, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .main-content-wrapper::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--gentle-lavender) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: gentle-float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gentle-float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* SOPHISTICATED INTERACTIVE ELEMENTS */
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced focus states for accessibility */
+        a:focus, button:focus {
+            outline: 3px solid var(--sacred-gold);
+            outline-offset: 2px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Elegant selection styling */
+        ::selection {
+            background: var(--sacred-gold);
+            color: var(--primary-color);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary-color), var(--sacred-gold));
+            border-radius: var(--radius-lg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(var(--sacred-gold), var(--sunset-orange));
+        }
+
+        /* Sophisticated loading animation */
+        @keyframes spiritual-pulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Page transition effects */
+        body {
+            animation: page-fade-in 0.6s ease-out;
+        }
+
+        @keyframes page-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* RESPONSIVE DESIGN ENHANCEMENTS */
+
+        /* Mobile-first responsive breakpoints */
+        @media (max-width: 768px) {
+            :root {
+                --space-16: 2rem;
+                --space-12: 1.5rem;
+                --space-8: 1rem;
+                --font-size-4xl: 2rem;
+                --font-size-3xl: 1.5rem;
+                --font-size-2xl: 1.25rem;
+            }
+
+            .site-header {
+                padding: var(--space-6) 0;
+            }
+
+            .main-content-wrapper {
+                margin: var(--space-4) auto;
+                padding: var(--space-8) var(--space-4);
+                border-radius: var(--radius-lg);
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            body main .pagination .button,
+            body main .pagination a,
+            body main a[href*="Next"],
+            body main a[href*="Prev"],
+            body main a[href*="page/"],
+            body main a[href*="collections"],
+            body .pagination .button,
+            body .pagination a,
+            body a[href*="Next"],
+            body a[href*="Prev"],
+            body a[href*="page/"],
+            body a[href*="collections"] {
+                width: 100% !important;
+                max-width: 200px !important;
+                margin: var(--space-1) 0 !important;
+            }
+
+            .simple-footer {
+                padding: var(--space-8) var(--space-4) !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content-wrapper {
+                margin: var(--space-2) var(--space-2);
+                padding: var(--space-6) var(--space-3);
+            }
+
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+
+            h2 {
+                font-size: var(--font-size-2xl);
+            }
+        }
+
+        /* Tablet and larger screens */
+        @media (min-width: 769px) {
+            .main-content-wrapper {
+                max-width: 1000px;
+            }
+
+            .pagination {
+                justify-content: center;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .main-content-wrapper {
+                max-width: 1200px;
+                padding: var(--space-20) var(--space-12);
+            }
+
+            .site-header {
+                padding: var(--space-12) 0;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .site-header::before,
+            .main-content-wrapper::before,
+            .simple-footer::before {
+                background-size: 50px 50px;
+            }
+        }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .main-content-wrapper::after {
+                animation: none !important;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --warm-cream: #2a2a2a;
+                --light-gray: #1a1a1a;
+                --charcoal: #e0e0e0;
+            }
+        }
+
+        /* ACCESSIBILITY ENHANCEMENTS */
+
+        /* Skip to main content link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--primary-color);
+            color: var(--warm-cream);
+            padding: 8px;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Improved focus indicators */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid var(--sacred-gold);
+            outline-offset: 2px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+                --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+            body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
+            body .content-links a,
+            body .resource-list a,
+            body .main-content-wrapper a {
+                border: 2px solid var(--primary-color) !important;
+            }
+        }
+
+        /* Performance optimizations */
+        .main-content-wrapper::after {
+            will-change: transform;
+        }
+
+        /* Ensure proper text contrast */
+        .main-content-wrapper {
+            color-contrast: AA;
+        }
+
+        /* Large Blue Heading - matching sufismreoriented.org style */
+        .page-title {
+            font-family: "Times New Roman", serif;
+            font-size: 2.5rem;
+            color: #4a6fa5;
+            font-weight: normal;
+            margin: 40px 0;
+            line-height: 1.2;
+        }
+
+        /* Content Links - gold/orange like reference site */
+        .content-links {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        /* SOPHISTICATED CONTENT LINKS */
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
+        body .content-links a,
+        body .resource-list a,
+        body .main-content-wrapper a {
+            color: var(--primary-color) !important;
+            text-decoration: none !important;
+            font-size: var(--font-size-lg) !important;
+            line-height: 1.8 !important;
+            display: block !important;
+            margin: var(--space-3) 0 !important;
+            padding: var(--space-4) var(--space-6) !important;
+            transition: var(--transition-normal) !important;
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--warm-cream) 100%) !important;
+            border-radius: var(--radius-lg) !important;
+            border: 2px solid transparent !important;
+            position: relative !important;
+            overflow: hidden !important;
+            font-weight: 500 !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):before,
+        body .content-links a:before,
+        body .resource-list a:before,
+        body .main-content-wrapper a:before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, var(--sacred-gold), transparent) !important;
+            transition: var(--transition-slow) !important;
+            opacity: 0.3 !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover,
+        body .content-links a:hover,
+        body .resource-list a:hover,
+        body .main-content-wrapper a:hover {
+            color: var(--sacred-gold) !important;
+            background: linear-gradient(135deg, var(--gentle-lavender) 0%, var(--soft-sage) 100%) !important;
+            border-color: var(--sacred-gold) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover:before,
+        body .content-links a:hover:before,
+        body .resource-list a:hover:before,
+        body .main-content-wrapper a:hover:before {
+            left: 100% !important;
+        }
+
+        /* SOPHISTICATED FOOTER STYLING */
+        .simple-footer {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--warm-earth) 100%) !important;
+            color: var(--warm-cream) !important;
+            padding: var(--space-16) var(--space-8) !important;
+            margin-top: var(--space-16);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simple-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="footerPattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23D4AF37" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23footerPattern)"/></svg>') repeat;
+            pointer-events: none;
+        }
+
+        .simple-footer p {
+            margin: var(--space-2) 0;
+            font-size: var(--font-size-sm);
+            color: var(--warm-cream) !important;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .simple-footer p:first-child {
+            font-weight: 500;
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-4);
+        }
+
+        /* Content Styling - matching sufismreoriented.org */
+        .main-content-wrapper h2,
+        .main-content-wrapper h3 {
+            font-family: "Times New Roman", serif;
+            color: #333333;
+            font-weight: normal;
+            margin: 30px 0 20px 0;
+            text-align: center;
+        }
+
+        .main-content-wrapper p {
+            color: #333333;
+            line-height: 1.8;
+            margin: 15px 0;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Resource listings - styled like reference site content */
+        .resource-list {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .resource-list .resource {
+            margin: 20px 0;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .resource-list .resource:last-child {
+            border-bottom: none;
+        }
+
+        .resource-list .resource-link {
+            color: #d4a574 !important;
+            text-decoration: none !important;
+            font-size: 16px !important;
+            display: block;
+            margin: 10px 0;
+            transition: color 0.3s ease;
+        }
+
+        .resource-list .resource-link:hover {
+            color: #b8935f !important;
+        }
+
+        .resource-list .resource-name {
+            color: #d4a574 !important;
+            font-size: 16px !important;
+            font-weight: normal !important;
+            text-decoration: none !important;
+        }
+
+        /* SOPHISTICATED PAGINATION STYLING */
+        .pagination {
+            text-align: center;
+            margin: var(--space-12) 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        /* Target all pagination buttons including Next/Prev links - FORCE BLUE STYLING */
+        body main .pagination .button,
+        body main .pagination a,
+        body main a[href*="Next"],
+        body main a[href*="Prev"],
+        body main a[href*="page/"],
+        body main a[href*="collections"],
+        body .pagination .button,
+        body .pagination a,
+        body a[href*="Next"],
+        body a[href*="Prev"],
+        body a[href*="page/"],
+        body a[href*="collections"] {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--warm-earth) 100%) !important;
+            color: var(--warm-cream) !important;
+            padding: var(--space-3) var(--space-6) !important;
+            margin: 0 var(--space-2) !important;
+            text-decoration: none !important;
+            border: 2px solid transparent !important;
+            font-size: var(--font-size-sm) !important;
+            border-radius: var(--radius-xl) !important;
+            transition: var(--transition-normal) !important;
+            display: inline-block !important;
+            font-weight: 500 !important;
+            box-shadow: var(--shadow-md) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            min-width: 80px !important;
+            text-align: center !important;
+        }
+
+        body main .pagination .button:hover,
+        body main .pagination a:hover,
+        body main a[href*="Next"]:hover,
+        body main a[href*="Prev"]:hover,
+        body main a[href*="page/"]:hover,
+        body main a[href*="collections"]:hover,
+        body .pagination .button:hover,
+        body .pagination a:hover,
+        body a[href*="Next"]:hover,
+        body a[href*="Prev"]:hover,
+        body a[href*="page/"]:hover,
+        body a[href*="collections"]:hover {
+            background: linear-gradient(135deg, var(--sacred-gold) 0%, var(--sunset-orange) 100%) !important;
+            color: var(--primary-color) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-lg) !important;
+            border-color: var(--sacred-gold) !important;
+        }
+
+        /* Dynamic tagline styling */
+        .site-tagline {
+            font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif !important;
+            font-weight: 400 !important;
+            font-style: normal !important;
+            color: <?php echo $taglineColor; ?> !important;
+        }
+
+        /* FINAL OVERRIDE FOR VERTICAL BAR - MAXIMUM SPECIFICITY */
+        html body div.main-content-wrapper main div ul.navigation,
+        html body main div ul.navigation,
+        html body main ul.navigation,
+        html body ul.navigation,
+        body ul.navigation,
+        ul.navigation {
+            border-left: 0px none transparent !important;
+            border: 0px none transparent !important;
+        }
+    </style>
+
+    <!-- VERTICAL BAR FIX - IMMEDIATE EXECUTION -->
+    <script>
+        // Fix vertical bar issue immediately when DOM is ready
+        function fixVerticalBar() {
+            const navigationElements = document.querySelectorAll('ul.navigation');
+            navigationElements.forEach(function(el) {
+                el.style.setProperty('border-left', 'none', 'important');
+                el.style.setProperty('border', 'none', 'important');
+            });
+
+            // Add permanent style fix
+            if (!document.getElementById('vertical-bar-fix-permanent')) {
+                const style = document.createElement('style');
+                style.id = 'vertical-bar-fix-permanent';
+                style.textContent = 'ul.navigation { border-left: none !important; border: none !important; }';
+                document.head.appendChild(style);
+            }
+        }
+
+        // Apply fix when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixVerticalBar);
+        } else {
+            fixVerticalBar();
+        }
+
+        // Also apply with delays to catch any late-loading content
+        setTimeout(fixVerticalBar, 100);
+        setTimeout(fixVerticalBar, 500);
+    </script>
+
+    <?php echo $this->headLink() ?>
+    <?php echo $this->headStyle() ?>
+    <?php echo $this->headScript() ?>
+</head>
+<body>
+    <!-- Accessibility: Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header with Logo and Menu - matching reference screenshot -->
+    <header class="site-header">
+        <div class="site-logo">
+            <?php
+            // Get proper asset URL for logo using Omeka's themeSettingAssetUrl helper
+            $logoUrl = '';
+            try {
+                $logoUrl = $this->themeSettingAssetUrl('site_logo');
+            } catch (Exception $e) {
+                // Fallback if themeSettingAssetUrl doesn't work
+                if ($siteLogo) {
+                    if (is_array($siteLogo) && isset($siteLogo['original_url'])) {
+                        $logoUrl = $siteLogo['original_url'];
+                    } elseif (is_string($siteLogo) && $siteLogo !== '9') {
+                        $logoUrl = $siteLogo;
+                    } elseif (is_object($siteLogo) && method_exists($siteLogo, 'originalUrl')) {
+                        $logoUrl = $siteLogo->originalUrl();
+                    }
+                }
+            }
+            ?>
+
+            <!-- Wrap logo in clickable link -->
+            <a href="<?php echo $this->escapeHtml($logoLinkPage); ?>" class="logo-link" style="text-decoration: none; display: block;">
+                <?php if ($logoUrl && $logoUrl !== '9'): ?>
+                    <img src="<?php echo $this->escapeHtml($logoUrl); ?>" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
+                <?php else: ?>
+                    <!-- Default logo placeholder -->
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjU2IiBzdHJva2U9IiNkNGE1NzQiIHN0cm9rZS13aWR0aD0iOCIvPgo8cGF0aCBkPSJNNjAgMzBMNzAgNTBINTBMNjAgMzBaIiBmaWxsPSIjZDRhNTc0Ii8+CjxwYXRoIGQ9Ik02MCA5MEw1MCA3MEg3MEw2MCA5MFoiIGZpbGw9IiNkNGE1NzQiLz4KPHN2Zz4K" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
+                <?php endif; ?>
+            </a>
+        </div>
+
+        <div class="site-tagline" style="font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif; font-weight: 400; font-style: normal; color: <?php echo $this->escapeHtml($taglineColor); ?>;">
+            <?php echo $this->escapeHtml($tagline); ?>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper - centered like sufismreoriented.org -->
+    <div class="main-content-wrapper">
+        <!-- Main Content -->
+        <main id="main-content">
+            <?php echo $this->content; ?>
+        </main>
+    </div>
+
+    <!-- Simple Footer - matching reference site -->
+    <footer class="simple-footer">
+        <p><?php echo $footerCopyrightText; ?></p>
+        <p><?php echo $footerPoweredByText; ?></p>
+    </footer>
+</body>
+</html>

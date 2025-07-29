@@ -1,0 +1,118 @@
+<?php
+/**
+ * Test Template for Sufism Library Theme
+ * Simple template to verify basic functionality
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$site = $this->vars()->site ?? null;
+?>
+
+<!DOCTYPE html>
+<html lang="<?php echo $this->lang(); ?>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo $translate('Theme Test'); ?></title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .test-section { margin: 1rem 0; padding: 1rem; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1><?php echo $translate('Sufism Library Theme Test'); ?></h1>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Basic Functions Test'); ?></h2>
+        <p class="success">✓ <?php echo $translate('Translate function working'); ?></p>
+        <p class="success">✓ <?php echo $translate('Escape function working: ') . $escape('<script>alert("test")</script>'); ?></p>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Site Variables Test'); ?></h2>
+        <?php if ($site): ?>
+            <p class="success">✓ <?php echo $translate('Site object available'); ?></p>
+            <p><?php echo $translate('Site title: ') . $escape($site->title()); ?></p>
+            <p><?php echo $translate('Site ID: ') . $site->id(); ?></p>
+        <?php else: ?>
+            <p class="error">✗ <?php echo $translate('Site object not available'); ?></p>
+        <?php endif; ?>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Theme Settings Test'); ?></h2>
+        <?php 
+        $themeSetting = $this->plugin('themeSetting');
+        $testSetting = $themeSetting('library_primary_color', '#003366');
+        ?>
+        <p class="success">✓ <?php echo $translate('Theme setting function working'); ?></p>
+        <p><?php echo $translate('Primary color: ') . $escape($testSetting); ?></p>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Asset URLs Test'); ?></h2>
+        <?php 
+        $cssUrl = $this->assetUrl('css/library.css');
+        $jsUrl = $this->assetUrl('js/lightbox.js');
+        ?>
+        <p class="success">✓ <?php echo $translate('Asset URL function working'); ?></p>
+        <p><?php echo $translate('CSS URL: ') . $escape($cssUrl); ?></p>
+        <p><?php echo $translate('JS URL: ') . $escape($jsUrl); ?></p>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Helper Functions Test'); ?></h2>
+        <?php 
+        try {
+            $api = $this->plugin('api');
+            $thumbnail = $this->plugin('thumbnail');
+            $url = $this->plugin('url');
+        ?>
+            <p class="success">✓ <?php echo $translate('API helper available'); ?></p>
+            <p class="success">✓ <?php echo $translate('Thumbnail helper available'); ?></p>
+            <p class="success">✓ <?php echo $translate('URL helper available'); ?></p>
+        <?php 
+        } catch (Exception $e) {
+        ?>
+            <p class="error">✗ <?php echo $translate('Helper error: ') . $escape($e->getMessage()); ?></p>
+        <?php } ?>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('Security Helper Test'); ?></h2>
+        <?php 
+        try {
+            $security = $this->plugin('securityHelper');
+            if ($security) {
+                $secureId = $security->generateSecureId();
+        ?>
+                <p class="success">✓ <?php echo $translate('Security helper available'); ?></p>
+                <p><?php echo $translate('Generated secure ID: ') . $escape($secureId); ?></p>
+        <?php 
+            } else {
+        ?>
+                <p class="error">✗ <?php echo $translate('Security helper not available'); ?></p>
+        <?php 
+            }
+        } catch (Exception $e) {
+        ?>
+            <p class="error">✗ <?php echo $translate('Security helper error: ') . $escape($e->getMessage()); ?></p>
+        <?php } ?>
+    </div>
+    
+    <div class="test-section">
+        <h2><?php echo $translate('File System Test'); ?></h2>
+        <?php 
+        $cssFile = 'themes/Sufism-Library/asset/css/library.css';
+        $jsFile = 'themes/Sufism-Library/asset/js/lightbox.js';
+        ?>
+        <p><?php echo $translate('CSS file exists: ') . (file_exists($cssFile) ? '✓' : '✗'); ?></p>
+        <p><?php echo $translate('JS file exists: ') . (file_exists($jsFile) ? '✓' : '✗'); ?></p>
+    </div>
+    
+    <p><strong><?php echo $translate('If all tests show green checkmarks, the theme is working correctly!'); ?></strong></p>
+</body>
+</html>

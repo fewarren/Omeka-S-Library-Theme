@@ -1,0 +1,80 @@
+<?php
+/**
+ * Homepage Template - Matching sufismreoriented.org design
+ * Clean, centered layout with gold/orange links
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$api = $this->plugin('api');
+$url = $this->plugin('url');
+
+// Get site data
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Murshids of Sufism Reoriented';
+
+// Get collections and items
+$itemSets = [];
+$recentItems = [];
+
+if ($site) {
+    try {
+        $itemSets = $api->search('item_sets', [
+            'site_id' => $site->id(),
+            'limit' => 10,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+
+        $recentItems = $api->search('items', [
+            'site_id' => $site->id(),
+            'limit' => 10,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+    } catch (Exception $e) {
+        $itemSets = [];
+        $recentItems = [];
+    }
+}
+?>
+
+<!-- Single Page Title - only on homepage -->
+<h1 class="page-title"><?php echo $escape($siteTitle); ?></h1>
+
+<!-- Content Links Section - matching sufismreoriented.org style -->
+<div class="content-links">
+    <?php if (!empty($itemSets)): ?>
+        <?php foreach ($itemSets as $itemSet): ?>
+            <a href="<?php echo $escape($itemSet->url()); ?>">
+                <?php echo $escape($itemSet->displayTitle()); ?>
+            </a>
+            <?php if ($itemSet->displayDescription()): ?>
+                <div style="font-size: 14px; color: #666; margin: 5px 0 15px 0;">
+                    <?php echo $escape($itemSet->displayDescription()); ?>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($recentItems)): ?>
+        <div style="margin-top: 40px;">
+            <?php foreach ($recentItems as $item): ?>
+                <a href="<?php echo $escape($item->url()); ?>">
+                    <?php echo $escape($item->displayTitle()); ?>
+                </a>
+                <?php if ($item->displayDescription()): ?>
+                    <div style="font-size: 14px; color: #666; margin: 5px 0 15px 0;">
+                        <?php echo $escape($item->displayDescription()); ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<!-- Simple pagination navigation like reference site -->
+<div class="content-links" style="margin-top: 40px;">
+    <a href="<?php echo $url('site/resource', ['controller' => 'item'], true); ?>">Prev</a>
+    <a href="<?php echo $url('site/resource', ['controller' => 'item'], true); ?>">Next</a>
+</div>

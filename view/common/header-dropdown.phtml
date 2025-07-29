@@ -1,0 +1,48 @@
+<?php
+$plugins = $this->getHelperPluginManager();
+
+$searchingForm = $plugins->has('searchingForm') ? $plugins->get('searchingForm') : null;
+?>
+
+<div class="top-bar">
+    <nav class="top-bar-left" aria-label="<?php echo $this->translate('Mobile navigation'); ?>">
+        <div class="title-bar" data-responsive-toggle="responsive-menu" data-hide-for="large">
+            <button class="menu-toggle" type="button" data-toggle="offCanvas" aria-label="<?php echo $this->translate('Menu'); ?>"><i class="fas fa-bars"></i></button>
+        </div>
+        <?php
+        // Get enhanced logo and branding settings
+        $siteLogo = $this->themeSettingAssetUrl('site_logo');
+        $logoLinkPage = $this->themeSetting('logo_link_page', '/');
+        $siteTagline = $this->themeSetting('site_tagline', '');
+        $headerLayout = $this->themeSetting('header_layout', 'title_only');
+
+        // Get configurable sizing settings
+        $logoHeight = $this->themeSetting('logo_height', '80');
+        $taglineFontSize = $this->themeSetting('tagline_font_size', '0.9');
+        $headerHeight = $this->themeSetting('header_height', '100');
+        ?>
+
+        <div class="centered-header-content" style="text-align: center; padding: 20px 0; min-height: <?php echo $headerHeight; ?>px;">
+            <?php if ($siteLogo): ?>
+                <div class="logo-container" style="margin-bottom: 30px; padding-bottom: 15px;">
+                    <a href="<?php echo $logoLinkPage; ?>" style="text-decoration: none;">
+                        <img src="<?php echo $siteLogo; ?>"
+                             alt="<?php echo $this->escapeHtml($site->title()); ?> Logo"
+                             class="site-logo centered-logo"
+                             style="max-height: <?php echo $logoHeight; ?>px; width: auto; display: block; margin: 0 auto 25px auto; padding-bottom: 10px;">
+                    </a>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($siteTagline)): ?>
+                <div class="tagline-container" style="margin-top: 25px; padding-top: 10px;">
+                    <p class="site-tagline centered-tagline"
+                       style="font-size: <?php echo $taglineFontSize; ?>rem; color: #666; margin: 20px 0 0 0; text-align: center; line-height: 1.4; padding-top: 15px;">
+                        <?php echo $this->escapeHtml($siteTagline); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </nav>
+    <!-- Navigation menu removed from header - now only in off-canvas mobile menu -->
+</div>

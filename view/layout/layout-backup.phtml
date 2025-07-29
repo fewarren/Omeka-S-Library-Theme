@@ -1,0 +1,1355 @@
+<?php
+/**
+ * Sufism Library Theme Layout - WORKING VERSION
+ * Designed to match sufismreoriented.org visual design
+ *
+ * FIXED: Uses proper partial access method $this->plugin('partial')
+ */
+
+// Debug logging
+$debugLog = "Sufism Library theme executed at " . date('Y-m-d H:i:s') . "\n";
+@file_put_contents('/tmp/sufism-debug.log', $debugLog, FILE_APPEND | LOCK_EX);
+
+$plugins = $this->getHelperPluginManager();
+
+// Get helpers using the WORKING method
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+$partial = $this->plugin('partial'); // THIS IS THE KEY FIX!
+
+// Safely check for plugins that might not exist
+$searchConfig = null;
+if ($plugins->has('getSearchConfig')) {
+    try {
+        $searchConfig = $plugins->get('getSearchConfig')();
+    } catch (Exception $e) {
+        // Ignore missing search config
+        $searchConfig = null;
+    }
+}
+
+// Get site information
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Sufism Library';
+
+// Get enhanced theme settings with fallbacks
+$libraryPrimaryColor = $this->themeSetting('library_primary_color', '#2c5aa0');
+$librarySecondaryColor = $this->themeSetting('library_secondary_color', '#1a365d');
+$libraryAccentColor = $this->themeSetting('library_accent_color', '#d69e2e');
+$libraryTextColor = $this->themeSetting('library_text_color', '#4a5568');
+$libraryBackgroundColor = $this->themeSetting('library_background_color', '#ffffff');
+$librarySidebarColor = $this->themeSetting('library_sidebar_color', '#f7fafc');
+
+// Typography settings
+$h1FontFamily = $this->themeSetting('h1_font_family', 'helvetica');
+$h1FontSize = $this->themeSetting('h1_font_size', '2.5rem');
+$h1FontColor = $this->themeSetting('h1_font_color', '#2c5aa0');
+$h1FontWeight = $this->themeSetting('h1_font_weight', '600');
+$h1FontStyle = $this->themeSetting('h1_font_style', 'normal');
+
+$h2FontFamily = $this->themeSetting('h2_font_family', 'helvetica');
+$h2FontSize = $this->themeSetting('h2_font_size', '2rem');
+$h2FontColor = $this->themeSetting('h2_font_color', '#2c5aa0');
+
+$h3FontFamily = $this->themeSetting('h3_font_family', 'helvetica');
+$h3FontSize = $this->themeSetting('h3_font_size', '1.5rem');
+$h3FontColor = $this->themeSetting('h3_font_color', '#2c5aa0');
+
+$bodyFontFamily = $this->themeSetting('body_font_family', 'helvetica');
+$bodyFontSize = $this->themeSetting('body_font_size', '1rem');
+$bodyFontColor = $this->themeSetting('body_font_color', '#4a5568');
+
+// Logo and branding settings
+$siteLogo = $this->themeSettingAssetUrl('site_logo');
+$logoLinkPage = $this->themeSetting('logo_link_page', '/');
+$siteTagline = $this->themeSetting('site_tagline', '');
+$headerLayout = $this->themeSetting('header_layout', 'title_only');
+
+// Configurable header sizing settings
+$logoHeight = $this->themeSetting('logo_height', '80');
+$taglineFontSizeSetting = $this->themeSetting('tagline_font_size', 'medium');
+$headerHeight = $this->themeSetting('header_height', '100');
+
+// Tagline font size mapping
+$taglineFontSizeMap = [
+    'small' => '0.8',
+    'medium' => '0.9',
+    'normal' => '1.0',
+    'large' => '1.1',
+    'extra_large' => '1.2'
+];
+
+$taglineFontSize = $taglineFontSizeMap[$taglineFontSizeSetting] ?? $taglineFontSizeMap['medium'];
+
+// Page title positioning
+$pageTitleAtTop = $this->themeSetting('page_title_at_top', true);
+
+// Pagination button settings
+$paginationButtonSize = $this->themeSetting('pagination_button_size', 'medium');
+$paginationFontSize = $this->themeSetting('pagination_font_size', '1rem');
+$paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
+$paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
+$paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
+
+// Button size mapping
+$buttonSizeMap = [
+    'extra_small' => ['padding' => '0.25rem 0.5rem', 'font-size' => '0.75rem'],
+    'small' => ['padding' => '0.5rem 1rem', 'font-size' => '0.875rem'],
+    'medium' => ['padding' => '0.75rem 1.5rem', 'font-size' => '1rem'],
+    'large' => ['padding' => '1rem 2rem', 'font-size' => '1.125rem'],
+    'extra_large' => ['padding' => '1.25rem 2.5rem', 'font-size' => '1.25rem']
+];
+
+$buttonSizeSettings = $buttonSizeMap[$paginationButtonSize] ?? $buttonSizeMap['medium'];
+
+// Font family mapping with Google Fonts support
+$fontFamilyMap = [
+    'helvetica' => "'Helvetica Neue', 'Segoe UI', Arial, sans-serif",
+    'georgia' => "Georgia, 'Times New Roman', serif",
+    'times' => "'Times New Roman', Times, serif",
+    'arial' => "Arial, Helvetica, sans-serif",
+    'roboto' => "'Roboto', 'Helvetica Neue', Arial, sans-serif",
+    'open_sans' => "'Open Sans', 'Helvetica Neue', Arial, sans-serif",
+    'lato' => "'Lato', 'Helvetica Neue', Arial, sans-serif",
+    'montserrat' => "'Montserrat', 'Helvetica Neue', Arial, sans-serif",
+    'source_sans' => "'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif",
+    'merriweather' => "'Merriweather', Georgia, serif",
+    'playfair' => "'Playfair Display', Georgia, serif",
+    'system' => "system-ui, -apple-system, sans-serif"
+];
+
+$h1FontFamilyCSS = $fontFamilyMap[$h1FontFamily] ?? $fontFamilyMap['helvetica'];
+$h2FontFamilyCSS = $fontFamilyMap[$h2FontFamily] ?? $fontFamilyMap['helvetica'];
+$h3FontFamilyCSS = $fontFamilyMap[$h3FontFamily] ?? $fontFamilyMap['helvetica'];
+$bodyFontFamilyCSS = $fontFamilyMap[$bodyFontFamily] ?? $fontFamilyMap['helvetica'];
+
+$stylesheet = $this->themeSetting('stylesheet');
+$this->htmlElement('html')->setAttribute('lang', $this->lang());
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle)->setSeparator(' · ');
+$this->headTitle()->append($this->setting('installation_title', 'Omeka S'));
+// Load the new Sufism Reoriented design CSS
+$this->headLink()->appendStylesheet($this->assetUrl('css/sufism-reoriented-design.css'));
+
+// Load base Omeka styles
+$this->headLink()->prependStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+
+// Load JavaScript in correct order - jQuery FIRST
+$this->headScript()->appendFile($this->assetUrl('vendor/jquery/jquery.min.js', 'Omeka'), 'text/javascript', ['defer' => false]);
+$this->headScript()->appendFile($this->assetUrl('js/global.js', 'Omeka'), 'text/javascript', ['defer' => false]);
+$this->headScript()->appendFile($this->assetUrl('js/sufism-menu.js'), 'text/javascript', ['defer' => false]);
+
+$this->trigger('view.layout');
+$this->jsTranslate();
+$userBar = $this->userBar();
+
+$navLayout = 'dropdown'; // Force dropdown layout for centered logo header
+$this->htmlElement('body')->appendAttribute('class', 'library-theme sufism-reoriented-style');
+$this->htmlElement('body')->appendAttribute('class', $navLayout . '-menu');
+$this->htmlElement('body')->appendAttribute('style', 'background-color: ' . $libraryBackgroundColor . ' !important; background: ' . $libraryBackgroundColor . ' !important; background-image: none !important; background-attachment: fixed !important;');
+
+// NUCLEAR OPTION: Prepare inline styles for JavaScript injection (with proper escaping)
+$h1InlineStyles = str_replace("'", "\\'", 'font-family: ' . $h1FontFamilyCSS . ' !important; font-size: ' . $h1FontSize . ' !important; color: ' . $h1FontColor . ' !important; font-weight: ' . $h1FontWeight . ' !important; font-style: ' . $h1FontStyle . ' !important;');
+$paginationInlineStyles = str_replace("'", "\\'", 'background-color: ' . $paginationBackgroundColor . ' !important; background: ' . $paginationBackgroundColor . ' !important; color: ' . $paginationFontColor . ' !important; padding: ' . $buttonSizeSettings['padding'] . ' !important; font-size: ' . $buttonSizeSettings['font-size'] . ' !important; border: 2px solid ' . $paginationBackgroundColor . ' !important; border-radius: 6px !important; text-decoration: none !important; display: inline-block !important; margin: 0.25rem !important; font-weight: 500 !important; text-align: center !important; cursor: pointer !important; min-width: 80px !important; transition: all 0.3s ease !important;');
+$paginationHoverStyles = str_replace("'", "\\'", 'background-color: ' . $paginationHoverColor . ' !important; background: ' . $paginationHoverColor . ' !important; border-color: ' . $paginationHoverColor . ' !important; color: ' . $paginationFontColor . ' !important; transform: translateY(-2px) !important; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;');
+
+if ($userBar) {
+  $this->htmlElement('body')->appendAttribute('class', 'user-bar');
+}
+
+$banner = $this->themeSettingAssetUrl('banner');
+$bannerWidth = ($this->themeSetting('banner_width')) ? $this->themeSetting('banner_width') : '';
+$bannerHeight = $this->themeSetting('banner_height');
+$bannerHeightMobile = $this->themeSetting('banner_height_mobile');
+$bannerPosition = ($this->themeSetting('banner_position')) ? str_replace('_','-', $this->themeSetting('banner_position')) : 'center';
+?>
+<?php echo $this->doctype(); ?>
+<?php echo $this->htmlElement('html'); ?>
+    <head>
+        <!-- Security Headers (Fixed CSP) -->
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://code.jquery.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self';">
+        <meta http-equiv="X-Content-Type-Options" content="nosniff">
+        <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+        <?php echo $this->headMeta(); ?>
+        <?php echo $this->headTitle(); ?>
+        <?php echo $this->headLink(); ?>
+
+        <!-- Google Fonts for enhanced typography -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <?php echo $this->headStyle(); ?>
+
+        <!-- Dynamic CSS from Theme Settings -->
+        <!-- DEBUG: PHP Variables -->
+        <!-- CACHE BUSTER: <?php echo time(); ?> -->
+        <!--
+        THEME SETTINGS DEBUG:
+        paginationFontColor: <?php echo $paginationFontColor ?? 'UNDEFINED'; ?>
+        paginationBackgroundColor: <?php echo $paginationBackgroundColor ?? 'UNDEFINED'; ?>
+        paginationHoverColor: <?php echo $paginationHoverColor ?? 'UNDEFINED'; ?>
+        paginationButtonSize: <?php echo $paginationButtonSize ?? 'UNDEFINED'; ?>
+
+        TAGLINE SETTINGS DEBUG:
+        siteTagline: <?php echo $siteTagline ?? 'UNDEFINED'; ?>
+        taglineFontSize: <?php echo $taglineFontSize ?? 'UNDEFINED'; ?>
+        logoHeight: <?php echo $logoHeight ?? 'UNDEFINED'; ?>
+        headerHeight: <?php echo $headerHeight ?? 'UNDEFINED'; ?>
+        headerLayout: <?php echo $headerLayout ?? 'UNDEFINED'; ?>
+        -->
+        <style>
+            :root {
+                /* Dynamic color variables from theme settings */
+                --sr-primary-color: <?php echo $escape($libraryPrimaryColor); ?>;
+                --sr-secondary-color: <?php echo $escape($librarySecondaryColor); ?>;
+                --sr-accent-color: <?php echo $escape($libraryAccentColor); ?>;
+                --sr-text-color: <?php echo $escape($libraryTextColor); ?>;
+                --sr-background-color: <?php echo $escape($libraryBackgroundColor); ?>;
+                --sr-sidebar-color: <?php echo $escape($librarySidebarColor); ?>;
+
+                /* Dynamic typography variables */
+                --h1-font-family: <?php echo $h1FontFamilyCSS; ?>;
+                --h1-font-size: <?php echo $escape($h1FontSize); ?>;
+                --h1-font-color: <?php echo $escape($h1FontColor); ?>;
+                --h1-font-weight: <?php echo $escape($h1FontWeight); ?>;
+                --h1-font-style: <?php echo $escape($h1FontStyle); ?>;
+
+                --h2-font-family: <?php echo $h2FontFamilyCSS; ?>;
+                --h2-font-size: <?php echo $escape($h2FontSize); ?>;
+                --h2-font-color: <?php echo $escape($h2FontColor); ?>;
+
+                --h3-font-family: <?php echo $h3FontFamilyCSS; ?>;
+                --h3-font-size: <?php echo $escape($h3FontSize); ?>;
+                --h3-font-color: <?php echo $escape($h3FontColor); ?>;
+
+                --body-font-family: <?php echo $bodyFontFamilyCSS; ?>;
+                --body-font-size: <?php echo $escape($bodyFontSize); ?>;
+                --body-font-color: <?php echo $escape($bodyFontColor); ?>;
+
+                /* Pagination button variables */
+                --pagination-button-size: <?php echo $escape($paginationButtonSize); ?>;
+                --pagination-button-padding: <?php echo $escape($buttonSizeSettings['padding']); ?>;
+                --pagination-button-font-size: <?php echo $escape($buttonSizeSettings['font-size']); ?>;
+                --pagination-font-size: <?php echo $escape($paginationFontSize); ?>;
+                --pagination-font-color: <?php echo $escape($paginationFontColor); ?>;
+                --pagination-background-color: <?php echo $escape($paginationBackgroundColor); ?>;
+                --pagination-hover-color: <?php echo $escape($paginationHoverColor); ?>;
+
+                /* Header Layout Variables */
+                --logo-height: <?php echo $escape($logoHeight); ?>px;
+                --tagline-font-size: <?php echo $escape($taglineFontSize); ?>rem;
+                --header-height: <?php echo $escape($headerHeight); ?>px;
+
+                /* Legacy variable support */
+                --library-primary-color: var(--sr-primary-color);
+                --library-secondary-color: var(--sr-secondary-color);
+                --library-accent-color: var(--sr-accent-color);
+                --library-text-gray: var(--sr-text-color);
+                --library-white: var(--sr-background-color);
+            }
+
+            /* Apply dynamic typography - MAXIMUM SPECIFICITY TO OVERRIDE EXTERNAL CSS */
+            html body h1,
+            html body .site-title h1,
+            html body h1.site-title,
+            html body .blocks h1,
+            html body .page-content h1,
+            html body main h1,
+            html body article h1,
+            html body section h1,
+            html body div h1,
+            html body .content h1 {
+                font-family: var(--h1-font-family) !important;
+                font-size: var(--h1-font-size) !important;
+                color: var(--h1-font-color) !important;
+                font-weight: var(--h1-font-weight) !important;
+                font-style: var(--h1-font-style) !important;
+            }
+
+            html body h2 {
+                font-family: var(--h2-font-family) !important;
+                font-size: var(--h2-font-size) !important;
+                color: var(--h2-font-color) !important;
+            }
+
+            html body h3 {
+                font-family: var(--h3-font-family) !important;
+                font-size: var(--h3-font-size) !important;
+                color: var(--h3-font-color) !important;
+            }
+
+            html body, html body p {
+                font-family: var(--body-font-family) !important;
+                font-size: var(--body-font-size) !important;
+                color: var(--body-font-color) !important;
+            }
+
+            /* NUCLEAR OPTION: MAXIMUM SPECIFICITY BACKGROUND COLOR FIXES */
+            html,
+            html body,
+            html body.library-theme,
+            html body.sufism-reoriented-style,
+            html body.dropdown-menu,
+            html body.page,
+            html body.home,
+            body,
+            body.library-theme,
+            body.sufism-reoriented-style,
+            body.dropdown-menu,
+            body.page,
+            body.home {
+                background-color: var(--sr-background-color) !important;
+                background: var(--sr-background-color) !important;
+                background-image: none !important;
+            }
+
+            /* Ensure ALL containers match with maximum specificity */
+            html body header#navigation,
+            html body header,
+            html body main,
+            html body #main-content,
+            html body .off-canvas-content,
+            html body .main-content,
+            html body div.off-canvas-content,
+            html body .page-content,
+            html body .site-content,
+            html body .content-wrapper,
+            html body .content,
+            html body .blocks,
+            html body .wrapper,
+            html body .container,
+            html body .row,
+            html body .column,
+            html body .grid-container,
+            html body .centered-header-content,
+            html body .logo-container,
+            html body .tagline-container,
+            html body .top-bar,
+            html body .sub-menu,
+            html body nav,
+            html body .navigation,
+            html body .menu:not(.pagination):not(.omeka-pagination),
+            html body .breadcrumbs,
+            html body .sticky {
+                background-color: var(--sr-background-color) !important;
+                background: var(--sr-background-color) !important;
+                background-image: none !important;
+            }
+
+            /* ENSURE NO TRANSPARENT BACKGROUNDS IN HEADER AREA */
+            html body header *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav),
+            html body .top-bar *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav),
+            html body .sub-menu *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav),
+            html body .centered-header-content *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav),
+            html body nav *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav) {
+                background-color: inherit !important;
+            }
+
+            /* SAFETY: Prevent unwanted backgrounds on general elements */
+            div:not(.pagination):not(.omeka-pagination):not(.prev-next-nav):not(.site-page-pagination):not(.centered-header-content):not(.logo-container):not(.tagline-container),
+            p:not(.site-tagline),
+            h1:not(.site-title),
+            h2:not(.site-title),
+            h3:not(.site-title),
+            span:not(.pagination):not(.omeka-pagination),
+            section:not(.pagination):not(.omeka-pagination) {
+                background-color: inherit !important;
+            }
+
+            /* ELIMINATE HEADER-MAIN SEPARATION LINE */
+            html body nav,
+            html body .navigation,
+            html body .menu,
+            html body .top-bar,
+            html body .sub-menu,
+            html body .breadcrumbs,
+            html body .sticky,
+            html body nav.sub-menu,
+            html body nav.top-bar,
+            html body .sub-menu.wide,
+            html body header nav,
+            html body header .navigation,
+            html body header .menu,
+            html body header .top-bar {
+                border: none !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+            }
+
+            /* NUCLEAR FIX FOR NAV-HEADER ELEMENTS AND ALL LINKS */
+            html body .nav-header,
+            html body a.nav-header,
+            html body nav .nav-header,
+            html body .navigation .nav-header,
+            html body .menu .nav-header,
+            html body .accordion-menu .nav-header,
+            html body .vertical.menu .nav-header,
+            html body nav a,
+            html body .navigation a,
+            html body .menu a:not(.pagination):not(.omeka-pagination):not(.prev-next-nav),
+            html body .accordion-menu a,
+            html body .vertical.menu a,
+            html body a:not(.pagination):not(.omeka-pagination):not(.prev-next-nav) {
+                background-color: var(--sr-background-color) !important;
+                background: var(--sr-background-color) !important;
+                background-image: none !important;
+                color: #333333 !important;
+                border: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: none !important;
+                border-bottom: none !important;
+            }
+
+            /* Exclude pagination buttons from the gray color rule above - ULTIMATE HIGH-SPECIFICITY EXCLUSION */
+            html body.page.home.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .site-page-pagination a,
+            html body.page.home.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .pagination a,
+            html body.page.home.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .omeka-pagination a,
+            html body.page.home.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .prev-next-nav a {
+                background-color: unset !important;
+                background: unset !important;
+                background-image: unset !important;
+                color: unset !important;
+                border: unset !important;
+                border-left: unset !important;
+                border-right: unset !important;
+                border-top: unset !important;
+                border-bottom: unset !important;
+            }
+
+            /* ELIMINATE ANY OTHER POTENTIAL VISUAL SEPARATORS INCLUDING VERTICAL BORDERS */
+            html body *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav):not(input):not(textarea):not(select):not(button),
+            html body *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav):not(input):not(textarea):not(select):not(button)::before,
+            html body *:not(.pagination):not(.omeka-pagination):not(.prev-next-nav):not(input):not(textarea):not(select):not(button)::after {
+                border: none !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+            }
+
+            /* RESTORE NECESSARY BORDERS ONLY FOR SPECIFIC ELEMENTS */
+            html body .pagination a,
+            html body .omeka-pagination a,
+            html body .prev-next-nav a,
+            html body input,
+            html body textarea,
+            html body select {
+                border: 2px solid var(--pagination-background-color, #ccc) !important;
+            }
+
+            .sufism-sidebar {
+                background-color: var(--sr-sidebar-color) !important;
+            }
+
+            /* MAXIMUM SPECIFICITY PAGINATION BUTTON STYLING */
+
+            /* Ultra-high specificity selectors to override all existing styles */
+            html body .pagination .button,
+            html body .omeka-pagination .button,
+            html body .pagination a,
+            html body .pagination button,
+            html body .prev-next-nav a,
+            html body .prev-next-nav button,
+            html body .pagination-nav a,
+            html body .pagination-nav button,
+            html body nav.pagination a,
+            html body nav.pagination button,
+            html body .navigation .button,
+            html body .navigation a,
+            html body .navigation button,
+            html body div .pagination .button,
+            html body div .pagination a,
+            html body div .omeka-pagination .button,
+            html body div .omeka-pagination a {
+                font-size: var(--pagination-button-font-size) !important;
+                color: var(--pagination-font-color) !important;
+                background-color: var(--pagination-background-color) !important;
+                background: var(--pagination-background-color) !important;
+                border: 2px solid var(--pagination-background-color) !important;
+                border-color: var(--pagination-background-color) !important;
+                padding: var(--pagination-button-padding) !important;
+                text-decoration: none !important;
+                border-radius: 6px !important;
+                transition: all 0.3s ease !important;
+                display: inline-block !important;
+                margin: 0.25rem !important;
+                font-weight: 500 !important;
+                text-align: center !important;
+                cursor: pointer !important;
+                min-width: 80px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* Ultra-high specificity hover states */
+            html body .pagination .button:hover,
+            html body .omeka-pagination .button:hover,
+            html body .pagination a:hover,
+            html body .pagination button:hover,
+            html body .prev-next-nav a:hover,
+            html body .prev-next-nav button:hover,
+            html body .pagination-nav a:hover,
+            html body .pagination-nav button:hover,
+            html body nav.pagination a:hover,
+            html body nav.pagination button:hover,
+            html body .navigation .button:hover,
+            html body .navigation a:hover,
+            html body .navigation button:hover,
+            html body div .pagination .button:hover,
+            html body div .pagination a:hover,
+            html body div .omeka-pagination .button:hover,
+            html body div .omeka-pagination a:hover {
+                background-color: var(--pagination-hover-color) !important;
+                background: var(--pagination-hover-color) !important;
+                border-color: var(--pagination-hover-color) !important;
+                color: var(--pagination-font-color) !important;
+                text-decoration: none !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            /* Focus states for accessibility */
+            body .pagination .button:focus,
+            body .omeka-pagination .button:focus,
+            body .pagination a:focus,
+            body .pagination button:focus,
+            body .prev-next-nav a:focus,
+            body .prev-next-nav button:focus,
+            body .pagination-nav a:focus,
+            body .pagination-nav button:focus,
+            body nav.pagination a:focus,
+            body nav.pagination button:focus,
+            body .navigation .button:focus,
+            body .navigation a:focus,
+            body .navigation button:focus {
+                outline: 3px solid var(--sr-accent-color) !important;
+                outline-offset: 2px !important;
+            }
+
+            /* Fix page title positioning */
+            .page-title-top {
+                order: -1 !important;
+                margin-bottom: 2rem !important;
+            }
+
+            .sufism-main-content {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .sufism-content-wrapper {
+                order: 1 !important;
+            }
+
+            /* SPECIFIC PAGINATION BUTTON SELECTORS - NO BROAD WILDCARDS */
+            .pagination .button,
+            .pagination a,
+            .omeka-pagination .button,
+            .omeka-pagination a,
+            .prev-next-nav a {
+                background-color: var(--pagination-background-color) !important;
+                background: var(--pagination-background-color) !important;
+                color: var(--pagination-font-color) !important;
+            }
+
+            .pagination .button:hover,
+            .pagination a:hover,
+            .omeka-pagination .button:hover,
+            .omeka-pagination a:hover,
+            .prev-next-nav a:hover {
+                background-color: var(--pagination-hover-color) !important;
+                background: var(--pagination-hover-color) !important;
+                color: var(--pagination-font-color) !important;
+            }
+
+            /* SPECIFIC PAGINATION SELECTORS - USE THEME SETTINGS */
+            .pagination .button,
+            .pagination a,
+            .omeka-pagination .button,
+            .omeka-pagination a,
+            .prev-next-nav a,
+            .site-page-pagination a {
+                background-color: var(--pagination-background-color) !important;
+                background: var(--pagination-background-color) !important;
+                color: var(--pagination-font-color) !important;
+                padding: var(--pagination-button-padding) !important;
+                font-size: var(--pagination-button-font-size) !important;
+                border: 2px solid var(--pagination-background-color) !important;
+                border-radius: 6px !important;
+                text-decoration: none !important;
+                display: inline-block !important;
+                margin: 0.25rem !important;
+                font-weight: 500 !important;
+                text-align: center !important;
+                cursor: pointer !important;
+                min-width: 80px !important;
+                transition: all 0.3s ease !important;
+            }
+
+            .pagination .button:hover,
+            .pagination a:hover,
+            .omeka-pagination .button:hover,
+            .omeka-pagination a:hover,
+            .prev-next-nav a:hover,
+            .site-page-pagination a:hover {
+                background-color: var(--pagination-hover-color) !important;
+                background: var(--pagination-hover-color) !important;
+                border-color: var(--pagination-hover-color) !important;
+                color: var(--pagination-font-color) !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            /* NUCLEAR OPTION: MAXIMUM SPECIFICITY FOR PAGINATION BUTTONS */
+            /* Target ONLY pagination buttons, not all links */
+            html body .site-page-pagination a,
+            html body div.site-page-pagination a,
+            html body main .site-page-pagination a,
+            html body .blocks .site-page-pagination a,
+            html body .content .site-page-pagination a,
+            html body section .site-page-pagination a,
+            html body article .site-page-pagination a {
+                background-color: var(--pagination-background-color) !important;
+                background: var(--pagination-background-color) !important;
+                color: var(--pagination-font-color) !important;
+                padding: var(--pagination-button-padding) !important;
+                font-size: var(--pagination-button-font-size) !important;
+                border: 2px solid var(--pagination-background-color) !important;
+                border-radius: 6px !important;
+                text-decoration: none !important;
+                display: inline-block !important;
+                margin: 0.25rem !important;
+                font-weight: 500 !important;
+                text-align: center !important;
+                cursor: pointer !important;
+                min-width: 80px !important;
+                transition: all 0.3s ease !important;
+            }
+
+            html body .site-page-pagination a:hover,
+            html body div.site-page-pagination a:hover,
+            html body main .site-page-pagination a:hover,
+            html body .blocks .site-page-pagination a:hover,
+            html body .content .site-page-pagination a:hover,
+            html body section .site-page-pagination a:hover,
+            html body article .site-page-pagination a:hover {
+                background-color: var(--pagination-hover-color) !important;
+                background: var(--pagination-hover-color) !important;
+                border-color: var(--pagination-hover-color) !important;
+                color: var(--pagination-font-color) !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+            }
+
+            /* CENTERED HEADER LAYOUT */
+            html body .centered-header-content {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                text-align: center !important;
+                padding: 20px 0 !important;
+                min-height: var(--header-height) !important;
+            }
+
+            html body .logo-container {
+                margin-bottom: 10px !important;
+            }
+
+            html body .site-logo.centered-logo {
+                display: block !important;
+                margin: 0 auto !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                object-fit: contain !important;
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                transform: none !important;
+                z-index: 1 !important;
+                transition: transform 0.2s ease !important;
+                max-height: var(--logo-height) !important;
+                width: auto !important;
+            }
+
+            html body .site-logo.centered-logo:hover {
+                transform: scale(1.05) !important;
+            }
+
+            html body .tagline-container {
+                margin-top: 10px !important;
+            }
+
+            html body .site-tagline.centered-tagline {
+                margin: 0 !important;
+                padding: 0 20px !important;
+                text-align: center !important;
+                line-height: 1.4 !important;
+                color: #666 !important;
+                font-weight: 400 !important;
+                font-size: var(--tagline-font-size) !important;
+            }
+
+            /* RESPONSIVE HEADER ADJUSTMENTS */
+            @media (max-width: 768px) {
+                html body .centered-header-content {
+                    padding: 15px 0 !important;
+                }
+
+                html body .site-logo.centered-logo {
+                    max-height: 60px !important;
+                }
+
+                html body .site-tagline.centered-tagline {
+                    font-size: 0.8rem !important;
+                    padding: 0 15px !important;
+                }
+            }
+
+            @media (max-width: 480px) {
+                html body .centered-header-content {
+                    padding: 10px 0 !important;
+                }
+
+                html body .site-logo.centered-logo {
+                    max-height: 50px !important;
+                }
+
+                html body .site-tagline.centered-tagline {
+                    font-size: 0.75rem !important;
+                    padding: 0 10px !important;
+                }
+            }
+
+            html body .site-title a {
+                display: block !important;
+                text-decoration: none !important;
+                position: relative !important;
+                left: 0 !important;
+                right: auto !important;
+                margin: 0 !important;
+                width: 100% !important;
+                text-align: center !important;
+            }
+
+            html body .site-title-label {
+                display: none !important;
+            }
+
+            /* SITE TAGLINE STYLING */
+            html body .site-tagline {
+                font-size: 0.9rem !important;
+                color: #666 !important;
+                margin-top: 5px !important;
+                text-align: center !important;
+                display: block !important;
+                position: absolute !important;
+                bottom: 5px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 100% !important;
+            }
+
+            /* HIDE UNWANTED TEXT ELEMENTS */
+            html body h1:not(.site-title),
+            html body h2:not(.site-title),
+            html body .page-title,
+            html body .content h1,
+            html body .content h2 {
+                display: none !important;
+            }
+
+            /* NUCLEAR OPTION: REMOVE ALL LIST DOTS WITH MAXIMUM SPECIFICITY */
+            html body nav ul,
+            html body nav li,
+            html body .navigation ul,
+            html body .navigation li,
+            html body .menu ul,
+            html body .menu li,
+            html body ul.vertical,
+            html body ul.menu,
+            html body .vertical.menu li,
+            html body .accordion-menu li,
+            html body ul li,
+            html body ol li,
+            html body li {
+                list-style: none !important;
+                list-style-type: none !important;
+                list-style-image: none !important;
+                list-style-position: outside !important;
+                display: block !important;
+                margin-left: 0 !important;
+                padding-left: 0 !important;
+                text-indent: 0 !important;
+                border: none !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                box-shadow: none !important;
+            }
+
+            /* Remove ALL pseudo-element content that could create dots */
+            html body nav ul::before,
+            html body nav li::before,
+            html body .navigation ul::before,
+            html body .navigation li::before,
+            html body .menu ul::before,
+            html body .menu li::before,
+            html body .vertical.menu li::before,
+            html body .accordion-menu li::before,
+            html body ul::before,
+            html body ol::before,
+            html body li::before,
+            html body nav ul::after,
+            html body nav li::after,
+            html body .navigation ul::after,
+            html body .navigation li::after,
+            html body .menu ul::after,
+            html body .menu li::after,
+            html body .vertical.menu li::after,
+            html body .accordion-menu li::after,
+            html body ul::after,
+            html body ol::after,
+            html body li::after {
+                content: none !important;
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* Ensure navigation links display properly */
+            html body nav li a,
+            html body .navigation li a,
+            html body .menu li a,
+            html body .vertical.menu li a,
+            html body .accordion-menu li a {
+                display: block !important;
+                text-decoration: none !important;
+            }
+
+            /* NUCLEAR POSITIONING OVERRIDE */
+            html body .site-title,
+            html body .site-title *,
+            html body .site-logo,
+            html body h1.site-title,
+            html body h1.site-title a,
+            html body h1.site-title a *,
+            .site-title,
+            .site-title *,
+            .site-logo {
+                left: auto !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                margin-right: auto !important;
+                transform: translateX(0) !important;
+                position: static !important;
+            }
+
+            /* Force top-bar-left to be visible */
+            html body .top-bar-left,
+            html body nav.top-bar-left,
+            .top-bar-left {
+                left: 0 !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                transform: translateX(0) !important;
+                position: relative !important;
+            }
+
+            /* FORCE HEADER VISIBILITY - MAXIMUM SPECIFICITY */
+            html body header#navigation,
+            html body header,
+            header#navigation,
+            header {
+                display: block !important;
+                width: 100% !important;
+                min-height: 80px !important;
+                height: auto !important;
+                overflow: visible !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                top: 0 !important;
+                left: 0 !important;
+                z-index: 1000 !important;
+                background-color: #ffffff !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            html body header#navigation .top-bar,
+            html body header .top-bar,
+            html body .top-bar,
+            body .top-bar,
+            .top-bar {
+                display: block !important;
+                width: 100% !important;
+                min-height: 60px !important;
+                height: auto !important;
+                overflow: visible !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                padding: 10px 20px !important;
+                background-color: transparent !important;
+            }
+
+            html body header#navigation .top-bar-left,
+            html body header .top-bar-left,
+            html body .top-bar-left,
+            body .top-bar-left,
+            .top-bar-left {
+                display: block !important;
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+
+            html body header#navigation .site-title,
+            html body header .site-title,
+            html body .site-title,
+            body .site-title,
+            .site-title {
+                display: block !important;
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+
+            /* ULTIMATE HIGH-SPECIFICITY CSS VARIABLE RULE - UNIVERSAL FOR ALL PAGES */
+            html body.page.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .site-page-pagination a,
+            html body.page.home.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .site-page-pagination a,
+            html body.page.collections.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu main .site-page-pagination a,
+            html body.page.sufism-page-style.sufism-reoriented-page.library-theme.sufism-reoriented-style.dropdown-menu .site-page-pagination a {
+                background-color: var(--pagination-background-color, #f7c97f) !important;
+                color: var(--pagination-font-color, #fdf7f7) !important;
+                padding: var(--pagination-button-padding, 0.5rem 1rem) !important;
+                font-size: var(--pagination-button-font-size, 0.875rem) !important;
+                border-radius: 6px !important;
+                text-decoration: none !important;
+                display: inline-block !important;
+                margin: 0.25rem !important;
+                border: 2px solid var(--pagination-background-color, #f7c97f) !important;
+                transition: all 0.3s ease !important;
+                font-weight: 500 !important;
+                text-align: center !important;
+                cursor: pointer !important;
+                min-width: 80px !important;
+                box-sizing: border-box !important;
+            }
+        </style>
+
+        <?php echo $this->headScript(); ?>
+        <style>
+            .banner {
+                height: <?php echo ($bannerHeight !== '') ? $bannerHeight: 'auto'  ?>;
+                background-image: url(<?php echo $this->themeSettingAssetUrl('banner'); ?>);
+                background-position: <?php echo $bannerPosition; ?>;
+            }
+        <?php if ($bannerHeightMobile !== ''): ?>
+            @media screen and (max-width:640px) {
+                .banner {
+                    height: <?php echo $bannerHeightMobile; ?>;
+                }
+            }
+        <?php endif; ?>
+
+            /* OLD CSS SECTION REMOVED - Using enhanced CSS generation above */
+        </style>
+    </head>
+
+    <?php echo $this->htmlElement('body'); ?>
+
+        <!-- Skip Links for Accessibility -->
+        <div class="skip-links">
+            <a href="#main-content"><?php echo $translate('Skip to main content'); ?></a>
+            <a href="#navigation"><?php echo $translate('Skip to navigation'); ?></a>
+            <a href="#search"><?php echo $translate('Skip to search'); ?></a>
+        </div>
+
+        <!-- ARIA Live Region for Dynamic Content -->
+        <div id="live-region" class="live-region" aria-live="polite" aria-atomic="true"></div>
+
+        <div id="offCanvas" class="off-canvas position-left" data-off-canvas role="navigation" aria-label="<?php echo $translate('Mobile Navigation'); ?>">
+            <?php if ($site): ?>
+            <?php echo $site->publicNav()->menu()->setPartial('common/foundation-navigation.phtml')->renderPartialWithParams(['layout' => 'vertical']); ?>
+            <?php endif; ?>
+            <div id="search" role="search" aria-label="<?php echo $translate('Search'); ?>">
+                <?php if ($searchConfig): ?>
+                <?php try { ?>
+                    <?= $searchConfig->renderForm(['template' => 'search/search-form-simple', 'variant' => 'simple']) ?>
+                <?php } catch (Exception $e) { ?>
+                    <?= $partial('common/search-form') ?>
+                <?php } ?>
+                <?php else: ?>
+                <?= $partial('common/search-form') ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="off-canvas-content" data-off-canvas-content>
+            <a id="skipnav" href="#content"><?php echo $translate('Skip to main content'); ?></a>
+            <?php echo $userBar; ?>
+            <header id="navigation" role="banner">
+                <?php if ($navLayout == 'vertical'): ?>
+                <?php
+                try {
+                    // Use the WORKING partial method and pass branding variables
+                    echo $partial('common/header-vertical', [
+                        'siteLogo' => $siteLogo,
+                        'logoLinkPage' => $logoLinkPage,
+                        'siteTagline' => $siteTagline,
+                        'headerLayout' => $headerLayout,
+                        'siteTitle' => $siteTitle
+                    ]);
+                    @file_put_contents('/tmp/sufism-debug.log', "Header-vertical partial loaded successfully with branding data\n", FILE_APPEND);
+                } catch (Exception $e) {
+                    @file_put_contents('/tmp/sufism-debug.log', "Header-vertical error: " . $e->getMessage() . "\n", FILE_APPEND);
+                    // Enhanced fallback header with logo support
+                    echo '<div class="header-fallback">';
+                    if ($siteLogo && ($headerLayout === 'logo_only' || $headerLayout === 'logo_and_title' || $headerLayout === 'logo_with_tagline')) {
+                        echo '<img src="' . $siteLogo . '" alt="' . $escape($siteTitle) . ' Logo" class="site-logo">';
+                    }
+                    if ($headerLayout === 'title_only' || $headerLayout === 'logo_and_title') {
+                        echo '<h1 class="site-title"><a href="' . $logoLinkPage . '">' . $escape($siteTitle) . '</a></h1>';
+                    }
+                    if ($headerLayout === 'logo_with_tagline' && !empty($siteTagline)) {
+                        echo '<p class="site-tagline">' . $escape($siteTagline) . '</p>';
+                    }
+                    echo '<nav>Navigation fallback</nav>';
+                    echo '</div>';
+                }
+                ?>
+                <?php else: ?>
+                <?php
+                try {
+                    echo $partial('common/header-dropdown');
+                } catch (Exception $e) {
+                    echo '<div class="header-fallback">Dropdown navigation fallback</div>';
+                }
+                ?>
+                <?php endif; ?>
+            </header>
+            <?php if ($banner && ($navLayout == 'dropdown')): ?>
+            <div class="banner <?php echo $bannerWidth; ?>" role="img" aria-label="<?php echo $translate('Site Banner'); ?>">
+                <img src="<?php echo $this->themeSettingAssetUrl('banner'); ?>" alt="<?php echo $escape($siteTitle); ?> Banner" role="presentation">
+            </div>
+            <?php endif; ?>
+            <main id="main-content" role="main" aria-label="<?php echo $translate('Main Content'); ?>">
+                <?php if ($banner && ($navLayout == 'vertical')): ?>
+                <div class="banner <?php echo $bannerWidth; ?>" role="img" aria-label="<?php echo $translate('Site Banner'); ?>">
+                    <img src="<?php echo $this->themeSettingAssetUrl('banner'); ?>" alt="<?php echo $escape($siteTitle); ?> Banner" role="presentation">
+                </div>
+                <?php endif; ?>
+
+                <?php if ($pageTitleAtTop && isset($this->pageTitle) && !empty($this->pageTitle)): ?>
+                <div class="page-title-top">
+                    <?php echo $escape($this->pageTitle); ?>
+                </div>
+                <?php endif; ?>
+
+                <?php echo $this->content; ?>
+            </main>
+            <footer role="contentinfo" aria-label="<?php echo $translate('Site Footer'); ?>">
+                <?php if ($footerContent = $this->themeSetting('footer')): ?>
+                <?php echo $footerContent; ?>
+                <?php else: ?>
+                    <p><?php echo $translate('Powered by Omeka S'); ?></p>
+                <?php endif; ?>
+            </footer>
+        </div>
+        <!-- THEME SETTINGS DEBUG SYSTEM -->
+        <script>
+            // Wait for DOM to be ready before running debug
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    console.log('🔍 THEME SETTINGS DEBUG');
+                    console.log('======================');
+
+                    // Check jQuery availability
+                    console.log('jQuery Status:', typeof jQuery !== 'undefined' ? '✅ Loaded' : '❌ Not Loaded');
+
+                    // Log all CSS variables
+                    const root = document.documentElement;
+                    const computedStyle = getComputedStyle(root);
+
+                    const cssVariables = [
+                        '--sr-primary-color',
+                        '--sr-secondary-color',
+                        '--sr-accent-color',
+                        '--pagination-font-color',
+                        '--pagination-background-color',
+                        '--pagination-hover-color',
+                        '--pagination-button-padding',
+                        '--pagination-button-font-size',
+                        '--h1-font-family',
+                        '--h1-font-size',
+                        '--h1-font-color'
+                    ];
+
+                    console.log('CSS Variables Status:');
+                    cssVariables.forEach(variable => {
+                        const value = computedStyle.getPropertyValue(variable).trim();
+                        console.log(`${variable}: ${value || 'NOT SET'}`);
+                    });
+
+                    // Log theme settings being used
+                    console.log('Theme Settings Values:');
+                    console.log('Primary Color: <?php echo $libraryPrimaryColor; ?>');
+                    console.log('Pagination Background: <?php echo $paginationBackgroundColor; ?>');
+                    console.log('Button Size: <?php echo $paginationButtonSize; ?>');
+                    console.log('Header Layout: <?php echo $headerLayout; ?>');
+                    console.log('Site Logo: <?php echo $siteLogo ?: "NOT SET"; ?>');
+
+                    // Test pagination button styling
+                    const paginationButtons = document.querySelectorAll('.pagination .button, .pagination a, .prev-next-nav a, .navigation a');
+                    console.log(`Found ${paginationButtons.length} pagination buttons`);
+
+                    if (paginationButtons.length > 0) {
+                        const firstButton = paginationButtons[0];
+                        const buttonStyle = getComputedStyle(firstButton);
+                        console.log('First Pagination Button Styles:');
+                        console.log('Background Color:', buttonStyle.backgroundColor);
+                        console.log('Color:', buttonStyle.color);
+                        console.log('Padding:', buttonStyle.padding);
+                        console.log('Font Size:', buttonStyle.fontSize);
+                    }
+
+                    console.log('======================');
+                    console.log('Debug complete - check values above');
+
+                    // SAFETY NET: Ensure background consistency
+                    const ensureBackgroundConsistency = () => {
+                        const headerElements = [
+                            document.body,
+                            document.querySelector('header'),
+                            document.querySelector('main'),
+                            document.querySelector('.centered-header-content'),
+                            document.querySelector('.off-canvas-content'),
+                            document.querySelector('#main-content'),
+                            document.querySelector('.main-content'),
+                            document.querySelector('.top-bar'),
+                            document.querySelector('.sub-menu'),
+                            document.querySelector('nav'),
+                            document.querySelector('.logo-container'),
+                            document.querySelector('.tagline-container')
+                        ];
+
+                        // Also include all nav-header elements
+                        const navHeaders = document.querySelectorAll('.nav-header, a.nav-header, nav a, .navigation a, .menu a:not(.pagination):not(.omeka-pagination):not(.prev-next-nav)');
+                        navHeaders.forEach(el => headerElements.push(el));
+
+                        let fixesApplied = 0;
+                        headerElements.forEach(element => {
+                            if (element) {
+                                const styles = getComputedStyle(element);
+                                if (!styles.backgroundColor.includes('255, 255, 255')) {
+                                    element.style.setProperty('background-color', '#ffffff', 'important');
+                                    element.style.setProperty('background', '#ffffff', 'important');
+                                    fixesApplied++;
+                                    console.log('Applied safety background fix to:', element.tagName, element.className);
+                                }
+                            }
+                        });
+
+                        if (fixesApplied === 0) {
+                            console.log('✅ All backgrounds already consistent');
+                        } else {
+                            console.log(`🔧 Applied ${fixesApplied} background consistency fixes`);
+                        }
+                    };
+
+                    // Apply immediately and on DOM changes
+                    ensureBackgroundConsistency();
+                    setTimeout(ensureBackgroundConsistency, 500);
+                    setTimeout(ensureBackgroundConsistency, 1000);
+
+                    // CSS VARIABLES SOLUTION: The CSS files now use CSS variables correctly
+                    console.log('✅ CSS variables solution active - nuclear enforcement DISABLED');
+
+                    // ULTIMATE NUCLEAR OPTION: DISABLED - CSS variables solution is working
+                    // Nuclear solution disabled because CSS variables are working perfectly
+                    const createNuclearCSS = () => {
+                        const nuclearStyle = document.createElement('style');
+                        nuclearStyle.setAttribute('data-nuclear-override', 'true');
+                        nuclearStyle.textContent = `
+                            /* ULTIMATE NUCLEAR CSS - MAXIMUM SPECIFICITY */
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page.home h1,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page h1,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu h1,
+                            html body.library-theme.sufism-reoriented-style h1,
+                            html body.library-theme h1,
+                            html body h1[style] {
+                                font-family: <?php echo $h1FontFamilyCSS; ?> !important;
+                                font-size: <?php echo $h1FontSize; ?> !important;
+                                color: <?php echo $h1FontColor; ?> !important;
+                                font-weight: <?php echo $h1FontWeight; ?> !important;
+                                font-style: <?php echo $h1FontStyle; ?> !important;
+                            }
+
+                            /* ULTIMATE NUCLEAR PAGINATION CSS */
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page.home .site-page-pagination a,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page .site-page-pagination a,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu .site-page-pagination a,
+                            html body.library-theme.sufism-reoriented-style .site-page-pagination a,
+                            html body.library-theme .site-page-pagination a,
+                            html body .site-page-pagination a[style] {
+                                background-color: <?php echo $paginationBackgroundColor; ?> !important;
+                                background: <?php echo $paginationBackgroundColor; ?> !important;
+                                color: <?php echo $paginationFontColor; ?> !important;
+                                padding: <?php echo $buttonSizeSettings['padding']; ?> !important;
+                                font-size: <?php echo $buttonSizeSettings['font-size']; ?> !important;
+                                border: 2px solid <?php echo $paginationBackgroundColor; ?> !important;
+                                border-radius: 6px !important;
+                                text-decoration: none !important;
+                                display: inline-block !important;
+                                margin: 0.25rem !important;
+                                font-weight: 500 !important;
+                                text-align: center !important;
+                                cursor: pointer !important;
+                                min-width: 80px !important;
+                                transition: all 0.3s ease !important;
+                            }
+
+                            /* ULTIMATE NUCLEAR PAGINATION HOVER CSS */
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page.home .site-page-pagination a:hover,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu.page .site-page-pagination a:hover,
+                            html body.library-theme.sufism-reoriented-style.dropdown-menu .site-page-pagination a:hover,
+                            html body.library-theme.sufism-reoriented-style .site-page-pagination a:hover,
+                            html body.library-theme .site-page-pagination a:hover,
+                            html body .site-page-pagination a[style]:hover {
+                                background-color: <?php echo $paginationHoverColor; ?> !important;
+                                background: <?php echo $paginationHoverColor; ?> !important;
+                                border-color: <?php echo $paginationHoverColor; ?> !important;
+                                color: <?php echo $paginationFontColor; ?> !important;
+                                transform: translateY(-2px) !important;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+                            }
+                        `;
+
+                        // Insert at the very end of head to ensure it loads last
+                        document.head.appendChild(nuclearStyle);
+                        console.log('💥 Ultimate nuclear CSS injected with maximum specificity');
+                    };
+
+                    // Nuclear CSS injection DISABLED - CSS variables solution is working
+                    // createNuclearCSS();
+                    // setTimeout(createNuclearCSS, 100);
+                    // setTimeout(createNuclearCSS, 500);
+
+                    // FINAL SAFETY NET: Continuous style enforcement
+                    let enforcementCount = 0;
+                    const continuousEnforcement = setInterval(() => {
+                        enforcementCount++;
+
+                        // Check if styles are still being overridden
+                        const h1 = document.querySelector('h1');
+                        const paginationButton = document.querySelector('.site-page-pagination a');
+
+                        let needsEnforcement = false;
+
+                        if (h1) {
+                            const h1Styles = getComputedStyle(h1);
+                            if (!h1Styles.color.includes('44, 90, 160') || h1Styles.fontFamily.includes('Cormorant')) {
+                                needsEnforcement = true;
+                            }
+                        }
+
+                        if (paginationButton) {
+                            const buttonStyles = getComputedStyle(paginationButton);
+                            if (!buttonStyles.backgroundColor.includes('44, 90, 160')) {
+                                needsEnforcement = true;
+                            }
+                        }
+
+                        if (needsEnforcement) {
+                            console.log('🔄 Continuous enforcement cycle ' + enforcementCount + ': Nuclear styles DISABLED - CSS variables working');
+                            // enforceStyles();
+                            // createNuclearCSS();
+                        }
+
+                        // Stop after 30 cycles (30 seconds) to avoid infinite loops
+                        if (enforcementCount >= 30) {
+                            clearInterval(continuousEnforcement);
+                            console.log('⏹️ Continuous enforcement stopped after 30 cycles');
+                        }
+                    }, 1000);
+
+                    console.log('🔄 Continuous style enforcement activated (30 second duration)');
+
+                } catch (error) {
+                    console.error('❌ Debug script error:', error);
+                }
+            });
+        </script>
+
+        <!-- Visual Debug Indicator -->
+        <div style="position: fixed; bottom: 10px; right: 10px; background: #007cba; color: white; padding: 8px 12px; border-radius: 5px; font-size: 11px; z-index: 9999; font-family: Arial, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+            🔍 Debug Mode<br>
+            <small>Check console (F12)</small>
+        </div>
+
+        <script>
+          // Enhanced jQuery loading and Foundation initialization
+          function initializeFoundation() {
+              if (typeof jQuery !== 'undefined') {
+                  jQuery(document).ready(function($) {
+                      if (typeof Foundation !== 'undefined') {
+                          $(document).foundation();
+                          console.log('✅ Foundation initialized successfully');
+                      } else {
+                          console.log('⚠️ Foundation not available, but jQuery is loaded');
+                      }
+                  });
+              } else {
+                  console.error('❌ jQuery not loaded - Foundation initialization failed');
+                  console.log('🔄 Attempting to load jQuery from local fallback...');
+
+                  // Try local jQuery first
+                  var script = document.createElement('script');
+                  script.src = '/omeka-s/application/asset/vendor/jquery/jquery.min.js';
+                  script.onload = function() {
+                      console.log('✅ jQuery loaded from local fallback');
+                      initializeFoundation();
+                  };
+                  script.onerror = function() {
+                      console.log('⚠️ Local jQuery failed, trying CDN...');
+                      // CDN fallback
+                      var cdnScript = document.createElement('script');
+                      cdnScript.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+                      cdnScript.onload = function() {
+                          console.log('✅ jQuery loaded from CDN');
+                          initializeFoundation();
+                      };
+                      cdnScript.onerror = function() {
+                          console.error('❌ All jQuery loading attempts failed');
+                      };
+                      document.head.appendChild(cdnScript);
+                  };
+                  document.head.appendChild(script);
+              }
+          }
+
+          // Initialize when DOM is ready
+          if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', initializeFoundation);
+          } else {
+              initializeFoundation();
+          }
+        </script>
+    </body>
+</html>

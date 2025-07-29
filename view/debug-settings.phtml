@@ -1,0 +1,245 @@
+<?php
+/**
+ * THEME SETTINGS DEBUG VIEW
+ * This file will show all theme settings and their values
+ */
+
+// Get all theme settings
+$allSettings = [];
+$settingKeys = [
+    // Color settings
+    'library_primary_color',
+    'library_secondary_color', 
+    'library_accent_color',
+    'library_text_color',
+    'library_background_color',
+    'library_sidebar_color',
+    
+    // Typography settings
+    'h1_font_family',
+    'h1_font_size',
+    'h1_font_color',
+    'h2_font_family',
+    'h2_font_size', 
+    'h2_font_color',
+    'h3_font_family',
+    'h3_font_size',
+    'h3_font_color',
+    'body_font_family',
+    'body_font_size',
+    'body_font_color',
+    
+    // Logo and branding
+    'site_logo',
+    'logo_link_page',
+    'site_tagline',
+    'header_layout',
+    
+    // Pagination
+    'pagination_button_size',
+    'pagination_font_size',
+    'pagination_font_color',
+    'pagination_background_color',
+    'pagination_hover_color',
+    
+    // Layout
+    'page_title_at_top',
+    'nav_layout',
+    
+    // Legacy settings
+    'library_secondary_color_old',
+    'library_primary_color_old',
+    'library_accent_color_old'
+];
+
+foreach ($settingKeys as $key) {
+    try {
+        $value = $this->themeSetting($key);
+        $allSettings[$key] = $value;
+    } catch (Exception $e) {
+        $allSettings[$key] = 'ERROR: ' . $e->getMessage();
+    }
+}
+
+// Get asset URLs
+$assetSettings = [
+    'site_logo' => $this->themeSettingAssetUrl('site_logo'),
+    'banner' => $this->themeSettingAssetUrl('banner')
+];
+
+// Get enhanced theme settings with fallbacks (same as layout.phtml)
+$libraryPrimaryColor = $this->themeSetting('library_primary_color', '#2c5aa0');
+$librarySecondaryColor = $this->themeSetting('library_secondary_color', '#1a365d');
+$libraryAccentColor = $this->themeSetting('library_accent_color', '#d69e2e');
+$libraryTextColor = $this->themeSetting('library_text_color', '#4a5568');
+$libraryBackgroundColor = $this->themeSetting('library_background_color', '#ffffff');
+$librarySidebarColor = $this->themeSetting('library_sidebar_color', '#f7fafc');
+
+$paginationButtonSize = $this->themeSetting('pagination_button_size', 'medium');
+$paginationFontSize = $this->themeSetting('pagination_font_size', '1rem');
+$paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
+$paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
+$paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Theme Settings Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .debug-container { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .setting-item { margin: 10px 0; padding: 10px; background: #f9f9f9; border-left: 4px solid #007cba; }
+        .setting-key { font-weight: bold; color: #007cba; }
+        .setting-value { margin-left: 20px; font-family: monospace; background: white; padding: 5px; border-radius: 3px; }
+        .empty-value { color: #999; font-style: italic; }
+        .error-value { color: #d63638; }
+        .asset-url { color: #00a32a; }
+        .color-preview { display: inline-block; width: 20px; height: 20px; border-radius: 3px; margin-right: 10px; border: 1px solid #ccc; }
+        h1 { color: #23282d; }
+        h2 { color: #007cba; border-bottom: 2px solid #007cba; padding-bottom: 5px; }
+        .test-section { background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Theme Settings Debug Report</h1>
+    <p><strong>Timestamp:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
+    
+    <div class="debug-container">
+        <h2>📊 Enhanced Theme Settings (Used by Layout)</h2>
+        <div class="setting-item">
+            <div class="setting-key">library_primary_color</div>
+            <div class="setting-value">
+                <span class="color-preview" style="background-color: <?php echo $libraryPrimaryColor; ?>"></span>
+                <?php echo htmlspecialchars($libraryPrimaryColor); ?>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="setting-key">library_secondary_color</div>
+            <div class="setting-value">
+                <span class="color-preview" style="background-color: <?php echo $librarySecondaryColor; ?>"></span>
+                <?php echo htmlspecialchars($librarySecondaryColor); ?>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="setting-key">library_accent_color</div>
+            <div class="setting-value">
+                <span class="color-preview" style="background-color: <?php echo $libraryAccentColor; ?>"></span>
+                <?php echo htmlspecialchars($libraryAccentColor); ?>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="setting-key">pagination_background_color</div>
+            <div class="setting-value">
+                <span class="color-preview" style="background-color: <?php echo $paginationBackgroundColor; ?>"></span>
+                <?php echo htmlspecialchars($paginationBackgroundColor); ?>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="setting-key">pagination_button_size</div>
+            <div class="setting-value"><?php echo htmlspecialchars($paginationButtonSize); ?></div>
+        </div>
+    </div>
+    
+    <div class="debug-container">
+        <h2>📋 All Theme Settings (Raw)</h2>
+        <?php foreach ($allSettings as $key => $value): ?>
+        <div class="setting-item">
+            <div class="setting-key"><?php echo htmlspecialchars($key); ?></div>
+            <div class="setting-value <?php echo empty($value) ? 'empty-value' : (strpos($value, 'ERROR:') === 0 ? 'error-value' : ''); ?>">
+                <?php echo empty($value) ? '(empty/null)' : htmlspecialchars($value); ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    
+    <div class="debug-container">
+        <h2>🖼️ Asset URLs</h2>
+        <?php foreach ($assetSettings as $key => $value): ?>
+        <div class="setting-item">
+            <div class="setting-key"><?php echo htmlspecialchars($key); ?></div>
+            <div class="setting-value asset-url">
+                <?php echo empty($value) ? '(no asset)' : htmlspecialchars($value); ?>
+                <?php if (!empty($value)): ?>
+                    <br><img src="<?php echo $value; ?>" alt="Asset preview" style="max-width: 200px; max-height: 100px; margin-top: 5px;">
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    
+    <div class="debug-container">
+        <h2>🎨 CSS Variables Test</h2>
+        <div class="test-section">
+            <h3>Color Tests</h3>
+            <div style="background: var(--sr-primary-color, red); color: white; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                Primary Color Test (should be: <?php echo $libraryPrimaryColor; ?>)
+            </div>
+            <div style="background: var(--pagination-background-color, red); color: white; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                Pagination Background Test (should be: <?php echo $paginationBackgroundColor; ?>)
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Typography Tests</h3>
+            <h1 style="font-family: var(--h1-font-family); font-size: var(--h1-font-size); color: var(--h1-font-color);">
+                H1 Test (should use theme settings)
+            </h1>
+            <p style="font-family: var(--body-font-family); font-size: var(--body-font-size); color: var(--body-font-color);">
+                Body text test (should use theme settings)
+            </p>
+        </div>
+    </div>
+    
+    <div class="debug-container">
+        <h2>📝 Diagnostic Instructions</h2>
+        <ol>
+            <li><strong>Check Enhanced Settings:</strong> These are the values actually used by the layout</li>
+            <li><strong>Verify Raw Settings:</strong> Check if your configured values appear here</li>
+            <li><strong>Test Asset URLs:</strong> Logo should display if configured</li>
+            <li><strong>CSS Variable Tests:</strong> Colors should match your settings</li>
+            <li><strong>Browser Console:</strong> Open F12 and check for CSS variable values</li>
+        </ol>
+        
+        <h3>Issue Identification:</h3>
+        <ul>
+            <li>If enhanced settings show defaults → Settings not being saved/retrieved</li>
+            <li>If raw settings are empty → Storage issue</li>
+            <li>If settings exist but CSS tests fail → CSS generation issue</li>
+            <li>If logo URL exists but doesn't display → Asset serving issue</li>
+        </ul>
+    </div>
+    
+    <script>
+        console.log('🔍 THEME SETTINGS DEBUG');
+        console.log('======================');
+        
+        // Log all CSS variables
+        const root = document.documentElement;
+        const computedStyle = getComputedStyle(root);
+        
+        const cssVariables = [
+            '--sr-primary-color',
+            '--sr-secondary-color', 
+            '--sr-accent-color',
+            '--pagination-font-color',
+            '--pagination-background-color',
+            '--pagination-hover-color',
+            '--h1-font-family',
+            '--h1-font-size',
+            '--h1-font-color'
+        ];
+        
+        console.log('CSS Variables:');
+        cssVariables.forEach(variable => {
+            const value = computedStyle.getPropertyValue(variable);
+            console.log(`${variable}: ${value || 'NOT SET'}`);
+        });
+        
+        console.log('Enhanced Settings Values:');
+        console.log('Primary Color: <?php echo $libraryPrimaryColor; ?>');
+        console.log('Pagination Background: <?php echo $paginationBackgroundColor; ?>');
+        console.log('Button Size: <?php echo $paginationButtonSize; ?>');
+    </script>
+</body>
+</html>

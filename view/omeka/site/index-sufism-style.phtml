@@ -1,0 +1,258 @@
+<?php
+/**
+ * Sufism Reoriented Style Homepage Template
+ * Elegant, minimal homepage matching sufismreoriented.org design
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$themeSetting = $this->plugin('themeSetting');
+$api = $this->plugin('api');
+$thumbnail = $this->plugin('thumbnail');
+$url = $this->plugin('url');
+
+// Get site data
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Sufism Library';
+$siteDescription = $site ? $site->summary() : '';
+
+// Get featured collections (first 6 item sets)
+$itemSets = [];
+$recentItems = [];
+
+if ($site) {
+    try {
+        $itemSets = $api->search('item_sets', [
+            'site_id' => $site->id(),
+            'limit' => 6,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+
+        // Get recent items for quick access
+        $recentItems = $api->search('items', [
+            'site_id' => $site->id(),
+            'limit' => 6,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+    } catch (Exception $e) {
+        // Fallback if API calls fail
+        $itemSets = [];
+        $recentItems = [];
+    }
+}
+
+// Add custom CSS for homepage
+$this->headLink()->appendStylesheet($this->assetUrl('css/homepage.css'));
+$this->htmlElement('body')->appendAttribute('class', 'homepage library-homepage sufism-style-homepage');
+?>
+
+<!-- Hero Section (elegant and minimal) -->
+<section class="hero-section">
+    <div class="main-content">
+        <h1 class="site-title"><?php echo $escape($siteTitle); ?></h1>
+        <?php if ($siteDescription): ?>
+        <div class="site-description">
+            <p><?php echo $escape($siteDescription); ?></p>
+        </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- Search Section (elegant) -->
+<section class="search-section">
+    <div class="main-content">
+        <div class="search-form">
+            <input type="search" name="fulltext_search" placeholder="<?php echo $translate('Search the collection...'); ?>">
+            <button type="submit" class="button"><?php echo $translate('Search'); ?></button>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Collections Section -->
+<?php if (!empty($itemSets)): ?>
+<section class="content-section">
+    <div class="main-content">
+        <h2 class="section-title"><?php echo $translate('Featured Collections'); ?></h2>
+        <div class="section-content">
+            <?php foreach ($itemSets as $itemSet): ?>
+            <div class="resource-item">
+                <h3 class="resource-title">
+                    <a href="<?php echo $escape($itemSet->url()); ?>">
+                        <?php echo $escape($itemSet->displayTitle()); ?>
+                    </a>
+                </h3>
+                
+                <?php if ($itemSet->displayDescription()): ?>
+                <div class="resource-description">
+                    <p><?php echo $escape($itemSet->displayDescription()); ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <div class="resource-meta">
+                    <?php echo sprintf($translate('%s items'), $itemSet->itemCount()); ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Recent Items Section -->
+<?php if (!empty($recentItems)): ?>
+<section class="content-section">
+    <div class="main-content">
+        <h2 class="section-title"><?php echo $translate('Recent Additions'); ?></h2>
+        <div class="section-content">
+            <?php foreach ($recentItems as $item): ?>
+            <div class="resource-item">
+                <h4 class="resource-title">
+                    <a href="<?php echo $escape($item->url()); ?>">
+                        <?php echo $escape($item->displayTitle()); ?>
+                    </a>
+                </h4>
+                
+                <?php if ($item->displayDescription()): ?>
+                <div class="resource-description">
+                    <p><?php echo $escape($item->displayDescription()); ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <div class="resource-meta">
+                    <?php if ($date = $item->value('dcterms:date')): ?>
+                    <?php echo $escape($date); ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Library Statistics (elegant presentation) -->
+<?php if ($site): ?>
+<section class="content-section">
+    <div class="main-content">
+        <h3 class="section-title"><?php echo $translate('Library Overview'); ?></h3>
+        <div class="section-content">
+            <div class="library-stats">
+                <div class="stat-item">
+                    <div class="stat-number"><?php echo number_format($api->search('items', ['site_id' => $site->id()])->getTotalResults()); ?></div>
+                    <div class="stat-label"><?php echo $translate('Items in Collection'); ?></div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number"><?php echo number_format($api->search('item_sets', ['site_id' => $site->id()])->getTotalResults()); ?></div>
+                    <div class="stat-label"><?php echo $translate('Collections'); ?></div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number"><?php echo number_format($api->search('media', ['site_id' => $site->id()])->getTotalResults()); ?></div>
+                    <div class="stat-label"><?php echo $translate('Digital Objects'); ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- About Section (if description exists) -->
+<?php if ($siteDescription): ?>
+<section class="content-section">
+    <div class="main-content">
+        <h3 class="section-title"><?php echo $translate('About This Collection'); ?></h3>
+        <div class="section-content">
+            <div class="about-content">
+                <p><?php echo $escape($siteDescription); ?></p>
+            </div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<style>
+/* Additional homepage-specific styling */
+.sufism-style-homepage {
+    
+    .hero-section {
+        padding: 60px 0;
+        text-align: center;
+        
+        .site-title {
+            font-size: 64px;
+            margin-bottom: 30px;
+        }
+        
+        .site-description {
+            max-width: 600px;
+            margin: 0 auto;
+            
+            p {
+                font-size: 24px;
+                line-height: 32px;
+                color: #605e5e;
+            }
+        }
+    }
+    
+    .search-section {
+        background: #f7f7f7;
+        padding: 40px 0;
+        
+        .search-form {
+            background: none;
+            
+            input {
+                width: 400px;
+                max-width: 100%;
+            }
+        }
+    }
+    
+    .library-stats {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        margin: 40px 0;
+        
+        @media (max-width: 768px) {
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            
+            .stat-number {
+                font-family: 'Cormorant Garamond', serif;
+                font-size: 48px;
+                color: #b37c05;
+                display: block;
+                margin-bottom: 10px;
+            }
+            
+            .stat-label {
+                font-family: 'Source Sans Pro', sans-serif;
+                font-size: 16px;
+                color: #605e5e;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+        }
+    }
+    
+    .about-content {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto;
+        
+        p {
+            font-size: 22px;
+            line-height: 30px;
+        }
+    }
+}
+</style>

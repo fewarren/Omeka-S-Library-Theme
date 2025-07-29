@@ -1,0 +1,95 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchConfig
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchPage Alias of $searchConfig
+ * @var \AdvancedSearch\Query $query
+ * @var \AdvancedSearch\Response $response
+ * @var string $title
+ * @var string $resourceType
+ */
+
+$resources = $response->getResources($resourceType);
+// A check is done: when page is not first, the resources may be empty even with results.
+if (!$resources) return;
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+// $assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+// $hyperlink = $plugins->get('hyperlink');
+// $thumbnail = $plugins->get('thumbnail');
+$themeSetting = $plugins->get('themeSetting');
+
+// Can be simplified in a public theme.
+$setting = $plugins->get(isset($site) ? 'siteSetting' : 'setting');
+
+// $siteSlug = isset($site) ? $site->slug() : null;
+
+$filterLocale = (bool) $setting('filter_locale_values');
+$siteLang = $plugins->get('lang')();
+$lang = $filterLocale ? $siteLang : null;
+$langValue = $filterLocale ? [$siteLang, ''] : null;
+$untitled = $translate('[Untitled]');
+$labelContactUs = $translate('Add to select list to contact us');
+
+$headingTerm = $setting('browse_heading_property_term');
+$bodyTerm = $setting('browse_body_property_term');
+$bodyTruncate = $this->themeSetting('truncate_body_property');
+
+$gridListMode = $searchConfig ? $searchConfig->subSetting('results', 'grid_list_mode', 'auto') : 'auto';
+
+// $defaultThumbnail = '<img src="' . $assetUrl('thumbnails/default.png', 'Omeka', true) . '" title="' . $translate('No media') . '"/>';
+
+$colors = $themeSetting('colors_rights');
+
+$resourceTypesToClasses = [
+    'items' => 'item',
+    'item_sets' => 'item-set',
+    'media' => 'media',
+];
+?>
+
+<ul class="resource-list search-results-list<?= $gridListMode === 'list_only' ? ' list' : ($gridListMode === 'grid_only' ? ' grid' : '') ?>">
+    <?php /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
+    foreach ($resources as $resource):
+        // Can be simplified in the public theme.
+        // $resourceUrl = $site ? $resource->siteUrl($siteSlug) : $resource->adminUrl($siteSlug);
+        $resourceType = $resource->resourceName();
+        // $resourceThumbnail = $thumbnail($resource, 'medium') ?: $defaultThumbnail;
+        $heading = $headingTerm ? $resource->value($headingTerm, ['lang' => $langValue]) : null;
+        $heading = $heading ? $heading->asHtml() : $escape($resource->displayTitle($untitled, $lang));
+        $body = $bodyTerm ? $resource->value($bodyTerm, ['lang' => $langValue]) : null;
+        $body = $body ? $body->asHtml() : $escape($resource->displayDescription(null, $lang));
+    ?>
+
+    <li class="<?= $resourceType . ' ' . $resourceTypesToClasses[$resourceType] ?? '' ?> resource <?= $gridListMode === 'list_only' ? 'media-object' : '' ?>">
+        <div class="resource-meta <?= $gridListMode === 'list_only' ? 'media-object-section' : '' ?>">
+            <input form="contact-us" class="contact-us-resource" type="checkbox" name="fields[id][]" value="<?= $resource->id() ?>" title="<?= $labelContactUs ?>"/>
+            <?= $resource->linkPretty('medium', $heading) ?>
+<?php /*
+            <?php if ($body): ?>
+            <div class="description <?= $bodyTruncate ?: '' ?>"><?= $escape($body) ?></div>
+            <?php endif; ?>
+            <?php if ($value = $resource->value('dcterms:identifier', ['lang' => $langValue])): ?>
+            <div class="identifier"><?= $escape($value) ?></div>
+            <?php endif; ?>
+*/ ?>
+            <?php if ($value = (string) $resource->value('dcterms:hasFormat', ['lang' => $langValue])): ?>
+            <div class="has-format" style="background-color:<?= $colors[$value] ?? $colors['default'] ?? 'white' ?>"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+            <?php endif; ?>
+            <?php if ($value = $resource->value('cumulus:mides', ['lang' => $langValue])): ?>
+            <div class="mides"><?= $escape($value) ?></div>
+            <?php endif; ?>
+            <?php if ($value = $resource->value('cumulus:resolucio', ['lang' => $langValue])): ?>
+            <div class="resolucio"><?= $escape($value) ?></div>
+            <?php endif; ?>
+            <?php if ($value = $resource->value('dcterms:type', ['lang' => $langValue])): ?>
+            <div class="credis"><?= $escape($value) ?></div>
+            <?php endif; ?>
+        </div>
+    </li>
+
+    <?php endforeach; ?>
+</ul>

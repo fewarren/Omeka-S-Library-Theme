@@ -1,0 +1,84 @@
+<?php
+/**
+ * MINIMAL THEME TEST - Step 1
+ * Testing basic theme functionality
+ */
+
+// Debug logging
+$debugLog = "MINIMAL THEME - Layout executed at " . date('Y-m-d H:i:s') . "\n";
+@file_put_contents('/tmp/sufism-debug.log', $debugLog, FILE_APPEND | LOCK_EX);
+
+$this->htmlElement('html', ['lang' => $this->lang()]);
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($this->setting('installation_title', 'Omeka S'))->setSeparator(' · ');
+
+// Load only basic Omeka CSS
+$this->headLink()->appendStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/page-blocks.css', 'Omeka'));
+
+// Add minimal test CSS
+echo '<style>
+/* MINIMAL TEST CSS */
+body {
+    background-color: #ffffcc !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 18px !important;
+}
+
+nav a, .navigation a {
+    color: #ff0000 !important;
+    font-size: 24px !important;
+    text-transform: uppercase !important;
+    background-color: #ffff00 !important;
+    padding: 10px !important;
+    margin: 5px !important;
+    display: inline-block !important;
+}
+
+h1 {
+    color: #0000ff !important;
+    font-size: 36px !important;
+}
+
+.site-page-pagination a {
+    background-color: #00ff00 !important;
+    color: #000000 !important;
+    padding: 15px !important;
+    font-size: 20px !important;
+}
+</style>';
+
+$this->trigger('view.layout.head');
+?>
+<!DOCTYPE html>
+<html <?php echo $this->htmlAttribs() ?>>
+<head>
+    <?php echo $this->headMeta() ?>
+    <?php echo $this->headTitle() ?>
+    <?php echo $this->headLink() ?>
+    <?php echo $this->headStyle() ?>
+    <?php echo $this->headScript() ?>
+</head>
+<body <?php echo $this->htmlAttribs('body') ?>>
+    <div style="background: #ff9999; padding: 20px; margin: 10px; border: 5px solid #ff0000;">
+        <h1>MINIMAL THEME TEST - STEP 1</h1>
+        <p>If you can see this red box with yellow background, the minimal theme is working!</p>
+        <p>Current time: <?php echo date('Y-m-d H:i:s'); ?></p>
+    </div>
+    
+    <header>
+        <?php echo $this->navigation('top') ?>
+    </header>
+    
+    <main>
+        <?php echo $this->content ?>
+    </main>
+    
+    <footer>
+        <p>Minimal Theme Test Footer</p>
+    </footer>
+    
+    <?php echo $this->footerScript() ?>
+</body>
+</html>

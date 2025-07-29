@@ -1,0 +1,85 @@
+<?php
+$plugins = $this->getHelperPluginManager();
+
+$searchingForm = $plugins->has('searchingForm') ? $plugins->get('searchingForm') : null;
+
+// Enhanced branding settings - use passed variables or fallback to theme settings
+$siteLogo = isset($this->siteLogo) ? $this->siteLogo : $this->themeSettingAssetUrl('site_logo');
+$logoLinkPage = isset($this->logoLinkPage) ? $this->logoLinkPage : $this->themeSetting('logo_link_page', '/');
+$siteTagline = isset($this->siteTagline) ? $this->siteTagline : $this->themeSetting('site_tagline', '');
+$headerLayout = isset($this->headerLayout) ? $this->headerLayout : $this->themeSetting('header_layout', 'title_only');
+$siteTitle = isset($this->siteTitle) ? $this->siteTitle : $this->escapeHtml($site->title());
+
+// Debug logo information
+@file_put_contents('/tmp/sufism-debug.log', "Logo debug - siteLogo: " . ($siteLogo ?: 'empty') . ", headerLayout: " . $headerLayout . "\n", FILE_APPEND);
+
+// Legacy logo support
+$legacyLogo = ($this->themeSetting('logo')) ? '<img src="' . $this->themeSettingAssetUrl('logo') . '" title="Logo" alt="">' : '';
+
+// Generate logo HTML based on header layout
+$logoHTML = '';
+if ($siteLogo && ($headerLayout === 'logo_only' || $headerLayout === 'logo_and_title' || $headerLayout === 'logo_with_tagline')) {
+    $logoHTML = '<img src="' . $siteLogo . '" alt="' . $this->escapeHtml($siteTitle) . ' Logo" class="site-logo">';
+} elseif ($legacyLogo) {
+    $logoHTML = $legacyLogo;
+}
+
+// Determine what to show in header
+$showTitle = ($headerLayout === 'title_only' || $headerLayout === 'logo_and_title');
+$showLogo = ($headerLayout === 'logo_only' || $headerLayout === 'logo_and_title' || $headerLayout === 'logo_with_tagline') && !empty($logoHTML);
+$showTagline = ($headerLayout === 'logo_with_tagline' && !empty($siteTagline));
+
+// Enhanced debug logging
+@file_put_contents('/tmp/sufism-debug.log', "LOGO DEBUG:\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  siteLogo: " . ($siteLogo ?: 'EMPTY') . "\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  headerLayout: " . $headerLayout . "\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  logoHTML: " . ($logoHTML ?: 'EMPTY') . "\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  showLogo: " . ($showLogo ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  showTitle: " . ($showTitle ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
+@file_put_contents('/tmp/sufism-debug.log', "  showTagline: " . ($showTagline ? 'TRUE' : 'FALSE') . "\n", FILE_APPEND);
+
+// Force load hamburger menu JavaScript
+$this->headScript()->appendFile($this->assetUrl('js/sufism-menu.js'));
+?>
+
+<div class="title-bar" data-responsive-toggle="responsive-menu" data-hide-for="large">
+    <button class="menu-toggle" type="button" data-toggle="offCanvas" aria-label="<?php echo $this->translate('Menu'); ?>"><i class="fas fa-bars"></i></button>
+    <div class="site-branding mobile-branding">
+        <a href="<?php echo $logoLinkPage; ?>" class="site-branding-link">
+            <?php if ($showLogo && $logoHTML): ?>
+                <?php echo $logoHTML; ?>
+            <?php endif; ?>
+            <?php if ($showTitle): ?>
+                <span class="site-title-label"><?php echo $siteTitle; ?></span>
+            <?php endif; ?>
+            <?php if ($showTagline): ?>
+                <span class="site-tagline"><?php echo $this->escapeHtml($siteTagline); ?></span>
+            <?php endif; ?>
+        </a>
+    </div>
+</div>
+
+<div class="desktop">
+    <div class="site-branding desktop-branding" style="text-align: center; width: 100%; padding: 20px;">
+        <a href="<?php echo $logoLinkPage; ?>" class="site-branding-link" style="display: block; text-decoration: none;">
+            <?php if ($siteLogo): ?>
+                <img src="<?php echo $siteLogo; ?>" alt="<?php echo $this->escapeHtml($siteTitle); ?> Logo" class="site-logo" style="max-height: 80px; width: auto; display: block; margin: 0 auto;">
+            <?php endif; ?>
+
+            <?php if (!empty($siteTagline)): ?>
+                <p class="site-tagline" style="margin-top: 10px; font-size: 0.9rem; color: #666; text-align: center;"><?php echo $this->escapeHtml($siteTagline); ?></p>
+            <?php endif; ?>
+        </a>
+    </div>
+
+  <!-- Navigation removed from header - available in off-canvas menu -->
+
+  <!-- Main navigation removed from header - available in off-canvas mobile menu -->
+  <div class="search">
+        <?php if ($searchingForm): ?>
+        <?= $searchingForm('search/search-form-simple') ?>
+        <?php else: ?>
+        <?= $this->partial('common/search-form') ?>
+        <?php endif; ?>
+  </div>
+</div>

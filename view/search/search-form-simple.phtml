@@ -1,0 +1,39 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Laminas\Form\Form $form
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchConfig
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchPage Alias of $searchConfig
+ */
+
+// This quick form displays only the field "q", similarly to the standard search form.
+
+$plugins = $this->getHelperPluginManager();
+$translate = $plugins->get('translate');
+$formHelper = $plugins->get('form');
+$formElement = $plugins->get('formElement');
+
+$params = $this->params()->fromQuery() ?: [];
+$form
+    ->setAttribute('id', 'form-search-simple')
+    ->setData($params)
+    ->prepare();
+
+if (!$form->has('q')) {
+    return;
+}
+$q = $form->get('q');
+
+$form->setAttribute('class', 'search-form input-group');
+$q->setAttribute('class', 'input-group-field');
+$q->removeAttribute('form');
+?>
+
+<?= $formHelper->openTag($form) ?>
+    <?= $formElement($q
+        ->setAttribute('placeholder', $translate('Search'))
+        ->setAttribute('aria-label', $translate('Search'))) ?>
+    <div class="input-group-button">
+        <button class="button" type="submit"><?= $translate('Search') ?></button>
+    </div>
+<?= $formHelper->closeTag() ?>
