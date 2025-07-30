@@ -1,6 +1,7 @@
 <?php $escape = $this->plugin('escapeHtml'); ?>
 
 <div class="assets">
+  <?php if (isset($attachments) && is_array($attachments) && !empty($attachments)): ?>
   <?php foreach ($attachments as $attachment): ?>
     <?php $asset = $attachment['asset']; ?>
     <div class="asset card">
@@ -20,4 +21,5 @@
         <?php endif; ?>
     </div>
   <?php endforeach; ?>
+  <?php endif; ?>
 </div>

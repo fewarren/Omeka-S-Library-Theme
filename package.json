@@ -1,71 +1,31 @@
 {
-  "name": "sufism-library-theme-optimized",
+  "name": "sufism-library-theme",
   "version": "2.0.0",
-  "description": "Ultra-optimized Omeka S theme - 99% file reduction achieved while maintaining 100% functionality",
+  "description": "Optimized Omeka S theme for Sufism Library - self-contained with no external dependencies.",
   "main": "view/layout/layout.phtml",
-  "scripts": {
-    "info": "echo 'This theme requires NO build process, NO dependencies, NO npm install. Ready to use immediately!'",
-    "validate": "echo 'Theme validation: All styles inlined, zero external dependencies, production-ready.'",
-    "deploy": "echo 'Deployment: Simply upload this directory to your Omeka S themes folder and activate.'"
-  },
   "author": "Library Development Team",
   "license": "MIT",
   "keywords": [
     "omeka-s",
     "theme",
-    "optimized",
-    "self-contained",
-    "minimal",
-    "sufism",
     "library",
-    "zero-dependencies",
-    "production-ready"
+    "sufism",
+    "self-contained",
+    "optimized"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/sufism-library/omeka-s-theme-optimized"
+    "url": "https://github.com/sufism-library/omeka-s-theme"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=14.0.0"
   },
   "omeka": {
     "version": "^4.1.0",
     "type": "theme",
     "optimized": true,
     "self_contained": true,
-    "zero_dependencies": true,
-    "file_reduction": "99%",
-    "build_process": "none",
-    "deployment": "upload-and-activate"
-  },
-  "optimization": {
-    "original_files": 6505,
-    "optimized_files": "~85",
-    "reduction_percentage": "99%",
-    "eliminated": [
-      "node_modules (6420+ files)",
-      "package-lock.json",
-      "gulpfile.js",
-      "development dependencies",
-      "build tools"
-    ],
-    "retained": [
-      "config/theme.ini",
-      "view templates",
-      "helper functions",
-      "documentation"
-    ]
-  },
-  "features": {
-    "inlined_css": true,
-    "responsive_design": true,
-    "accessibility": true,
-    "customizable": true,
-    "foundation_framework": "inlined",
-    "google_fonts": "cdn",
-    "jquery": "cdn"
-  },
-  "performance": {
-    "load_time": "instant",
-    "dependencies": "zero",
-    "build_time": "none",
-    "deployment_time": "seconds"
+    "file_count_optimized": true
   }
 }

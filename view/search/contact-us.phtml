@@ -13,6 +13,7 @@
 // Note: you may use css grid / flex to quick adapt the form and reorder fields.
 
 $escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
 
 $heading = 'Formulari de sol·licitud de reproducció d’imatges';
 
@@ -42,9 +43,9 @@ $consent
 
 <div class="contact-us-block">
 
-    <button id="contact-us-store-add" class="button" type="button">Desa els elements marcats per a un ús futur</button>
+    <button id="contact-us-store-add" class="button" type="button"><?= $escape($translate('Save marked items for future use')) ?></button>
 
-    <button id="contact-us-store-clear" class="button" type="button">Esborra els elements desats anteriorment</button>
+    <button id="contact-us-store-clear" class="button" type="button"><?= $escape($translate('Clear previously saved items')) ?></button>
 
     <?php if (!empty($heading)): ?>
     <h2><?= $escape($heading) ?></h2>

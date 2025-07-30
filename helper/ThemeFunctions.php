@@ -2,8 +2,6 @@
 
 namespace OmekaTheme\Helper;
 
-require_once __DIR__ . '/ThemeFunctionsSpecific.php';
-
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -17,15 +15,115 @@ class ThemeFunctions extends AbstractHelper
 {
     use ThemeFunctionsSpecific;
 
+    private ?ModuleService $moduleService = null;
+    private ?SiteSettingsRepository $siteSettingsRepository = null;
+
     public function __invoke(): self
     {
         return $this;
     }
 
     /**
-     * Get the Omeka services. It should not be used in themes.
+     * Set the module service for dependency injection
+     *
+     * @param ModuleService $moduleService
+     * @return self
      */
-    public function getServiceLocator(): ?ServiceLocatorInterface
+    public function setModuleService(ModuleService $moduleService): self
+    {
+        $this->moduleService = $moduleService;
+        return $this;
+    }
+
+    /**
+     * Set the site settings repository for dependency injection
+     *
+     * @param SiteSettingsRepository $siteSettingsRepository
+     * @return self
+     */
+    public function setSiteSettingsRepository(SiteSettingsRepository $siteSettingsRepository): self
+    {
+        $this->siteSettingsRepository = $siteSettingsRepository;
+        return $this;
+    }
+
+    /**
+     * Get the module service, creating it if not injected
+     *
+     * @return ModuleService
+     */
+    private function getModuleService(): ModuleService
+    {
+        if ($this->moduleService === null) {
+            // Fallback: create service manually if not injected
+            $serviceLocator = $this->getServiceLocator();
+            if ($serviceLocator && $serviceLocator->has('OmekaTheme\Helper\ModuleService')) {
+                $this->moduleService = $serviceLocator->get('OmekaTheme\Helper\ModuleService');
+            } else {
+                // Last resort: create with manual dependencies
+                $apiManager = $serviceLocator ? $serviceLocator->get('Omeka\ApiManager') : $this->view->api();
+                $moduleManager = $serviceLocator ? $serviceLocator->get('Omeka\ModuleManager') : null;
+
+                if ($moduleManager) {
+                    $this->moduleService = new ModuleService($apiManager, $moduleManager);
+                } else {
+                    // If we can't get the module manager, we'll have to use the fallback methods
+                    throw new \RuntimeException('ModuleService could not be created: ModuleManager not available');
+                }
+            }
+        }
+
+        return $this->moduleService;
+    }
+
+    /**
+     * Get the site settings repository, creating it if not injected
+     *
+     * @return SiteSettingsRepository
+     */
+    private function getSiteSettingsRepository(): SiteSettingsRepository
+    {
+        if ($this->siteSettingsRepository === null) {
+            // Fallback: create repository manually if not injected
+            $serviceLocator = $this->getServiceLocator();
+            if ($serviceLocator && $serviceLocator->has('OmekaTheme\Helper\SiteSettingsRepository')) {
+                $this->siteSettingsRepository = $serviceLocator->get('OmekaTheme\Helper\SiteSettingsRepository');
+            } else {
+                // Last resort: create with manual dependencies
+                $connection = $serviceLocator ? $serviceLocator->get('Omeka\Connection') : null;
+
+                if ($connection) {
+                    $this->siteSettingsRepository = new SiteSettingsRepository($connection);
+                } else {
+                    throw new \RuntimeException('SiteSettingsRepository could not be created: Connection not available');
+                }
+            }
+        }
+
+        return $this->siteSettingsRepository;
+    }
+
+    /**
+     * Get the Omeka services.
+     *
+     * @internal This method is for internal use only and should not be used in themes.
+     *
+     * WARNING: Direct access to the service locator violates the dependency injection
+     * principle and creates tight coupling between themes and Omeka's internal services.
+     * This can lead to:
+     * - Broken themes when Omeka updates its internal structure
+     * - Difficult debugging and maintenance
+     * - Reduced theme portability and reusability
+     * - Potential security vulnerabilities
+     *
+     * Instead of using this method, themes should:
+     * - Use the view helpers provided by Omeka S
+     * - Access data through the representation objects passed to templates
+     * - Follow Omeka S theming best practices and documentation
+     *
+     * @return ServiceLocatorInterface|null The service locator or null if unavailable
+     */
+    protected function getServiceLocator(): ?ServiceLocatorInterface
     {
         static $services;
         if (is_null($services)) {
@@ -75,6 +173,9 @@ class ThemeFunctions extends AbstractHelper
             return null;
         }
         $site = $this->currentSite();
+        if ($site === null) {
+            return null;
+        }
         return $this->view->page = $this->view->api()->searchOne('site_pages', ['site_id' => $site->id(), 'slug' => $pageSlug])->getContent();
     }
 
@@ -148,7 +249,8 @@ class ThemeFunctions extends AbstractHelper
 
             // Strip out the protocol, host, base URL, and rightmost slash before
             // comparing the URL to the current one
-            $stripOut = [$serverUrl . $basePath, @$_SERVER['HTTP_HOST'], $basePath];
+            $httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+            $stripOut = [$serverUrl . $basePath, $httpHost, $basePath];
             $currentUrl = rtrim(str_replace($stripOut, '', $currentUrl), '/');
         }
 
@@ -189,21 +291,50 @@ class ThemeFunctions extends AbstractHelper
      * Check if a module is active and greater or equal to a version.
      *
      * @deprecated Just check for the presence of a view helper.
+     *
+     * @param string $module Module identifier
+     * @param string|null $minimumVersion Minimum version required (optional)
+     * @return bool True if module is active and meets version requirement
      */
     public function isModuleActive(string $module, ?string $minimumVersion = null): bool
     {
-        static $activeModuleVersions;
-        if (is_null($activeModuleVersions)) {
-            /** @var \Doctrine\DBAL\Connection $connection */
-            $connection = $this->getServiceLocator()->get('Omeka\Connection');
-            $activeModuleVersions = $connection->fetchAllKeyValue('SELECT id, version FROM module WHERE is_active = 1 ORDER BY id ASC;');
+        try {
+            // Use injected ModuleService for proper separation of concerns
+            $moduleService = $this->getModuleService();
+            return $moduleService->isModuleActive($module, $minimumVersion);
+
+        } catch (\Exception $e) {
+            // Fallback: check for presence of module's view helper as suggested in deprecation notice
+            return $this->hasModuleViewHelper($module);
         }
-        if (!isset($activeModuleVersions[$module])) {
-            return false;
+    }
+
+
+    /**
+     * Fallback method to check module presence by view helper availability
+     *
+     * @param string $module Module identifier
+     * @return bool True if module's view helper is available
+     */
+    private function hasModuleViewHelper(string $module): bool
+    {
+        // Common view helper patterns for modules
+        $commonHelpers = [
+            $module,
+            lcfirst($module),
+            strtolower($module),
+            str_replace(['-', '_'], '', strtolower($module))
+        ];
+
+        $pluginManager = $this->view->getHelperPluginManager();
+
+        foreach ($commonHelpers as $helperName) {
+            if ($pluginManager->has($helperName)) {
+                return true;
+            }
         }
-        return $minimumVersion
-            ? version_compare($activeModuleVersions[$module], $minimumVersion, '>=')
-            : true;
+
+        return false;
     }
 
     /**
@@ -819,7 +950,7 @@ class ThemeFunctions extends AbstractHelper
      *
      * @deprecated Use module BlockPlus.
      */
-    public function listMediasByViewer(ItemRepresentation $item, ?string $viewer = null): array
+    public function listMediasByViewer(ItemRepresentation $item): array
     {
         $viewing = [
             // All non-to be viewed media. Always empty here: the viewer is unknown.
@@ -1037,6 +1168,9 @@ HTML;
 
         $translate = $this->view->plugin('translate');
         $site = $this->currentSite();
+        if ($site === null) {
+            return [];
+        }
         $siteSlug = $site->slug();
         $siteTitle = $site->title();
 
@@ -1051,7 +1185,8 @@ HTML;
         $encodedUrl = rawurlencode($url);
         $encodedTitle = rawurlencode($title);
 
-        $onclick = "javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;";
+        // Use data attributes instead of inline onclick for CSP compliance
+        $popupOptions = 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600';
         foreach ($socialMedia as $social) {
             $attrs = [];
             switch ($social) {
@@ -1060,9 +1195,9 @@ HTML;
                     $attrs = [
                         'href' => 'https://www.facebook.com/sharer/sharer.php?u=' . $encodedUrl . '&t=' . $encodedTitle,
                         'title' => $translate('Partager sur Facebook'),
-                        'onclick' => $onclick,
+                        'data-popup' => $popupOptions,
                         'target' => '_blank',
-                        'class' => 'share-item icon-facebook',
+                        'class' => 'share-item icon-facebook social-share-popup',
                         'tabindex' => '0',
                     ];
                     break;
@@ -1073,9 +1208,9 @@ HTML;
                         'id' => 'button-pinterest',
                         'href' => 'https://pinterest.com/pin/create/link/?url=' . $encodedUrl . '&description=' . $encodedTitle,
                         'title' => $translate('Share on Pinterest'), // @translate
-                        'onclick' => $onclick,
+                        'data-popup' => $popupOptions,
                         'target' => '_blank',
-                        'class' => 'share-page icon-pinterest',
+                        'class' => 'share-page icon-pinterest social-share-popup',
                         'tabindex' => '0',
                     ];
                     break;
@@ -1085,9 +1220,9 @@ HTML;
                     $attrs = [
                         'href' => 'https://twitter.com/share?url=' . $encodedUrl . '&text=' . $encodedTitle,
                         'title' => $translate('Partager sur Twitter'),
-                        'onclick' => $onclick,
+                        'data-popup' => $popupOptions,
                         'target' => '_blank',
-                        'class' => 'share-item icon-twitter',
+                        'class' => 'share-item icon-twitter social-share-popup',
                         'tabindex' => '0',
                     ];
                     break;
@@ -1107,6 +1242,26 @@ HTML;
             $result[$social] = $attrs;
         }
         return $result;
+    }
+
+    /**
+     * Include social share JavaScript for popup functionality
+     *
+     * This method should be called in templates that use social sharing
+     * to ensure the external JavaScript is loaded for CSP compliance.
+     *
+     * @return void
+     */
+    public function includeSocialShareScript(): void
+    {
+        $view = $this->getView();
+
+        // Add the social share JavaScript file
+        $view->headScript()->appendFile(
+            $view->assetUrl('js/social-share.js', 'library-theme'),
+            'text/javascript',
+            ['defer' => true]
+        );
     }
 
     /**
@@ -1212,31 +1367,19 @@ HTML;
             $user = $this->view->identity();
             $isPublic = !$user || $user->getRole() === 'guest';
 
-            // Filter empty locale directly? Not here, in order to manage complex cases.
-            $sql = <<<'SQL'
-SELECT
-    site.slug AS site_slug,
-    REPLACE(site_setting.value, '"', "") AS localeId
-FROM site_setting
-JOIN site ON site.id = site_setting.site_id
-WHERE site_setting.id = :setting_id
-ORDER BY site.id ASC
-SQL;
-            $bind = ['setting_id' => 'locale'];
-            if ($isPublic) {
-                $sql .= ' AND site.is_public = :is_public';
-                $bind['is_public'] = 1;
-            }
-
-            /** @var \Doctrine\DBAL\Connection $connection */
-            $connection = $this->getServiceLocator()->get('Omeka\Connection');
-            $localeSites = $connection->fetchAllKeyValue($sql, $bind);
-            $localeSites = array_filter($localeSites);
+            // Use repository for data access instead of direct SQL
+            $repository = $this->getSiteSettingsRepository();
+            $localeSites = $repository->getLocaleSites($isPublic);
 
             if (!$localeSites) {
-                $localeSites = [
-                    $this->currentSite()->slug() => $this->view->setting('locale'),
-                ];
+                $currentSite = $this->currentSite();
+                if ($currentSite !== null) {
+                    $localeSites = [
+                        $currentSite->slug() => $this->view->setting('locale'),
+                    ];
+                } else {
+                    $localeSites = [];
+                }
             }
 
             // TODO Use laminas/doctrine language management.

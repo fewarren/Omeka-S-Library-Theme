@@ -226,17 +226,40 @@ fi
 log "Step 7: Cleaning up old backups"
 
 if [ -d "$BACKUP_DIR" ]; then
-    # Keep only the 5 most recent backups
-    backup_count=$(ls -1 "$BACKUP_DIR" | grep "$THEME_NAME-backup-" | wc -l)
-    
+    # Use find to safely locate backup files and count them
+    # This avoids parsing ls output and handles unusual filenames safely
+    backup_files=()
+    while IFS= read -r -d '' backup_file; do
+        backup_files+=("$backup_file")
+    done < <(find "$BACKUP_DIR" -maxdepth 1 -name "${THEME_NAME}-backup-*" -type d -print0)
+
+    backup_count=${#backup_files[@]}
+
     if [ "$backup_count" -gt 5 ]; then
-        log "Removing old backups (keeping 5 most recent)"
-        ls -1t "$BACKUP_DIR" | grep "$THEME_NAME-backup-" | tail -n +6 | while read old_backup; do
-            rm -rf "$BACKUP_DIR/$old_backup"
-            log "Removed old backup: $old_backup"
+        log "Found $backup_count backups, removing old ones (keeping 5 most recent)"
+
+        # Sort backup files by modification time (newest first) and get files to remove
+        files_to_remove=()
+        while IFS= read -r -d '' old_backup; do
+            files_to_remove+=("$old_backup")
+        done < <(find "$BACKUP_DIR" -maxdepth 1 -name "${THEME_NAME}-backup-*" -type d -printf '%T@ %p\0' | \
+                 sort -rz -n | \
+                 tail -z -n +"$((5 + 1))" | \
+                 cut -z -d' ' -f2-)
+
+        # Safely remove old backup files
+        for old_backup in "${files_to_remove[@]}"; do
+            if [ -d "$old_backup" ]; then
+                rm -rf "$old_backup"
+                log "Removed old backup: $(basename "$old_backup")"
+            fi
         done
+
+        log "Removed $((backup_count - 5)) old backup(s)"
+    else
+        log "Found $backup_count backup(s), no cleanup needed"
     fi
-    
+
     success "Backup cleanup completed"
 fi
 

@@ -1,0 +1,29 @@
+<?php
+/**
+ * Reusable partial for facets submit and reset buttons
+ * 
+ * Variables expected:
+ * @var string $position - 'above', 'below', or 'both'
+ * @var string $displayReset - Reset button display setting
+ * @var string $displaySubmit - Submit button display setting  
+ * @var bool $displayFacetButton - Whether to show facet button
+ * @var string $labelSubmit - Submit button label
+ * @var string $labelReset - Reset button label
+ * @var callable $escape - HTML escape function
+ */
+
+// Determine if buttons should be displayed for this position
+$displayButtonReset = $displayReset === $position || $displayReset === 'both';
+$displayButtonSubmit = $displayFacetButton && ($displaySubmit === $position || $displaySubmit === 'both');
+
+// Only render if at least one button should be displayed
+if ($displayButtonReset || $displayButtonSubmit): ?>
+<div class="facets-actions facets-actions-<?= $escape($position) ?>">
+    <?php if ($displayButtonSubmit): ?>
+    <button id="facets-apply-<?= $escape($position) ?>" class="facets-apply button" type="submit"><?= $escape($labelSubmit) ?></button>
+    <?php endif; ?>
+    <?php if ($displayButtonReset): ?>
+    <button id="facets-reset-<?= $escape($position) ?>" class="facets-reset button" type="reset"><?= $escape($labelReset) ?></button>
+    <?php endif; ?>
+</div>
+<?php endif; ?>

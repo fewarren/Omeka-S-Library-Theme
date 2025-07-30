@@ -64,7 +64,7 @@ $resourceTypesToClasses = [
         $body = $body ? $body->asHtml() : $escape($resource->displayDescription(null, $lang));
     ?>
 
-    <li class="<?= $resourceType . ' ' . $resourceTypesToClasses[$resourceType] ?? '' ?> resource <?= $gridListMode === 'list_only' ? 'media-object' : '' ?>">
+    <li class="<?= $resourceType . ' ' . ($resourceTypesToClasses[$resourceType] ?? '') ?> resource <?= $gridListMode === 'list_only' ? 'media-object' : '' ?>">
         <div class="resource-meta <?= $gridListMode === 'list_only' ? 'media-object-section' : '' ?>">
             <input form="contact-us" class="contact-us-resource" type="checkbox" name="fields[id][]" value="<?= $resource->id() ?>" title="<?= $labelContactUs ?>"/>
             <?= $resource->linkPretty('medium', $heading) ?>
@@ -77,7 +77,18 @@ $resourceTypesToClasses = [
             <?php endif; ?>
 */ ?>
             <?php if ($value = (string) $resource->value('dcterms:hasFormat', ['lang' => $langValue])): ?>
-            <div class="has-format" style="background-color:<?= $colors[$value] ?? $colors['default'] ?? 'white' ?>"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+            <?php
+                // Safely get color with fallback to default or white
+                $backgroundColor = 'white'; // Default fallback
+                if (is_array($colors)) {
+                    if (isset($colors[$value])) {
+                        $backgroundColor = $colors[$value];
+                    } elseif (isset($colors['default'])) {
+                        $backgroundColor = $colors['default'];
+                    }
+                }
+            ?>
+            <div class="has-format" style="background-color:<?= $escape($backgroundColor) ?>"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
             <?php endif; ?>
             <?php if ($value = $resource->value('cumulus:mides', ['lang' => $langValue])): ?>
             <div class="mides"><?= $escape($value) ?></div>

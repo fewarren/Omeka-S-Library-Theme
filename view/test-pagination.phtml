@@ -5,6 +5,7 @@
  */
 
 $this->headTitle('Pagination Button Test');
+$this->headLink()->appendStylesheet($this->assetUrl('css/test-pagination.css', 'library-theme'));
 ?>
 
 <div class="test-container" style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
@@ -131,42 +132,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-/* Ensure pagination button styles are applied with high specificity */
-body .test-container .pagination .button,
-body .test-container .omeka-pagination .button,
-body .test-container .pagination a,
-body .test-container .prev-next-nav a,
-body .test-container .navigation a,
-body .test-container .navigation .button {
-    font-size: var(--pagination-button-font-size, 1rem) !important;
-    color: var(--pagination-font-color, #ffffff) !important;
-    background-color: var(--pagination-background-color, #2c5aa0) !important;
-    border: 2px solid var(--pagination-background-color, #2c5aa0) !important;
-    padding: var(--pagination-button-padding, 0.75rem 1.5rem) !important;
-    text-decoration: none !important;
-    border-radius: 6px !important;
-    transition: all 0.3s ease !important;
-    display: inline-block !important;
-    margin: 0.5rem 0.25rem !important;
-    font-weight: 500 !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    min-width: 100px !important;
-    box-sizing: border-box !important;
-}
 
-body .test-container .pagination .button:hover,
-body .test-container .omeka-pagination .button:hover,
-body .test-container .pagination a:hover,
-body .test-container .prev-next-nav a:hover,
-body .test-container .navigation a:hover,
-body .test-container .navigation .button:hover {
-    background-color: var(--pagination-hover-color, #1a365d) !important;
-    border-color: var(--pagination-hover-color, #1a365d) !important;
-    color: var(--pagination-font-color, #ffffff) !important;
-    text-decoration: none !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-}
-</style>

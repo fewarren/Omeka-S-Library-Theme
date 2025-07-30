@@ -105,10 +105,22 @@ $site = $this->vars()->site ?? null;
     
     <div class="test-section">
         <h2><?php echo $translate('File System Test'); ?></h2>
-        <?php 
-        $cssFile = 'themes/Sufism-Library/asset/css/library.css';
-        $jsFile = 'themes/Sufism-Library/asset/js/lightbox.js';
+        <?php
+        // Get current theme name dynamically
+        $currentTheme = $this->vars()->site ? $this->vars()->site->theme() : 'library-theme';
+
+        // Use dynamic asset URL resolution instead of hardcoded paths
+        $cssUrl = $this->assetUrl('css/library.css');
+        $jsUrl = $this->assetUrl('js/lightbox.js');
+
+        // Convert URLs to file paths for existence checking
+        $basePath = OMEKA_PATH . '/themes/' . $currentTheme . '/asset/';
+        $cssFile = $basePath . 'css/library.css';
+        $jsFile = $basePath . 'js/lightbox.js';
         ?>
+        <p><?php echo $translate('Current theme: ') . $escape($currentTheme); ?></p>
+        <p><?php echo $translate('CSS URL: ') . $escape($cssUrl); ?></p>
+        <p><?php echo $translate('JS URL: ') . $escape($jsUrl); ?></p>
         <p><?php echo $translate('CSS file exists: ') . (file_exists($cssFile) ? '✓' : '✗'); ?></p>
         <p><?php echo $translate('JS file exists: ') . (file_exists($jsFile) ? '✓' : '✗'); ?></p>
     </div>

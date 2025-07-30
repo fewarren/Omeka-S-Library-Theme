@@ -109,7 +109,7 @@ $colors = $themeSetting('colors_rights');
             <?php if ($mainWithSidebarHasBlocks): ?>
             <div class="main-with-sidebar cell medium-<?php echo $mainWidth; ?>">
                 <?php if ($tabNavigationRegion == 'main'): ?>
-                    <?php echo $tabManager->renderTabsOnly($resource, $tabContent, $tabLayout); ?>
+                    <?php echo $tabManager->renderTabsOnly($resource, $tabContent); ?>
                 <?php endif; ?>
                 <?php if ($tabNavigationRegion && ($tabContent == 'main')): ?>
                     <?php echo $tabManager->renderPanels($itemSet, $tabContent, $tabLayout); ?>
