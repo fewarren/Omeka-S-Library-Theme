@@ -31,13 +31,11 @@ class Module extends AbstractModule
      */
     public function getViewHelperConfig()
     {
-        $helpers = [
-            'invokables' => [
-                // Tab manager helper (exposed in templates as $this->TabManager())
-                'tabManager' => \OmekaTheme\Helper\TabManager::class,
-                'TabManager' => \OmekaTheme\Helper\TabManager::class,
-            ],
-        ];
+        $helpers = ['invokables' => []];
+        if (class_exists('\OmekaTheme\Helper\TabManager')) {
+            $helpers['invokables']['tabManager'] = \OmekaTheme\Helper\TabManager::class;
+            $helpers['invokables']['TabManager'] = \OmekaTheme\Helper\TabManager::class;
+        }
         // If a ThemeFunctions helper exists in Theme\View\Helper, register aliases
         if (class_exists('Theme\\View\\Helper\\ThemeFunctions')) {
             $helpers['invokables']['themeFunctions'] = \Theme\View\Helper\ThemeFunctions::class;
