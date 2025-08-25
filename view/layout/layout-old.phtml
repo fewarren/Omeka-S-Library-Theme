@@ -1,0 +1,1743 @@
+<!-- LAYOUT FILE TEST: This comment proves our layout file is being executed -->
+<?php
+// CRITICAL: Initialize variables from theme settings FIRST
+error_log('FONT TRACE: Variables initialized at top of file');
+
+// Get theme functions helper instance (object) with safe fallback shim
+$themeFunctions = null;
+try {
+    $plugins = $this->getHelperPluginManager();
+    if ($plugins && $plugins->has('themeFunctions')) {
+        // Preferred: our registered helper
+        $themeFunctions = $this->themeFunctions();
+    }
+} catch (\Throwable $e) {
+    error_log('WARN: themeFunctions helper missing, using fallback shim: ' . $e->getMessage());
+}
+if (!$themeFunctions) {
+    // Fallback shim to avoid any errors if helper not registered
+    $themeFunctions = new class {
+        public function getFontFamily($fontKey) {
+            $fontMap = [
+                'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+                'roboto' => 'Roboto, Arial, sans-serif',
+                'open_sans' => 'Open Sans, Arial, sans-serif',
+                'lato' => 'Lato, Arial, sans-serif',
+                'montserrat' => 'Montserrat, Arial, sans-serif',
+                'source_sans' => 'Source Sans Pro, Arial, sans-serif',
+                'nunito' => 'Nunito, Arial, sans-serif',
+                'poppins' => 'Poppins, Arial, sans-serif',
+                'inter' => 'Inter, Arial, sans-serif',
+                'work_sans' => 'Work Sans, Arial, sans-serif',
+                'fira_sans' => 'Fira Sans, Arial, sans-serif',
+                'verdana' => 'Verdana, Arial, sans-serif',
+                'arial' => 'Arial, sans-serif',
+                'merriweather' => 'Merriweather, Georgia, serif',
+                'playfair' => 'Playfair Display, Georgia, serif',
+                'crimson' => 'Crimson Text, Georgia, serif',
+                'libre_baskerville' => 'Libre Baskerville, Georgia, serif',
+                'lora' => 'Lora, Georgia, serif',
+                'pt_serif' => 'PT Serif, Georgia, serif',
+                'source_serif' => 'Source Serif Pro, Georgia, serif',
+                'georgia' => 'Georgia, serif',
+                'times' => 'Times New Roman, serif',
+                'oswald' => 'Oswald, Arial, sans-serif',
+                'raleway' => 'Raleway, Arial, sans-serif',
+                'bebas_neue' => 'Bebas Neue, Arial, sans-serif',
+                'anton' => 'Anton, Arial, sans-serif',
+                'dancing_script' => 'Dancing Script, cursive',
+                'pacifico' => 'Pacifico, cursive',
+                'fira_code' => 'Fira Code, Consolas, monospace',
+                'source_code' => 'Source Code Pro, Consolas, monospace',
+                'courier' => 'Courier New, monospace',
+                'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            ];
+            return $fontMap[$fontKey] ?? $fontMap['system'];
+        }
+    };
+}
+
+// Initialize all theme settings with defaults if not set
+$mediumGray = $mediumGray ?? '#6C757D';
+$lightGray = $lightGray ?? '#F8F9FA';
+$charcoal = $charcoal ?? '#36454F';
+$deepBurgundy = $deepBurgundy ?? '#800020';
+$sunsetOrange = $sunsetOrange ?? '#FF8C42';
+$gentleLavender = $gentleLavender ?? '#E6E6FA';
+$warmCream = $warmCream ?? '#F5F5DC';
+$softSage = $softSage ?? '#9CAF88';
+$warmEarth = $warmEarth ?? '#8B4513';
+$sacredGold = $sacredGold ?? '#D4AF37';
+$primaryColor = $primaryColor ?? '#2C4A6B';
+
+
+// SIMPLIFIED SUFISM REORIENTED THEME
+// Get site information
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Murshids of Sufism Reoriented';
+
+// DEBUG: Log current settings from database
+$rawSettings = $this->themeSetting(null, null, true);
+error_log('FONT TRACE: Current database settings: ' . print_r($rawSettings, true));
+
+// Get theme settings with safe fallbacks
+try {
+    // DATABASE VERIFICATION LOGGING - START
+    error_log('FONT TRACE: =================================');
+    error_log('FONT TRACE: Database verification phase');
+    error_log('FONT TRACE: Getting raw settings from database...');
+    $rawSettings = $this->themeSetting(null, null, true); // Get all settings
+    error_log('FONT TRACE: Raw database settings: ' . var_export($rawSettings, true));
+
+    // Verify specific font settings
+    if (isset($rawSettings['tagline_font_family'])) {
+        error_log('FONT TRACE: Database has tagline_font_family = ' . $rawSettings['tagline_font_family']);
+    } else {
+        error_log('FONT TRACE: Database MISSING tagline_font_family setting');
+    }
+
+    error_log('FONT TRACE: =================================');
+
+    // COMPREHENSIVE FONT TRACING - START
+    error_log('FONT TRACE: =================================');
+    error_log('FONT TRACE: Starting theme settings load process');
+    error_log('FONT TRACE: Current timestamp: ' . date('Y-m-d H:i:s'));
+    error_log('FONT TRACE: Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+    error_log('FONT TRACE: PHP version: ' . PHP_VERSION);
+    error_log('FONT TRACE: Memory usage: ' . memory_get_usage(true) . ' bytes');
+
+    // Debug: Check if themeSetting method exists
+    if (!method_exists($this, 'themeSetting')) {
+        error_log('FONT TRACE: CRITICAL ERROR - themeSetting method does not exist!');
+        error_log('FONT TRACE: Object class: ' . get_class($this));
+        error_log('FONT TRACE: Available methods: ' . implode(', ', array_slice(get_class_methods($this), 0, 10)));
+        throw new Exception('themeSetting method not available');
+    }
+    error_log('FONT TRACE: themeSetting method exists - proceeding');
+
+    // Test a simple setting first to verify the method works
+    error_log('FONT TRACE: Testing themeSetting method with simple setting...');
+    $testSetting = $this->themeSetting('site_tagline', 'TEST_DEFAULT_VALUE');
+    error_log('FONT TRACE: Test setting result: ' . var_export($testSetting, true));
+    error_log('FONT TRACE: Test setting type: ' . gettype($testSetting));
+
+    // Test the actual font settings we're trying to use
+    error_log('FONT TRACE: Testing actual font settings...');
+    $testTaglineFont = $this->themeSetting('tagline_font_family', 'TEST_DEFAULT_FONT');
+    error_log('FONT TRACE: tagline_font result: ' . var_export($testTaglineFont, true));
+    $testH2Font = $this->themeSetting('h2_font_family', 'TEST_DEFAULT_H2');
+    error_log('FONT TRACE: h2_font_family result: ' . var_export($testH2Font, true));
+
+    // DEBUG: Output to page for immediate visibility
+    echo "<!-- DEBUG: tagline_font = " . htmlspecialchars(var_export($testTaglineFont, true)) . " -->";
+    echo "<!-- DEBUG: h2_font_family = " . htmlspecialchars(var_export($testH2Font, true)) . " -->";
+    // Logo and branding settings
+    $siteLogo = $this->themeSetting('site_logo', '');
+    $logoLinkPage = $this->themeSetting('logo_link_page', '/');
+    $tagline = $this->themeSetting('site_tagline', 'Menu');
+    $taglineFont = $this->themeSetting('tagline_font_family', 'georgia');
+    $taglineColor = $this->themeSetting('tagline_font_color', '#f7c97f');
+    $logoHeight = $this->themeSetting('logo_height', '100px');
+    $headerHeight = $this->themeSetting('header_height', '100px');
+    $headerLayout = $this->themeSetting('header_layout', 'logo_with_tagline');
+
+    // Typography settings
+    $h1FontFamily = $this->themeSetting('h1_font_family', 'helvetica');
+    $h1FontSize = $this->themeSetting('h1_font_size', '2.5rem');
+    $h1FontColor = $this->themeSetting('h1_font_color', '#2c5aa0');
+    $h1FontWeight = $this->themeSetting('h1_font_weight', '600');
+    $h1FontStyle = $this->themeSetting('h1_font_style', 'normal');
+
+    // Font settings - now active WITH DETAILED TRACING
+    error_log('FONT TRACE: Loading H2 font settings...');
+    $h2FontFamily = $this->themeSetting('h2_font_family', 'helvetica');
+    error_log('FONT TRACE: h2_font_family = ' . var_export($h2FontFamily, true));
+    $h2FontSize = $this->themeSetting('h2_font_size', '2rem');
+    error_log('FONT TRACE: h2_font_size = ' . var_export($h2FontSize, true));
+    $h2FontColor = $this->themeSetting('h2_font_color', '#2c5aa0');
+    error_log('FONT TRACE: h2_font_color = ' . var_export($h2FontColor, true));
+    $h2FontWeight = $this->themeSetting('h2_font_weight', '600');
+    error_log('FONT TRACE: h2_font_weight = ' . var_export($h2FontWeight, true));
+    $h2FontStyle = $this->themeSetting('h2_font_style', 'normal');
+    error_log('FONT TRACE: h2_font_style = ' . var_export($h2FontStyle, true));
+
+    $h3FontFamily = $this->themeSetting('h3_font_family', 'helvetica');
+    $h3FontSize = $this->themeSetting('h3_font_size', '1.5rem');
+    $h3FontColor = $this->themeSetting('h3_font_color', '#2c5aa0');
+    $h3FontWeight = $this->themeSetting('h3_font_weight', '500');
+    $h3FontStyle = $this->themeSetting('h3_font_style', 'normal');
+
+    error_log('FONT TRACE: Loading body font settings...');
+    $bodyFontFamily = $this->themeSetting('body_font_family', 'helvetica');
+    error_log('FONT TRACE: body_font_family = ' . var_export($bodyFontFamily, true));
+    $bodyFontSize = $this->themeSetting('body_font_size', '1rem');
+    error_log('FONT TRACE: body_font_size = ' . var_export($bodyFontSize, true));
+    $bodyFontColor = $this->themeSetting('body_font_color', '#4a5568');
+    error_log('FONT TRACE: body_font_color = ' . var_export($bodyFontColor, true));
+    $bodyFontWeight = $this->themeSetting('body_font_weight', '400');
+    error_log('FONT TRACE: body_font_weight = ' . var_export($bodyFontWeight, true));
+    $bodyFontStyle = $this->themeSetting('body_font_style', 'normal');
+    error_log('FONT TRACE: body_font_style = ' . var_export($bodyFontStyle, true));
+
+    $taglineFontWeight = $this->themeSetting('tagline_font_weight', '400');
+    $taglineFontStyle = $this->themeSetting('tagline_font_style', 'normal');
+
+    // COMPREHENSIVE SUCCESS LOGGING
+    error_log('FONT TRACE: =================================');
+    error_log('FONT TRACE: Theme settings loaded SUCCESSFULLY!');
+    error_log('FONT TRACE: Final font values summary:');
+    error_log('FONT TRACE: - H2 Font Family: ' . var_export($h2FontFamily, true));
+    error_log('FONT TRACE: - H2 Font Size: ' . var_export($h2FontSize, true));
+    error_log('FONT TRACE: - H2 Font Color: ' . var_export($h2FontColor, true));
+    error_log('FONT TRACE: - Body Font Family: ' . var_export($bodyFontFamily, true));
+    error_log('FONT TRACE: - Body Font Size: ' . var_export($bodyFontSize, true));
+    error_log('FONT TRACE: - Body Font Color: ' . var_export($bodyFontColor, true));
+    error_log('FONT TRACE: =================================');
+
+    // Pagination settings
+    $paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
+    $paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
+    $paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
+    $paginationFontSize = $this->themeSetting('pagination_font_size', '1rem');
+    $paginationButtonSize = $this->themeSetting('pagination_button_size', 'extra_small');
+
+    // Footer settings
+    $footerBackgroundColor = $this->themeSetting('footer_background_color', '#4a6fa5');
+    $footerTextColor = $this->themeSetting('footer_text_color', '#ffffff');
+    $footerCopyrightText = $this->themeSetting('footer_copyright_text', '© ' . date('Y') . ' The Library. All rights reserved.');
+    $footerPoweredByText = $this->themeSetting('footer_powered_by_text', 'Powered by Omeka S');
+    $footerBannerHeight = $this->themeSetting('footer_banner_height', 'standard');
+
+    // Sophisticated Color Palette
+    $primaryColor = $this->themeSetting('primary_color', '#2C4A6B');
+    $sacredGold = $this->themeSetting('sacred_gold', '#D4AF37');
+    $warmEarth = $this->themeSetting('warm_earth', '#8B4513');
+    $softSage = $this->themeSetting('soft_sage', '#9CAF88');
+    $warmCream = $this->themeSetting('warm_cream', '#F5F5DC');
+    $gentleLavender = $this->themeSetting('gentle_lavender', '#E6E6FA');
+    $sunsetOrange = $this->themeSetting('sunset_orange', '#FF8C42');
+    $deepBurgundy = $this->themeSetting('deep_burgundy', '#800020');
+    $charcoal = $this->themeSetting('charcoal', '#36454F');
+    $lightGray = $this->themeSetting('light_gray', '#F8F9FA');
+    $mediumGray = $this->themeSetting('medium_gray', '#6C757D');
+
+    // Legacy compatibility
+    $secondaryColor = $sacredGold;
+    $accentColor = $warmCream;
+} catch (Exception $e) {
+    // ENHANCED ERROR HANDLING
+    error_log('SETTINGS ERROR: ==============================');
+    error_log('SETTINGS ERROR: Theme settings loading failed');
+    error_log('SETTINGS ERROR: Time: ' . date('Y-m-d H:i:s'));
+    error_log('SETTINGS ERROR: Request: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+    error_log('SETTINGS ERROR: Exception: ' . get_class($e));
+    error_log('SETTINGS ERROR: Message: ' . $e->getMessage());
+    error_log('SETTINGS ERROR: File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('SETTINGS ERROR: Trace: ' . $e->getTraceAsString());
+
+    // VALIDATED FALLBACK VALUES
+    $fallbacks = [
+        'site' => [
+            'logo' => '',
+            'tagline' => 'Menu',
+            'logo_link_page' => '/',
+            'logo_height' => '100px',
+            'header_height' => '100px',
+            'header_layout' => 'logo_with_tagline'
+        ],
+        'fonts' => [
+            'tagline' => [
+                'family' => 'georgia',
+                'color' => '#f7c97f',
+                'weight' => '400',
+                'style' => 'normal'
+            ],
+            'h1' => [
+                'family' => 'helvetica',
+                'size' => '2.5rem',
+                'color' => '#2c5aa0',
+                'weight' => '600',
+                'style' => 'normal'
+            ],
+            'h2' => [
+                'family' => 'helvetica',
+                'size' => '2rem',
+                'color' => '#2c5aa0',
+                'weight' => '600',
+                'style' => 'normal'
+            ],
+            'h3' => [
+                'family' => 'helvetica',
+                'size' => '1.5rem',
+                'color' => '#2c5aa0',
+                'weight' => '500',
+                'style' => 'normal'
+            ],
+            'body' => [
+                'family' => 'helvetica',
+                'size' => '1rem',
+                'color' => '#4a5568',
+                'weight' => '400',
+                'style' => 'normal'
+            ]
+        ],
+        'colors' => [
+            'primary' => '#f7c97f',
+            'secondary' => '#f7c97f',
+            'accent' => '#fffaf7'
+        ],
+        'pagination' => [
+            'font_color' => '#ffffff',
+            'background' => '#2c5aa0',
+            'hover' => '#1a365d',
+            'font_size' => '1rem',
+            'button_size' => 'extra_small'
+        ],
+        'footer' => [
+            'background' => '#4a6fa5',
+            'text_color' => '#ffffff',
+            'copyright' => '© ' . date('Y') . ' The Library. All rights reserved.',
+            'powered_by' => 'Powered by Omeka S',
+            'banner_height' => 'standard'
+        ]
+    ];
+
+    // Apply fallbacks
+    $siteLogo = $fallbacks['site']['logo'];
+    $logoLinkPage = $fallbacks['site']['logo_link_page'];
+    $tagline = $fallbacks['site']['tagline'];
+    $taglineFont = $fallbacks['fonts']['tagline']['family'];
+    $taglineColor = $fallbacks['fonts']['tagline']['color'];
+    $logoHeight = $fallbacks['site']['logo_height'];
+    $headerHeight = $fallbacks['site']['header_height'];
+    $headerLayout = $fallbacks['site']['header_layout'];
+    $h1FontFamily = $fallbacks['fonts']['h1']['family'];
+    $h1FontSize = $fallbacks['fonts']['h1']['size'];
+    $h1FontColor = $fallbacks['fonts']['h1']['color'];
+    $h1FontWeight = $fallbacks['fonts']['h1']['weight'];
+    $h1FontStyle = $fallbacks['fonts']['h1']['style'];
+    $h2FontFamily = $fallbacks['fonts']['h2']['family'];
+    $h2FontSize = $fallbacks['fonts']['h2']['size'];
+    $h2FontColor = $fallbacks['fonts']['h2']['color'];
+    $h2FontWeight = $fallbacks['fonts']['h2']['weight'];
+    $h2FontStyle = $fallbacks['fonts']['h2']['style'];
+    $h3FontFamily = $fallbacks['fonts']['h3']['family'];
+    $h3FontSize = $fallbacks['fonts']['h3']['size'];
+    $h3FontColor = $fallbacks['fonts']['h3']['color'];
+    $h3FontWeight = $fallbacks['fonts']['h3']['weight'];
+    $h3FontStyle = $fallbacks['fonts']['h3']['style'];
+    $bodyFontFamily = $fallbacks['fonts']['body']['family'];
+    $bodyFontSize = $fallbacks['fonts']['body']['size'];
+    $bodyFontColor = $fallbacks['fonts']['body']['color'];
+    $bodyFontWeight = $fallbacks['fonts']['body']['weight'];
+    $bodyFontStyle = $fallbacks['fonts']['body']['style'];
+    $taglineFontWeight = $fallbacks['fonts']['tagline']['weight'];
+    $taglineFontStyle = $fallbacks['fonts']['tagline']['style'];
+    $paginationFontColor = $fallbacks['pagination']['font_color'];
+    $paginationBackgroundColor = $fallbacks['pagination']['background'];
+    $paginationHoverColor = $fallbacks['pagination']['hover'];
+    $paginationFontSize = $fallbacks['pagination']['font_size'];
+    $paginationButtonSize = $fallbacks['pagination']['button_size'];
+    $footerBackgroundColor = $fallbacks['footer']['background'];
+    $footerTextColor = $fallbacks['footer']['text_color'];
+    $footerCopyrightText = $fallbacks['footer']['copyright'];
+    $footerPoweredByText = $fallbacks['footer']['powered_by'];
+    $footerBannerHeight = $fallbacks['footer']['banner_height'];
+    $primaryColor = $fallbacks['colors']['primary'];
+    $secondaryColor = $fallbacks['colors']['secondary'];
+    $accentColor = $fallbacks['colors']['accent'];
+
+    error_log('SETTINGS ERROR: Applied validated fallback values');
+    error_log('SETTINGS ERROR: ==============================');
+
+    // Convert footer banner height setting to padding value
+    $footerPaddingMap = [
+        'compact' => '20px 0',
+        'standard' => '30px 0',
+        'spacious' => '40px 0',
+        'extra_spacious' => '50px 0'
+    ];
+    $footerPadding = $footerPaddingMap[$footerBannerHeight] ?? '30px 0';
+}
+
+// Convert button size setting to CSS values
+$buttonSizeMap = [
+    'extra_small' => ['padding' => '8px 16px', 'font-size' => '12px'],
+    'small' => ['padding' => '10px 20px', 'font-size' => '14px'],
+    'medium' => ['padding' => '12px 24px', 'font-size' => '16px'],
+    'large' => ['padding' => '16px 32px', 'font-size' => '18px'],
+    'extra_large' => ['padding' => '20px 40px', 'font-size' => '20px']
+];
+$buttonStyles = $buttonSizeMap[$paginationButtonSize] ?? $buttonSizeMap['medium'];
+
+// Add basic head elements
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle);
+
+// Add minimal CSS - only what's essential
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+// Add font management CSS
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/fonts.css'));
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+// Add TOC CSS
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/toc-styles.css'));
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+// Add Library CSS (global theme helpers)
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/library.css') . '?v=' . time());
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+// Add Library CSS (global theme helpers)
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/library.css') . '?v=' . time());
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+}
+
+// Admin-only preset preview trigger button
+try {
+    if (method_exists($this, 'identity') && $this->identity()) {
+        $this->headScript()->appendFile($this->assetUrl('js/preset-preview.js') . '?v=' . time());
+        $this->headStyle()->appendStyle('.admin-preview-trigger{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;}.admin-preview-trigger:hover{border-color:#ccc;}');
+    }
+} catch (Exception $e) {}
+
+// Add high-priority font styles via headStyle to ensure they load after Omeka S defaults
+$fontStyles = "
+/* CRITICAL FONT OVERRIDES - HIGH SPECIFICITY */
+/* These styles must load AFTER Omeka S defaults to take precedence */
+
+/* Debug: Font variables loaded */
+/* DEBUG: Body font family: {$bodyFontFamily} */
+/* DEBUG: H1 font family: {$h1FontFamily} */
+/* DEBUG: H2 font family: {$h2FontFamily} */
+/* DEBUG: H3 font family: {$h3FontFamily} */
+
+/* High specificity body font override */
+html body,
+body.omeka-s,
+.omeka-s body,
+#content body,
+body {
+    font-family: " . $themeFunctions->getFontFamily($bodyFontFamily) . " !important;
+    font-size: {$bodyFontSize} !important;
+    font-weight: {$bodyFontWeight} !important;
+    font-style: {$bodyFontStyle} !important;
+}
+
+/* High specificity heading overrides */
+html h1,
+body h1,
+.omeka-s h1,
+#content h1,
+h1 {
+    font-family: " . $themeFunctions->getFontFamily($h1FontFamily) . " !important;
+    font-size: {$h1FontSize} !important;
+    font-weight: {$h1FontWeight} !important;
+    font-style: {$h1FontStyle} !important;
+}
+
+html h2,
+body h2,
+.omeka-s h2,
+#content h2,
+h2 {
+    font-family: " . $themeFunctions->getFontFamily($h2FontFamily) . " !important;
+    font-size: {$h2FontSize} !important;
+    font-weight: {$h2FontWeight} !important;
+    font-style: {$h2FontStyle} !important;
+}
+
+html h3,
+body h3,
+.omeka-s h3,
+#content h3,
+h3 {
+    font-family: " . $themeFunctions->getFontFamily($h3FontFamily) . " !important;
+    font-size: {$h3FontSize} !important;
+    font-weight: {$h3FontWeight} !important;
+    font-style: {$h3FontStyle} !important;
+}
+
+/* Tagline with maximum specificity */
+html .site-tagline,
+body .site-tagline,
+.omeka-s .site-tagline,
+#content .site-tagline,
+.site-tagline {
+    font-family: " . $themeFunctions->getFontFamily($taglineFont) . " !important;
+    font-weight: {$taglineFontWeight} !important;
+    font-style: {$taglineFontStyle} !important;
+    color: {$taglineColor} !important;
+}
+
+/* Override any Omeka S default font declarations */
+.omeka-s * {
+    font-family: inherit !important;
+}
+
+/* Ensure Google Fonts load properly */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+";
+
+$this->headStyle()->appendStyle($fontStyles);
+
+// TOC Dynamic CSS consolidated in common/theme-setting-css.phtml (single source of truth)
+
+// Add high-priority font override CSS file - this loads AFTER Omeka S defaults
+try {
+    $this->headLink()->appendStylesheet($this->assetUrl('css/font-overrides.css'), 'screen', null, ['priority' => 1000]);
+} catch (Exception $e) {
+    // Skip if file doesn't exist
+}
+
+// Add dynamic CSS variables via JavaScript to ensure they're set after page load
+$fontVariablesScript = "\n(function(){\n    // COMPREHENSIVE JAVASCRIPT CSS VARIABLE TRACING
+    console.log('FONT TRACE: =================================');
+    console.log('FONT TRACE: JavaScript CSS variable setting phase');
+    console.log('FONT TRACE: DOM loaded, setting CSS variables...');
+
+    // Set CSS variables dynamically to override any defaults
+    const root = document.documentElement;
+
+    // COMPREHENSIVE DIAGNOSTIC LOGGING
+    console.log('DIAGNOSTIC: =================================');
+    console.log('DIAGNOSTIC: CSS Variable Setting Analysis');
+    console.log('DIAGNOSTIC: Current stylesheets loaded:', document.styleSheets.length);
+
+    // Check if font-overrides.css loaded
+    let fontOverridesLoaded = false;
+    Array.from(document.styleSheets).forEach((sheet, index) => {
+        try {
+            const href = sheet.href || 'inline';
+            console.log('DIAGNOSTIC: Stylesheet ' + index + ':', href);
+            if (href.includes('font-overrides.css')) {
+                fontOverridesLoaded = true;
+                console.log('DIAGNOSTIC: ✓ font-overrides.css FOUND at index', index);
+            }
+        } catch (e) {
+            console.log('DIAGNOSTIC: Stylesheet ' + index + ': (blocked/cross-origin)');
+        }
+    });
+
+    if (!fontOverridesLoaded) {
+        console.error('DIAGNOSTIC: ✗ font-overrides.css NOT LOADED - CRITICAL ISSUE');
+    }
+
+    // Check current CSS variable values BEFORE setting
+    console.log('DIAGNOSTIC: CSS Variables BEFORE setting:');
+    console.log('  --body-font-family:', getComputedStyle(root).getPropertyValue('--body-font-family'));
+    console.log('  --theme-body-font:', getComputedStyle(root).getPropertyValue('--theme-body-font'));
+    console.log('  --h2-font-family:', getComputedStyle(root).getPropertyValue('--h2-font-family'));
+    console.log('  --theme-h2-font:', getComputedStyle(root).getPropertyValue('--theme-h2-font'));
+
+    // Font family variables with detailed logging
+
+    // CRITICAL FIX: Set CSS variables that match font-overrides.css
+    console.log('DIAGNOSTIC: Setting CSS variables...');
+
+    // Font family variables - set via CSS partial; JS assignment disabled to avoid PHP warnings
+    console.log('DIAGNOSTIC: Font family variables are provided by CSS partial (theme-setting-css.phtml).');
+
+    // Font size variables
+    root.style.setProperty('--body-font-size', <?php echo json_encode($bodyFontSize); ?>);
+    root.style.setProperty('--h1-font-size', <?php echo json_encode($h1FontSize); ?>);
+    root.style.setProperty('--h2-font-size', <?php echo json_encode($h2FontSize); ?>);
+    root.style.setProperty('--h3-font-size', <?php echo json_encode($h3FontSize); ?>);
+
+    // Font color variables
+    root.style.setProperty('--body-font-color', <?php echo json_encode($bodyFontColor); ?>);
+    root.style.setProperty('--h1-font-color', <?php echo json_encode($h1FontColor); ?>);
+    root.style.setProperty('--h2-font-color', <?php echo json_encode($h2FontColor); ?>);
+    root.style.setProperty('--h3-font-color', <?php echo json_encode($h3FontColor); ?>);
+    root.style.setProperty('--tagline-color', <?php echo json_encode($taglineColor); ?>);
+
+    console.log('DIAGNOSTIC: Size/color variables set:');
+    console.log('  --body-font-size:', <?php echo json_encode($bodyFontSize); ?>);
+    console.log('  --body-font-color:', <?php echo json_encode($bodyFontColor); ?>);
+    console.log('  --tagline-color:', <?php echo json_encode($taglineColor); ?>);
+
+    // Font weight variables
+    root.style.setProperty('--body-font-weight', <?php echo json_encode($bodyFontWeight); ?>);
+    root.style.setProperty('--h1-font-weight', <?php echo json_encode($h1FontWeight); ?>);
+    root.style.setProperty('--h2-font-weight', <?php echo json_encode($h2FontWeight); ?>);
+    root.style.setProperty('--h3-font-weight', <?php echo json_encode($h3FontWeight); ?>);
+    root.style.setProperty('--tagline-font-weight', <?php echo json_encode($taglineFontWeight); ?>);
+
+    // Font style variables
+    root.style.setProperty('--body-font-style', <?php echo json_encode($bodyFontStyle); ?>);
+    root.style.setProperty('--h1-font-style', <?php echo json_encode($h1FontStyle); ?>);
+    root.style.setProperty('--h2-font-style', <?php echo json_encode($h2FontStyle); ?>);
+    root.style.setProperty('--h3-font-style', <?php echo json_encode($h3FontStyle); ?>);
+    root.style.setProperty('--tagline-font-style', <?php echo json_encode($taglineFontStyle); ?>);
+
+    // Validate CSS variables were set correctly
+    console.log('DIAGNOSTIC: CSS Variables AFTER setting:');
+    console.log('  --body-font-family:', getComputedStyle(root).getPropertyValue('--body-font-family'));
+    console.log('  --theme-body-font:', getComputedStyle(root).getPropertyValue('--theme-body-font'));
+    console.log('  --h2-font-family:', getComputedStyle(root).getPropertyValue('--h2-font-family'));
+    console.log('  --theme-h2-font:', getComputedStyle(root).getPropertyValue('--theme-h2-font'));
+
+    // Check if variables are actually being used by elements
+    const bodyElement = document.body;
+    const h2Element = document.querySelector('h2');
+    const taglineElement = document.querySelector('.site-tagline');
+
+    console.log('DIAGNOSTIC: Element computed styles:');
+    if (bodyElement) {
+        console.log('  Body font-family:', getComputedStyle(bodyElement).fontFamily);
+    }
+    if (h2Element) {
+        console.log('  H2 font-family:', getComputedStyle(h2Element).fontFamily);
+    }
+    if (taglineElement) {
+        console.log('  Tagline font-family:', getComputedStyle(taglineElement).fontFamily);
+    }
+
+    console.log('DIAGNOSTIC: =================================');
+
+    // Force style recalculation
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // Trigger reflow
+    document.body.style.display = '';
+
+    // Add debug class for testing
+    if (window.location.search.includes('font-debug')) {
+        document.body.classList.add('font-debug');
+    }\n})();\n";
+
+$this->headScript()->appendScript('/* fontVariablesScript disabled pending cleanup */');
+
+// Add jQuery safely
+$this->headScript()->prependFile('https://code.jquery.com/jquery-3.6.0.min.js');
+
+$this->trigger('view.layout.head');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <?php echo $this->headMeta() ?>
+    <?php echo $this->headTitle() ?>
+    <?php echo $this->headLink(); ?>
+    <?php echo $this->headStyle(); ?>
+    <?php
+// Ensure our menu script is loaded on every page with cache-busting
+$jsUrl = $this->assetUrl('js/library-menu.v2.js');
+$sep = (strpos($jsUrl, '?') !== false) ? '&' : '?';
+$this->headScript()->appendFile($jsUrl . $sep . 'cb=' . time(), 'text/javascript', ['defer' => 'defer']);
+// Runtime debug trace: list all scripts in head
+$this->headScript()->appendScript("(function(){try{var tags=[].slice.call(document.getElementsByTagName('script'));console.log('[THEME DEBUG] Scripts in head:', tags.map(function(t){return t.src||'(inline)';}));}catch(e){console.warn('[THEME DEBUG] Head script enumeration failed', e);}})();");
+echo $this->headScript();
+?>
+    <title>Sufism Library - Professional Theme</title>
+
+    <!-- Optimized Google Fonts for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Load comprehensive font families for theme customization -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700;800&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Oswald:wght@300;400;500;600;700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bebas+Neue&family=Anton&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Fira+Code:wght@300;400;500;600;700&family=Source+Code+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Performance and Accessibility Meta Tags -->
+    <meta name="theme-color" content="<?php echo $primaryColor; ?>">
+    <meta name="color-scheme" content="light dark">
+
+
+    <!-- Accessibility Enhancements -->
+    <meta name="description" content="<?php echo $this->escapeHtml($site ? $site->summary() : 'Sufism Reoriented Digital Library - A comprehensive collection of spiritual teachings and resources'); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <!-- FONT DEBUG: Variable values for troubleshooting -->
+    <!-- h3FontStyle: <?php echo htmlspecialchars($h3FontStyle); ?> -->
+    <!-- bodyFontFamily: <?php echo htmlspecialchars($bodyFontFamily); ?> -->
+    <!-- h2FontFamily: <?php echo htmlspecialchars($h2FontFamily); ?> -->
+    <!-- bodyFontColor: <?php echo htmlspecialchars($bodyFontColor); ?> -->
+
+    <style>
+        /* SOPHISTICATED SPIRITUAL DESIGN SYSTEM */
+        :root {
+            /* Sophisticated Color Palette */
+            --primary-color: <?php echo $primaryColor; ?>;
+            --sacred-gold: <?php echo $sacredGold; ?>;
+            --warm-earth: <?php echo $warmEarth; ?>;
+            --soft-sage: <?php echo $softSage; ?>;
+            --warm-cream: <?php echo $warmCream; ?>;
+            --gentle-lavender: <?php echo $gentleLavender; ?>;
+            --sunset-orange: <?php echo $sunsetOrange; ?>;
+            --deep-burgundy: <?php echo $deepBurgundy; ?>;
+            --charcoal: <?php echo $charcoal; ?>;
+            --light-gray: <?php echo $lightGray; ?>;
+            --medium-gray: <?php echo $mediumGray; ?>;
+
+            /* Typography Scale */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+
+            /* Spacing Scale */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+
+            /* Shadows for Depth */
+            --shadow-sm: 0 1px 2px 0 rgba(44, 74, 107, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(44, 74, 107, 0.1), 0 2px 4px -1px rgba(44, 74, 107, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(44, 74, 107, 0.1), 0 4px 6px -2px rgba(44, 74, 107, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(44, 74, 107, 0.1), 0 10px 10px -5px rgba(44, 74, 107, 0.04);
+
+            /* Border Radius */
+            --radius-sm: 0.125rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+
+            /* Legacy Theme Settings */
+            /* Pagination color variables are defined in common/theme-setting-css.phtml */
+            --pagination-button-padding: <?php echo $buttonStyles['padding']; ?>;
+            --pagination-button-font-size: <?php echo $buttonStyles['font-size']; ?>;
+        }
+
+        /* SOPHISTICATED BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: <?php echo $themeFunctions->getFontFamily($bodyFontFamily); ?>;
+            line-height: 1.7;
+            color: var(--charcoal);
+            background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-gray) 100%);
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            min-height: 100vh;
+        }
+
+        /* ELEGANT TYPOGRAPHY SYSTEM */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: <?php echo $themeFunctions->getFontFamily($h1FontFamily); ?>;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--primary-color);
+            margin-bottom: var(--space-4);
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: var(--space-6);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+            color: var(--warm-earth);
+            margin-bottom: var(--space-5);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+            color: var(--deep-burgundy);
+            margin-bottom: var(--space-4);
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            line-height: 1.8;
+            color: var(--charcoal);
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition-normal);
+            border-bottom: 1px solid transparent;
+        }
+
+        a:hover {
+            color: var(--sacred-gold);
+            border-bottom-color: var(--sacred-gold);
+            transform: translateY(-1px);
+        }
+
+        /* HIDE DEFAULT OMEKA NAVIGATION AND HEADERS */
+
+        /* SHOW CONTENT NAVIGATION */
+        nav.sub-menu, .sub-menu {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* STYLE CONTENT NAVIGATION PROPERLY - FORCE OVERRIDE */
+        main nav ul, main nav ol, .sub-menu ul, .sub-menu ol,
+        main navigation ul, main navigation ol,
+        nav.sub-menu ul, nav.sub-menu ol,
+        ul.navigation, ol.navigation {
+            list-style: none !important;
+            list-style-type: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-left: none !important; /* Remove the gray vertical bar */
+        }
+
+        /* SPECIFIC FIX FOR VERTICAL BAR ISSUE - HIGH SPECIFICITY */
+        html body main ul.navigation,
+        html body main div ul.navigation,
+        html body .main-content-wrapper ul.navigation,
+        html body div main ul.navigation {
+            border-left: none !important;
+            border: none !important;
+        }
+
+        /* ADDITIONAL OVERRIDE FOR OMEKA DEFAULT STYLES */
+        ul.navigation {
+            border-left: none !important;
+            border: none !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        main nav li, .sub-menu li,
+        main navigation li,
+        nav.sub-menu li {
+            list-style: none !important;
+            list-style-type: none !important;
+            margin: 10px 0 !important;
+            padding: 0 !important;
+            padding-left: 0 !important;
+        }
+
+        main nav li::before, .sub-menu li::before,
+        main navigation li::before,
+        nav.sub-menu li::before {
+            content: none !important;
+            display: none !important;
+        }
+
+        /* ADDITIONAL FORCE OVERRIDES */
+        body main nav ul li,
+        body main navigation ul li,
+        body nav.sub-menu ul li {
+            list-style: none !important;
+            list-style-type: none !important;
+        }
+
+        /* REMOVE ALL BULLETS FROM MAIN CONTENT LISTS */
+        main ul, main ol,
+        body main ul, body main ol,
+        .main-content ul, .main-content ol {
+            list-style: none !important;
+            list-style-type: none !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        main li, body main li,
+        .main-content li {
+            list-style: none !important;
+            list-style-type: none !important;
+            margin: 10px 0 !important;
+            padding-left: 0 !important;
+        }
+
+        main li::before, body main li::before,
+        .main-content li::before {
+            content: none !important;
+            display: none !important;
+        }
+        .top-bar, #navigation, .title-bar, .site-title, .user-bar,
+        main h1:first-child, .page-header h1,
+        .top-bar-left, .top-bar-right, #responsive-menu {
+            display: none !important;
+        }
+
+        /* Hide the duplicate page title that appears in main content */
+        main > div > h1:first-child {
+            display: none !important;
+        }
+
+        /* SUFISM REORIENTED INSPIRED DESIGN */
+        body {
+            background: #ffffff;
+            font-family: <?php echo $themeFunctions->getFontFamily($bodyFontFamily); ?>;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* SOPHISTICATED HEADER STYLING */
+        .site-header {
+            background: linear-gradient(135deg, var(--warm-cream) 0%, rgba(255, 255, 255, 0.95) 100%);
+            padding: var(--space-8) 0;
+            text-align: center;
+            border-bottom: 3px solid var(--sacred-gold);
+            position: relative;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, var(--gentle-lavender) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, var(--soft-sage) 0%, transparent 50%);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .site-logo {
+            margin-bottom: var(--space-4);
+            position: relative;
+            z-index: 2;
+            transition: var(--transition-normal);
+        }
+
+        .site-logo:hover {
+            transform: translateY(-2px);
+            filter: drop-shadow(var(--shadow-lg));
+        }
+
+        .site-logo .logo-image {
+            max-height: <?php echo $logoHeight; ?>;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+            background: transparent !important;
+            border-radius: var(--radius-lg);
+            transition: var(--transition-normal);
+        }
+
+        /* FIX LOGO BACKGROUND - ENSURE IT MATCHES HEADER */
+        .site-header, .site-header .logo-container {
+            background: #ffffff !important;
+        }
+
+        /* FIX LOGO LINK BACKGROUND - REMOVE BLUE BACKGROUND */
+        .site-logo .logo-link,
+        .logo-link {
+            background: transparent !important;
+            background-color: transparent !important;
+            padding: 0 !important;
+        }
+
+        .site-logo {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* APPLY THEME SETTINGS */
+        .site-header {
+            height: <?php echo $headerHeight; ?>;
+            background: #ffffff !important;
+        }
+
+        .site-tagline {
+            color: <?php echo $taglineColor; ?> !important;
+            font-size: 16px !important;
+            font-family: <?php echo $themeFunctions->getFontFamily($taglineFont); ?> !important;
+            font-weight: <?php echo $taglineFontWeight; ?> !important;
+            font-style: <?php echo $taglineFontStyle; ?> !important;
+            margin: 15px 0 !important;
+            text-align: center !important;
+        }
+
+        /* TYPOGRAPHY SETTINGS FROM ADMIN */
+        /* COMPREHENSIVE CSS GENERATION TRACING */
+        <?php
+        error_log('FONT TRACE: =================================');
+        error_log('FONT TRACE: CSS GENERATION PHASE');
+        error_log('FONT TRACE: About to generate CSS with these values:');
+        error_log('FONT TRACE: - bodyFontFamily: ' . var_export($bodyFontFamily, true));
+        error_log('FONT TRACE: - h2FontFamily: ' . var_export($h2FontFamily, true));
+        error_log('FONT TRACE: - bodyFontSize: ' . var_export($bodyFontSize, true));
+        error_log('FONT TRACE: - bodyFontColor: ' . var_export($bodyFontColor, true));
+
+        $mappedBodyFont = $themeFunctions->getFontFamily($bodyFontFamily);
+        $mappedH2Font = $themeFunctions->getFontFamily($h2FontFamily);
+        error_log('FONT TRACE: - Mapped body font: ' . var_export($mappedBodyFont, true));
+        error_log('FONT TRACE: - Mapped H2 font: ' . var_export($mappedH2Font, true));
+        error_log('FONT TRACE: =================================');
+        ?>
+        /* DEBUG: Body font family: <?php echo $bodyFontFamily; ?> */
+        /* DEBUG: H1 font family: <?php echo $h1FontFamily; ?> */
+        /* DEBUG: H2 font family: <?php echo $h2FontFamily; ?> */
+        /* DEBUG: H3 font family: <?php echo $h3FontFamily; ?> */
+        /* DEBUG: Mapped body font: <?php echo $mappedBodyFont; ?> */
+        /* DEBUG: Mapped H2 font: <?php echo $mappedH2Font; ?> */
+        body {
+            font-family: <?php echo $mappedBodyFont; ?> !important;
+            font-size: <?php echo $bodyFontSize; ?> !important;
+            color: <?php echo $bodyFontColor; ?> !important;
+            font-weight: <?php echo $bodyFontWeight; ?> !important;
+            font-style: <?php echo $bodyFontStyle; ?> !important;
+        }
+
+        h1 {
+            font-family: <?php echo $themeFunctions->getFontFamily($h1FontFamily); ?> !important;
+            font-size: <?php echo $h1FontSize; ?> !important;
+            color: <?php echo $h1FontColor; ?> !important;
+            font-weight: <?php echo $h1FontWeight; ?> !important;
+            font-style: <?php echo $h1FontStyle; ?> !important;
+        }
+
+        h2 {
+            font-family: <?php echo $themeFunctions->getFontFamily($h2FontFamily); ?> !important;
+            font-size: <?php echo $h2FontSize; ?> !important;
+            color: <?php echo $h2FontColor; ?> !important;
+            font-weight: <?php echo $h2FontWeight; ?> !important;
+            font-style: <?php echo $h2FontStyle; ?> !important;
+        }
+
+        h3 {
+            font-family: <?php echo $themeFunctions->getFontFamily($h3FontFamily); ?> !important;
+            font-size: <?php echo $h3FontSize; ?> !important;
+            color: <?php echo $h3FontColor; ?> !important;
+            font-weight: <?php echo $h3FontWeight; ?> !important;
+            font-style: <?php echo $h3FontStyle; ?> !important;
+        }
+
+        /* SOPHISTICATED MAIN CONTENT AREA */
+        .main-content-wrapper {
+            max-width: 900px;
+            margin: var(--space-8) auto;
+            padding: var(--space-16) var(--space-8);
+            text-align: center;
+            background: var(--warm-cream);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-content-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 0%, rgba(212, 175, 55, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .main-content-wrapper::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--gentle-lavender) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: gentle-float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gentle-float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* SOPHISTICATED INTERACTIVE ELEMENTS */
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced focus states for accessibility */
+        a:focus, button:focus {
+            outline: 3px solid var(--sacred-gold);
+            outline-offset: 2px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Elegant selection styling */
+        ::selection {
+            background: var(--sacred-gold);
+            color: var(--primary-color);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary-color), var(--sacred-gold));
+            border-radius: var(--radius-lg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(var(--sacred-gold), var(--sunset-orange));
+        }
+
+        /* Sophisticated loading animation */
+        @keyframes spiritual-pulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Page transition effects */
+        body {
+            animation: page-fade-in 0.6s ease-out;
+        }
+
+        @keyframes page-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* RESPONSIVE DESIGN ENHANCEMENTS */
+
+        /* Mobile-first responsive breakpoints */
+        @media (max-width: 768px) {
+            :root {
+                --space-16: 2rem;
+                --space-12: 1.5rem;
+                --space-8: 1rem;
+                --font-size-4xl: 2rem;
+                --font-size-3xl: 1.5rem;
+                --font-size-2xl: 1.25rem;
+            }
+
+            .site-header {
+                padding: var(--space-6) 0;
+            }
+
+            .main-content-wrapper {
+                margin: var(--space-4) auto;
+                padding: var(--space-8) var(--space-4);
+                border-radius: var(--radius-lg);
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            body main .pagination .button,
+            body main .pagination a,
+            body main a[href*="Next"],
+            body main a[href*="Prev"],
+            body main a[href*="page/"],
+            body main a[href*="collections"],
+            body .pagination .button,
+            body .pagination a,
+            body a[href*="Next"],
+            body a[href*="Prev"],
+            body a[href*="page/"],
+            body a[href*="collections"] {
+                width: 100% !important;
+                max-width: 200px !important;
+                margin: var(--space-1) 0 !important;
+            }
+
+            .simple-footer {
+                padding: var(--space-8) var(--space-4) !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content-wrapper {
+                margin: var(--space-2) var(--space-2);
+                padding: var(--space-6) var(--space-3);
+            }
+
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+
+            h2 {
+                font-size: var(--font-size-2xl);
+            }
+        }
+
+        /* Tablet and larger screens */
+        @media (min-width: 769px) {
+            .main-content-wrapper {
+                max-width: 1000px;
+            }
+
+            .pagination {
+                justify-content: center;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .main-content-wrapper {
+                max-width: 1200px;
+                padding: var(--space-20) var(--space-12);
+            }
+
+            .site-header {
+                padding: var(--space-12) 0;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .site-header::before,
+            .main-content-wrapper::before,
+            .simple-footer::before {
+                background-size: 50px 50px;
+            }
+        }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .main-content-wrapper::after {
+                animation: none !important;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --warm-cream: #2a2a2a;
+                --light-gray: #1a1a1a;
+                --charcoal: #e0e0e0;
+            }
+        }
+
+        /* ACCESSIBILITY ENHANCEMENTS */
+
+
+
+        /* Improved focus indicators */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid var(--sacred-gold);
+            outline-offset: 2px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+                --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+            body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
+            body .content-links a,
+            body .resource-list a,
+            body .main-content-wrapper a {
+                border: 2px solid var(--primary-color) !important;
+            }
+        }
+
+        /* Performance optimizations */
+        .main-content-wrapper::after {
+            will-change: transform;
+        }
+
+        /* Ensure proper text contrast */
+        .main-content-wrapper {
+            color-contrast: AA;
+        }
+
+        /* Large Blue Heading - matching sufismreoriented.org style */
+        .page-title {
+            font-family: "Times New Roman", serif;
+            font-size: 2.5rem;
+            color: #4a6fa5;
+            font-weight: normal;
+            margin: 40px 0;
+            line-height: 1.2;
+        }
+
+        /* Content Links - gold/orange like reference site */
+        .content-links {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        /* SOPHISTICATED CONTENT LINKS */
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
+        body .content-links a,
+        body .resource-list a,
+        body .main-content-wrapper a {
+            color: var(--primary-color) !important;
+            text-decoration: none !important;
+            font-size: var(--font-size-lg) !important;
+            line-height: 1.8 !important;
+            display: block !important;
+            margin: var(--space-3) 0 !important;
+            padding: var(--space-4) var(--space-6) !important;
+            transition: var(--transition-normal) !important;
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--warm-cream) 100%) !important;
+            border-radius: var(--radius-lg) !important;
+            border: 2px solid transparent !important;
+            position: relative !important;
+            overflow: hidden !important;
+            font-weight: 500 !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):before,
+        body .content-links a:before,
+        body .resource-list a:before,
+        body .main-content-wrapper a:before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, var(--sacred-gold), transparent) !important;
+            transition: var(--transition-slow) !important;
+            opacity: 0.3 !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover,
+        body .content-links a:hover,
+        body .resource-list a:hover,
+        body .main-content-wrapper a:hover {
+            color: var(--sacred-gold) !important;
+            background: linear-gradient(135deg, var(--gentle-lavender) 0%, var(--soft-sage) 100%) !important;
+            border-color: var(--sacred-gold) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover:before,
+        body .content-links a:hover:before,
+        body .resource-list a:hover:before,
+        body .main-content-wrapper a:hover:before {
+            left: 100% !important;
+        }
+
+        /* SOPHISTICATED FOOTER STYLING */
+        .simple-footer {
+            background: <?php echo $footerBackgroundColor; ?> !important;
+            color: <?php echo $footerTextColor; ?> !important;
+            padding: var(--space-16) var(--space-8) !important;
+            margin-top: var(--space-16);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Disabled pattern overlay to match reference site */
+/* .simple-footer::before { */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* pattern removed */
+            pointer-events: none;
+        */
+
+        .simple-footer p {
+            margin: var(--space-2) 0;
+            font-size: var(--font-size-sm);
+            color: var(--warm-cream) !important;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .simple-footer p:first-child {
+            font-weight: 500;
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-4);
+        }
+
+        /* Content Styling - matching sufismreoriented.org */
+        .main-content-wrapper h2,
+        .main-content-wrapper h3 {
+            font-family: "Times New Roman", serif;
+            color: #333333;
+            font-weight: normal;
+            margin: 30px 0 20px 0;
+            text-align: center;
+        }
+
+        .main-content-wrapper p {
+            color: #333333;
+            line-height: 1.8;
+            margin: 15px 0;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Resource listings - styled like reference site content */
+        .resource-list {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .resource-list .resource {
+            margin: 20px 0;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .resource-list .resource:last-child {
+            border-bottom: none;
+        }
+
+        .resource-list .resource-link {
+            color: #d4a574 !important;
+            text-decoration: none !important;
+            font-size: 16px !important;
+            display: block;
+            margin: 10px 0;
+            transition: color 0.3s ease;
+        }
+
+        .resource-list .resource-link:hover {
+            color: #b8935f !important;
+        }
+
+        .resource-list .resource-name {
+            color: #d4a574 !important;
+            font-size: 16px !important;
+            font-weight: normal !important;
+            text-decoration: none !important;
+        }
+
+        /* SOPHISTICATED PAGINATION STYLING */
+        .pagination {
+            text-align: center;
+            margin: var(--space-12) 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        /* Target all pagination buttons including Next/Prev links - uses dynamic variables */
+        body main .pagination .button,
+        body main .pagination a,
+        body main a[href*="Next"],
+        body main a[href*="Prev"],
+        body main a[href*="page/"],
+        body main a[href*="collections"],
+        body .pagination .button,
+        body .pagination a,
+        body a[href*="Next"],
+        body a[href*="Prev"],
+        body a[href*="page/"],
+        body a[href*="collections"] {
+            background: var(--pagination-background-color, var(--pagination-bg)) !important;
+            color: var(--pagination-font-color, var(--pagination-color)) !important;
+            padding: var(--space-3) var(--space-6) !important;
+            margin: 0 var(--space-2) !important;
+            text-decoration: none !important;
+            border: 2px solid transparent !important;
+            font-size: var(--font-size-sm) !important;
+            border-radius: var(--radius-xl) !important;
+            transition: var(--transition-normal) !important;
+            display: inline-block !important;
+            font-weight: 500 !important;
+            box-shadow: var(--shadow-md) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            min-width: 80px !important;
+            text-align: center !important;
+        }
+
+        body main .pagination .button:hover,
+        body main .pagination a:hover,
+        body main a[href*="Next"]:hover,
+        body main a[href*="Prev"]:hover,
+        body main a[href*="page/"]:hover,
+        body main a[href*="collections"]:hover,
+        body .pagination .button:hover,
+        body .pagination a:hover,
+        body a[href*="Next"]:hover,
+        body a[href*="Prev"]:hover,
+        body a[href*="page/"]:hover,
+        body a[href*="collections"]:hover {
+            background: var(--sacred-gold) !important; border-color: var(--sacred-gold) !important; color: #000 !important;
+            color: var(--primary-color) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        /* Dynamic tagline styling */
+        .site-tagline {
+            font-family: <?php echo $themeFunctions->getFontFamily($taglineFont); ?> !important;
+            font-weight: <?php echo $taglineFontWeight; ?> !important;
+            font-style: <?php echo $taglineFontStyle; ?> !important;
+            color: <?php echo $taglineColor; ?> !important;
+        }
+
+        /* FINAL OVERRIDE FOR VERTICAL BAR - MAXIMUM SPECIFICITY */
+        html body div.main-content-wrapper main div ul.navigation,
+        html body main div ul.navigation,
+        html body main ul.navigation,
+        html body ul.navigation,
+        body ul.navigation,
+        ul.navigation {
+            border-left: 0px none transparent !important;
+            border: 0px none transparent !important;
+        }
+    </style>
+
+    <!-- VERTICAL BAR FIX - IMMEDIATE EXECUTION -->
+    <script>
+        // Fix vertical bar issue immediately when DOM is ready
+        function fixVerticalBar() {
+            const navigationElements = document.querySelectorAll('ul.navigation');
+            navigationElements.forEach(function(el) {
+                el.style.setProperty('border-left', 'none', 'important');
+                el.style.setProperty('border', 'none', 'important');
+            });
+
+            // Add permanent style fix
+            if (!document.getElementById('vertical-bar-fix-permanent')) {
+                const style = document.createElement('style');
+                style.id = 'vertical-bar-fix-permanent';
+                style.textContent = 'ul.navigation { border-left: none !important; border: none !important; }';
+                document.head.appendChild(style);
+            }
+        }
+
+        // Apply fix when DOM is ready
+    <!-- Live, settings-driven preset preview for admin (render only in admin context if needed) -->
+    <?php if (!empty($_GET['presetPreview']) && method_exists($this, 'identity') && $this->identity()): ?>
+        <div class="preset-preview-container" style="max-width:1200px;margin:12px auto;">
+            <?php echo $this->partial('common/preset-preview'); ?>
+        </div>
+    <?php endif; ?>
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixVerticalBar);
+               } else {
+            fixVerticalBar();
+    <?php if (method_exists($this, 'identity') && $this->identity()): ?>
+      <div style="text-align:center;margin:8px 0;">
+        <a href="#" data-action="open-preset-preview" class="admin-preview-trigger">Preview current preset</a>
+      </div>
+    <?php endif; ?>
+
+        }
+
+        // Also apply with delays to catch any late-loading content
+        setTimeout(fixVerticalBar, 100);
+        setTimeout(fixVerticalBar, 500);
+    </script>
+
+    <!-- Inject dynamic theme CSS and debug log -->
+    <?php echo "<!-- DEBUG: Loading theme-setting-css partial -->"; ?>
+    <?php echo $this->partial('common/theme-setting-css', []); ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📐 DEBUG CSS VARS:', {
+            primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color'),
+            h1FontSize: getComputedStyle(document.documentElement).getPropertyValue('--h1-font-size'),
+            bodyFontFamily: getComputedStyle(document.body).fontFamily,
+            h2FontSize: getComputedStyle(document.documentElement).getPropertyValue('--h2-font-size')
+        });
+        var h1 = document.querySelector('h1');
+        if (h1) console.log('💡 Computed h1:', {
+            fontFamily: getComputedStyle(h1).fontFamily,
+            fontSize: getComputedStyle(h1).fontSize,
+            color: getComputedStyle(h1).color
+        });
+        var paginationLink = document.querySelector('.pagination a');
+        if (paginationLink) console.log('🔢 Computed pagination link:', {
+            color: getComputedStyle(paginationLink).color,
+            backgroundColor: getComputedStyle(paginationLink).backgroundColor
+        });
+    });
+    </script>
+</head>
+<body>
+
+    <!-- Header with Logo and Tagline (tagline directly below logo) -->
+    <header class="site-header">
+        <?php if (in_array($headerLayout, ['logo_with_tagline', 'logo_only'])): ?>
+        <div class="site-logo">
+            <?php
+            // Get proper asset URL for logo using Omeka's themeSettingAssetUrl helper
+            $logoUrl = '';
+            try {
+                $logoUrl = $this->themeSettingAssetUrl('site_logo');
+            } catch (Exception $e) {
+                // Fallback if themeSettingAssetUrl doesn't work
+                if ($siteLogo) {
+                    if (is_array($siteLogo) && isset($siteLogo['original_url'])) {
+                        $logoUrl = $siteLogo['original_url'];
+                    } elseif (is_string($siteLogo) && $siteLogo !== '9') {
+                        $logoUrl = $siteLogo;
+                    } elseif (is_object($siteLogo) && method_exists($siteLogo, 'originalUrl')) {
+                        $logoUrl = $siteLogo->originalUrl();
+                    }
+                }
+            }
+            ?>
+
+            <!-- Wrap logo in clickable link -->
+            <a href="<?php echo $this->escapeHtml($logoLinkPage); ?>" class="logo-link" style="text-decoration: none; display: block;">
+                <?php if ($logoUrl && $logoUrl !== '9'): ?>
+                    <img src="<?php echo $this->escapeHtml($logoUrl); ?>" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
+                <?php else: ?>
+                    <!-- Default logo placeholder -->
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjU2IiBzdHJva2U9IiNkNGE1NzQiIHN0cm9rZS13aWR0aD0iOCIvPgo8cGF0aCBkPSJNNjAgMzBMNzAgNTBINTBMNjAgMzBaIiBmaWxsPSIjZDRhNTc0Ii8+CjxwYXRoIGQ9Ik02MCA5MEw1MCA3MEg3MEw2MCA5MFoiIGZpbGw9IiNkNGE1NzQiLz4KPHN2Zz4K" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
+                <?php endif; ?>
+            </a>
+        </div>
+        <?php endif; ?>
+
+        <?php if (in_array($headerLayout, ['logo_with_tagline', 'tagline_only'])): ?>
+        <div class="site-tagline">
+            <?php echo $this->escapeHtml($tagline); ?>
+        </div>
+        <?php
+        // Optional search box rendering based on settings
+        $searchEnable = (bool) $this->themeSetting('search_enable', 0);
+        $searchPosition = $this->themeSetting('search_position', 'none');
+        if ($searchEnable && in_array($searchPosition, ['below_tagline','below_header'])):
+            $searchBg = $this->themeSetting('search_background_color', '#ffffff');
+            $searchText = $this->themeSetting('search_text_color', '#000000');
+            $searchFontFamily = $this->themeSetting('search_font_family', 'helvetica');
+            $searchFontWeight = $this->themeSetting('search_font_weight', '400');
+        ?>
+        <div class="site-search" style="margin-top: 10px; display:flex; justify-content:center;">
+            <form action="<?php echo $this->url('site/search', [], true); ?>" method="get" style="background: <?php echo $searchBg; ?>; color: <?php echo $searchText; ?>; padding: 8px 10px; border: 1px solid <?php echo $sacredGold; ?>; border-radius: 6px;">
+                <input type="text" name="q" placeholder="Search" style="border: none; outline: none; background: transparent; color: <?php echo $searchText; ?>; font-family: <?php echo $themeFunctions->getFontFamily($searchFontFamily); ?>; font-weight: <?php echo $searchFontWeight; ?>;">
+                <button type="submit" style="border: none; background: transparent; color: <?php echo $searchText; ?>; font-weight: 600;">Go</button>
+            </form>
+        </div>
+        <?php endif; ?>
+        <?php
+        // Optional search box rendering in header-right position
+        if ($searchEnable && $searchPosition === 'header_right'):
+            $searchBg = $this->themeSetting('search_background_color', '#ffffff');
+            $searchText = $this->themeSetting('search_text_color', '#000000');
+            $searchFontFamily = $this->themeSetting('search_font_family', 'helvetica');
+            $searchFontWeight = $this->themeSetting('search_font_weight', '400');
+        ?>
+        <div class="header-right-search">
+            <form action="<?php echo $this->url('site/search', [], true); ?>" method="get" style="--search-bg: <?php echo $searchBg; ?>; --search-text: <?php echo $searchText; ?>; --search-font-family: <?php echo $themeFunctions->getFontFamily($searchFontFamily); ?>; --search-font-weight: <?php echo $searchFontWeight; ?>;">
+                <input type="text" name="q" placeholder="Search">
+                <?php
+                    $btnLabel = $this->themeSetting('search_button_label', 'Go');
+                    $btnIcon = $this->themeSetting('search_button_icon', 'none');
+                    $iconHtml = '';
+                    if ($btnIcon === 'magnifier') { $iconHtml = '<span class="icon icon-search" aria-hidden="true">🔍</span>'; }
+                    if ($btnIcon === 'arrow') { $iconHtml = '<span class="icon icon-arrow" aria-hidden="true">➤</span>'; }
+                ?>
+                <button type="submit" class="search-button">
+                    <?php echo $iconHtml; ?>
+                    <span class="label"><?php echo $this->escapeHtml($btnLabel); ?></span>
+                </button>
+            </form>
+        </div>
+        <?php endif; ?>
+
+
+        <?php endif; ?>
+    </header>
+
+    <!-- Main Content Wrapper - centered like sufismreoriented.org -->
+    <div class="main-content-wrapper">
+        <!-- Main Content -->
+        <main id="main-content">
+            <?php echo $this->content; ?>
+        </main>
+    </div>
+
+    <!-- Simple Footer - matching reference site -->
+    <footer class="simple-footer">
+        <p><?php echo $footerCopyrightText; ?></p>
+        <p><?php echo $footerPoweredByText; ?></p>
+    </footer>
+</body>
+</html>

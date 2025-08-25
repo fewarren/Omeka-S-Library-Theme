@@ -1,10 +1,17 @@
 # Foundation S
 
-This is an Omeka S theme based on ZURB Foundation Sites. It currently comes with a default stylesheet for prototyping as well as 3 other style options. 
+This is an Omeka S theme based on ZURB Foundation Sites. It currently comes with a default stylesheet for prototyping as well as 3 other style options.
+
+
+> This theme has been adapted for the Library Theme with a production-focused footprint.
+> See MAINTENANCE.md for maintenance, deployment, and lessons learned.
 
 ## Installation
 
-For basic out-of-the-box use of the theme, follow the [Omeka S User Manual instructions for installing themes](https://omeka.org/s/docs/user-manual/sites/site_theme/#installing-themes). 
+- Deployment: see DEPLOY.sh (supports DRY_RUN=1) for deploying only production-required files.
+- Maintenance and dev-tools: see MAINTENANCE.md (includes dev-tools/export-modern-defaults.php usage).
+
+For basic out-of-the-box use of the theme, follow the [Omeka S User Manual instructions for installing themes](https://omeka.org/s/docs/user-manual/sites/site_theme/#installing-themes).
 
 For more advanced use, such as customizing the theme with Sass, you'll need to install the tools with [NodeJS](https://nodejs.org/en/) (0.12 or greater). Navigate to your theme directory and run `npm install`.
 
@@ -64,7 +71,7 @@ Foundation S comes with the Default theme, as well as 3 other customized stylesh
 // Sea Foam Settings
 
 $topbar-background: $primary-color;
-  
+
 $thumbnail-border: 4px solid $secondary-color;
 $thumbnail-shadow: none;
 $thumbnail-shadow-hover: 0 0 6px 1px rgba($primary-color, 0.5);
@@ -80,9 +87,9 @@ header a {
 }
 ```
 
-Much of the customizability within the theme lies in managing its settings variables. ZURB Foundation's default global variables from their original `_settings.scss` all sit in `_globals-default.scss`. Many of these variables are used throughout the rest of `_settings.scss`, so it was necessary to separate them out into their own file if the theme writer wants to set their own global variables. Here all the overrides live in `_globals-seafoam.scss`, and so all overridden values will be appropriately updated for use throughout the rest of `_settings.scss`. 
+Much of the customizability within the theme lies in managing its settings variables. ZURB Foundation's default global variables from their original `_settings.scss` all sit in `_globals-default.scss`. Many of these variables are used throughout the rest of `_settings.scss`, so it was necessary to separate them out into their own file if the theme writer wants to set their own global variables. Here all the overrides live in `_globals-seafoam.scss`, and so all overridden values will be appropriately updated for use throughout the rest of `_settings.scss`.
 
-Any non-global setting variable overrides should come after the import for `_settings.scss` and before their usagee in the rule files, `_foundation-core.scss`, and `_omeka.scss`. 
+Any non-global setting variable overrides should come after the import for `_settings.scss` and before their usagee in the rule files, `_foundation-core.scss`, and `_omeka.scss`.
 
 ZURB Foundation's default style rules are all managed in `_foundation-core.scss`. All style rules specific to Omeka S are contained within `_omeka.scss`.
 
@@ -117,7 +124,7 @@ Omeka S 4.0 introduced configurable resource pages. Foundation supports block co
 * **Full-width main**: This is intended to be a primary content area that spans the full width of a page.
 * **Main with sidebar**: This is a version of the primary content area that expects to sit alongside one or two sidebars.
 * **Right sidebar**: This is a sidebar that sits to the right of "main with sidebar".
-* **Left sidebar**: This is a sidebar that sits to the left of "main with sidebar". 
+* **Left sidebar**: This is a sidebar that sits to the left of "main with sidebar".
 
 Some examples of how these regions can be used:
 

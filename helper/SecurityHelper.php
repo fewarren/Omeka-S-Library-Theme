@@ -186,8 +186,8 @@ class SecurityHelper extends AbstractHelper
     }
     
     /**
-     * Rate limiting check with shared storage support
-     *
+     * Rate limiting check (basic implementation)
+     * 
      * @param string $identifier Unique identifier (IP, user ID, etc.)
      * @param int $maxRequests Maximum requests allowed
      * @param int $timeWindow Time window in seconds
@@ -195,246 +195,36 @@ class SecurityHelper extends AbstractHelper
      */
     public function checkRateLimit(string $identifier, int $maxRequests = 60, int $timeWindow = 3600): bool
     {
-        // Generate secure key using SHA256 for better distribution
-        $key = 'rate_limit_' . hash('sha256', $identifier);
-        $now = time();
-
-        // Try shared storage first (Redis/Memcached), fallback to session
-        $storage = $this->getSharedStorage();
-
-        if ($storage) {
-            return $this->checkRateLimitShared($storage, $key, $maxRequests, $timeWindow, $now);
-        } else {
-            return $this->checkRateLimitSession($key, $maxRequests, $timeWindow, $now);
-        }
-    }
-
-    /**
-     * Get shared storage instance (Redis or Memcached)
-     *
-     * @return object|null Storage instance or null if unavailable
-     */
-    private function getSharedStorage()
-    {
-        static $storage = null;
-        static $checked = false;
-
-        if ($checked) {
-            return $storage;
-        }
-
-        $checked = true;
-
-        // Try Redis first
-        if (class_exists('Redis')) {
-            try {
-                $redis = new \Redis();
-                $host = $_ENV['REDIS_HOST'] ?? 'localhost';
-                $port = (int)($_ENV['REDIS_PORT'] ?? 6379);
-                $timeout = (float)($_ENV['REDIS_TIMEOUT'] ?? 2.0);
-
-                if ($redis->connect($host, $port, $timeout)) {
-                    // Test connection
-                    $redis->ping();
-                    $storage = $redis;
-                    return $storage;
-                }
-            } catch (\Exception $e) {
-                // Redis failed, try Memcached
-            }
-        }
-
-        // Try Memcached as fallback
-        if (class_exists('Memcached')) {
-            try {
-                $memcached = new \Memcached();
-                $host = $_ENV['MEMCACHED_HOST'] ?? 'localhost';
-                $port = (int)($_ENV['MEMCACHED_PORT'] ?? 11211);
-
-                $memcached->addServer($host, $port);
-
-                // Test connection
-                $memcached->get('test_connection');
-                if ($memcached->getResultCode() !== \Memcached::RES_NOTFOUND &&
-                    $memcached->getResultCode() !== \Memcached::RES_SUCCESS) {
-                    throw new \Exception('Memcached connection failed');
-                }
-
-                $storage = $memcached;
-                return $storage;
-            } catch (\Exception $e) {
-                // Memcached failed, will use session fallback
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Rate limiting with shared storage (Redis/Memcached)
-     *
-     * @param object $storage Storage instance
-     * @param string $key Rate limit key
-     * @param int $maxRequests Maximum requests allowed
-     * @param int $timeWindow Time window in seconds
-     * @param int $now Current timestamp
-     * @return bool Whether request is allowed
-     */
-    private function checkRateLimitShared($storage, string $key, int $maxRequests, int $timeWindow, int $now): bool
-    {
-        $dataKey = $key . '_data';
-        $lockKey = $key . '_lock';
-
-        // Implement atomic operations based on storage type
-        if ($storage instanceof \Redis) {
-            return $this->checkRateLimitRedis($storage, $dataKey, $lockKey, $maxRequests, $timeWindow, $now);
-        } elseif ($storage instanceof \Memcached) {
-            return $this->checkRateLimitMemcached($storage, $dataKey, $lockKey, $maxRequests, $timeWindow, $now);
-        }
-
-        return false;
-    }
-
-    /**
-     * Redis-specific rate limiting with atomic operations
-     */
-    private function checkRateLimitRedis(\Redis $redis, string $dataKey, string $lockKey, int $maxRequests, int $timeWindow, int $now): bool
-    {
-        // Use Redis transactions for atomicity
-        $redis->multi();
-
-        try {
-            // Get current data
-            $data = $redis->get($dataKey);
-
-            if ($data === false) {
-                // First request
-                $newData = json_encode(['count' => 1, 'start' => $now]);
-                $redis->setex($dataKey, $timeWindow, $newData);
-                $redis->exec();
-                return true;
-            }
-
-            $data = json_decode($data, true);
-
-            // Reset if time window has passed
-            if ($now - $data['start'] > $timeWindow) {
-                $newData = json_encode(['count' => 1, 'start' => $now]);
-                $redis->setex($dataKey, $timeWindow, $newData);
-                $redis->exec();
-                return true;
-            }
-
-            // Check if limit exceeded
-            if ($data['count'] >= $maxRequests) {
-                $redis->discard();
-                return false;
-            }
-
-            // Increment counter atomically
-            $data['count']++;
-            $newData = json_encode($data);
-            $ttl = $timeWindow - ($now - $data['start']);
-            $redis->setex($dataKey, max($ttl, 1), $newData);
-            $redis->exec();
-
-            return true;
-
-        } catch (\Exception $e) {
-            $redis->discard();
-            return false;
-        }
-    }
-
-    /**
-     * Memcached-specific rate limiting with CAS operations
-     */
-    private function checkRateLimitMemcached(\Memcached $memcached, string $dataKey, string $lockKey, int $maxRequests, int $timeWindow, int $now): bool
-    {
-        $maxRetries = 3;
-        $retryDelay = 1000; // microseconds
-
-        for ($retry = 0; $retry < $maxRetries; $retry++) {
-            // Get with CAS token for atomic updates
-            $data = $memcached->get($dataKey, null, $casToken);
-
-            if ($memcached->getResultCode() === \Memcached::RES_NOTFOUND) {
-                // First request
-                $newData = ['count' => 1, 'start' => $now];
-                if ($memcached->set($dataKey, $newData, $timeWindow)) {
-                    return true;
-                }
-                // If set failed, retry
-                usleep($retryDelay);
-                continue;
-            }
-
-            if (!is_array($data)) {
-                return false;
-            }
-
-            // Reset if time window has passed
-            if ($now - $data['start'] > $timeWindow) {
-                $newData = ['count' => 1, 'start' => $now];
-                if ($memcached->set($dataKey, $newData, $timeWindow)) {
-                    return true;
-                }
-                usleep($retryDelay);
-                continue;
-            }
-
-            // Check if limit exceeded
-            if ($data['count'] >= $maxRequests) {
-                return false;
-            }
-
-            // Increment counter with CAS
-            $data['count']++;
-            $ttl = $timeWindow - ($now - $data['start']);
-
-            if ($memcached->cas($casToken, $dataKey, $data, max($ttl, 1))) {
-                return true;
-            }
-
-            // CAS failed, retry
-            usleep($retryDelay);
-        }
-
-        return false;
-    }
-
-    /**
-     * Session-based rate limiting fallback
-     */
-    private function checkRateLimitSession(string $key, int $maxRequests, int $timeWindow, int $now): bool
-    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
+        
+        $key = 'rate_limit_' . md5($identifier);
+        $now = time();
+        
         if (!isset($_SESSION[$key])) {
             $_SESSION[$key] = ['count' => 1, 'start' => $now];
             return true;
         }
-
+        
         $data = $_SESSION[$key];
-
+        
         // Reset if time window has passed
         if ($now - $data['start'] > $timeWindow) {
             $_SESSION[$key] = ['count' => 1, 'start' => $now];
             return true;
         }
-
+        
         // Check if limit exceeded
         if ($data['count'] >= $maxRequests) {
             return false;
         }
-
+        
         // Increment counter
         $_SESSION[$key]['count']++;
         return true;
     }
-
+    
     /**
      * Log security event (basic implementation)
      * 

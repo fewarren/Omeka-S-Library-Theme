@@ -1,0 +1,86 @@
+/* Library Reoriented Design (scoped). This file ports SR-inspired layout rules under opt-in classes. */
+
+/* Scope: applies only when body carries library-reoriented-page OR library-style-homepage */
+body.library-reoriented-page,
+body.library-style-homepage {
+}
+
+/* Layout structure */
+body.library-reoriented-page .library-layout-container,
+body.library-style-homepage .library-layout-container {
+  display: flex !important;
+  min-height: 100vh !important;
+  background-color: var(--sr-white, #ffffff) !important;
+}
+
+/* Sidebar */
+body.library-reoriented-page .library-sidebar,
+body.library-style-homepage .library-sidebar {
+  width: 280px !important;
+  background-color: var(--sr-light-gray, #f5f5f5) !important;
+  border-right: 1px solid var(--sr-border-gray, #e5e7eb) !important;
+  padding: 2rem 1.5rem !important;
+  position: fixed !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  z-index: 1000 !important;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Main content */
+body.library-reoriented-page .library-main-content,
+body.library-style-homepage .library-main-content {
+  flex: 1 !important;
+  margin-left: 280px !important;
+  max-width: 100% !important;
+}
+
+/* Navigation */
+body.library-reoriented-page .library-navigation,
+body.library-style-homepage .library-navigation {
+  margin-bottom: 2rem !important;
+}
+body.library-reoriented-page .library-nav-link,
+body.library-style-homepage .library-nav-link {
+  display: block !important;
+  padding: 0.75rem 1rem !important;
+  color: var(--sr-deep-blue, #1f3a5f) !important;
+  text-decoration: none !important;
+  border-radius: 6px !important;
+}
+body.library-reoriented-page .library-nav-link:hover,
+body.library-style-homepage .library-nav-link:hover {
+  background-color: var(--sr-deep-blue, #1f3a5f) !important;
+  color: var(--sr-white, #ffffff) !important;
+}
+
+/* Search */
+body.library-reoriented-page .library-search-container,
+body.library-style-homepage .library-search-container { margin-top: 2rem !important; padding-top: 1.5rem !important; border-top: 1px solid var(--sr-border-gray, #e5e7eb) !important; }
+body.library-reoriented-page .library-search-input,
+body.library-style-homepage .library-search-input { padding: 0.75rem !important; border: 1px solid var(--sr-border-gray, #e5e7eb) !important; border-radius: 4px !important; }
+body.library-reoriented-page .library-search-button,
+body.library-style-homepage .library-search-button { padding: 0.75rem 1rem !important; background: var(--sr-deep-blue, #1f3a5f) !important; color: var(--sr-white, #ffffff) !important; border-radius: 4px !important; }
+
+/* Content wrapper */
+body.library-reoriented-page .library-content-wrapper,
+body.library-style-homepage .library-content-wrapper { max-width: 800px !important; margin: 0 auto !important; }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  body.library-reoriented-page .library-sidebar,
+  body.library-style-homepage .library-sidebar { transform: translateX(-100%) !important; transition: transform 0.3s ease !important; }
+  body.library-reoriented-page .library-sidebar.open,
+  body.library-style-homepage .library-sidebar.open { transform: translateX(0) !important; }
+  body.library-reoriented-page .library-main-content,
+  body.library-style-homepage .library-main-content { margin-left: 0 !important; max-width: 100% !important; }
+}
+
+/* Library Theme - Enhanced Design System (renamed from sufism-reoriented-design.css) */
+@charset "UTF-8";
+
+/* This file is a placeholder for renamed asset. If you actively use
+   sufism-reoriented-design.css in templates, update references to
+   library-reoriented-design.css. Content remains in original file
+   until templates are updated to avoid breakage. */
+

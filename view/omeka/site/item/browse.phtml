@@ -85,7 +85,7 @@ $colors = $themeSetting('colors_rights');
 
         <?php if ($mainWithSidebarHasBlocks || $leftSidebarHasBlocks || $rightSidebarHasBlocks): ?>
 
-        <?php 
+        <?php
         if ($leftSidebarHasBlocks && $rightSidebarHasBlocks) {
             $sidebarWidth = '3';
             $mainWidth = '6';
@@ -109,7 +109,7 @@ $colors = $themeSetting('colors_rights');
             <?php if ($mainWithSidebarHasBlocks): ?>
             <div class="main-with-sidebar cell medium-<?php echo $mainWidth; ?>">
                 <?php if ($tabNavigationRegion == 'main'): ?>
-                    <?php echo $tabManager->renderTabsOnly($resource, $tabContent); ?>
+                    <?php echo $tabManager->renderTabsOnly($resource, $tabContent, $tabLayout); ?>
                 <?php endif; ?>
                 <?php if ($tabNavigationRegion && ($tabContent == 'main')): ?>
                     <?php echo $tabManager->renderPanels($itemSet, $tabContent, $tabLayout); ?>
@@ -143,6 +143,8 @@ $colors = $themeSetting('colors_rights');
 <button type="button" class="browse-toggle closed"><?php echo $translate('Options'); ?></button>
 </div>
 <div class="browse-controls top closed">
+    <?php if (!$this->themeSetting('enable_pagination', 1)) { echo '<style>.browse-controls.top,.browse-controls.bottom{display:none !important;}</style>'; } ?>
+
     <?php echo $this->pagination(); ?>
     <?php if (strpos($layoutSetting, 'toggle') !== false): ?>
     <div class="layout-toggle">

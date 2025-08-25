@@ -1,0 +1,259 @@
+/**
+ * Font Management System
+ * 
+ * This file provides fallback font definitions and ensures proper font loading
+ * when Google Fonts are not available or fail to load.
+ */
+
+/* Font Face Declarations for Local Fallbacks */
+@font-face {
+    font-family: 'Roboto Fallback';
+    src: local('Roboto'), local('Arial'), local('Helvetica Neue'), local('sans-serif');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Open Sans Fallback';
+    src: local('Open Sans'), local('Arial'), local('Helvetica Neue'), local('sans-serif');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Merriweather Fallback';
+    src: local('Merriweather'), local('Georgia'), local('Times New Roman'), local('serif');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Playfair Display Fallback';
+    src: local('Playfair Display'), local('Georgia'), local('Times New Roman'), local('serif');
+    font-display: swap;
+}
+
+/* CSS Custom Properties for Font Stacks */
+:root {
+    /* Sans-Serif Font Stacks */
+    --font-helvetica: 'Helvetica Neue', Arial, sans-serif;
+    --font-roboto: 'Roboto', 'Roboto Fallback', Arial, sans-serif;
+    --font-open-sans: 'Open Sans', 'Open Sans Fallback', Arial, sans-serif;
+    --font-lato: 'Lato', Arial, sans-serif;
+    --font-montserrat: 'Montserrat', Arial, sans-serif;
+    --font-source-sans: 'Source Sans Pro', Arial, sans-serif;
+    --font-nunito: 'Nunito', Arial, sans-serif;
+    --font-poppins: 'Poppins', Arial, sans-serif;
+    --font-inter: 'Inter', Arial, sans-serif;
+    --font-work-sans: 'Work Sans', Arial, sans-serif;
+    --font-fira-sans: 'Fira Sans', Arial, sans-serif;
+    --font-arial: Arial, sans-serif;
+    
+    /* Serif Font Stacks */
+    --font-merriweather: 'Merriweather', 'Merriweather Fallback', Georgia, serif;
+    --font-playfair: 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    --font-crimson: 'Crimson Text', Georgia, serif;
+    --font-libre-baskerville: 'Libre Baskerville', Georgia, serif;
+    --font-lora: 'Lora', Georgia, serif;
+    --font-pt-serif: 'PT Serif', Georgia, serif;
+    --font-source-serif: 'Source Serif Pro', Georgia, serif;
+    --font-georgia: Georgia, serif;
+    --font-times: 'Times New Roman', serif;
+    
+    /* Display Font Stacks */
+    --font-oswald: 'Oswald', Arial, sans-serif;
+    --font-raleway: 'Raleway', Arial, sans-serif;
+    --font-bebas-neue: 'Bebas Neue', Arial, sans-serif;
+    --font-anton: 'Anton', Arial, sans-serif;
+    --font-dancing-script: 'Dancing Script', cursive;
+    --font-pacifico: 'Pacifico', cursive;
+    
+    /* Monospace Font Stacks */
+    --font-fira-code: 'Fira Code', Consolas, monospace;
+    --font-source-code: 'Source Code Pro', Consolas, monospace;
+    --font-courier: 'Courier New', monospace;
+    
+    /* System Font Stack */
+    --font-system: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Font Loading Optimization */
+.font-loading {
+    font-display: swap;
+}
+
+/* Ensure fonts are properly loaded */
+body {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Font Weight Normalization */
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+
+/* Font Style Classes */
+.font-italic { font-style: italic; }
+.font-normal-style { font-style: normal; }
+
+/* Responsive Font Sizes */
+@media (max-width: 768px) {
+    :root {
+        --font-size-xs: 0.7rem;
+        --font-size-sm: 0.8rem;
+        --font-size-base: 0.9rem;
+        --font-size-lg: 1rem;
+        --font-size-xl: 1.1rem;
+        --font-size-2xl: 1.3rem;
+        --font-size-3xl: 1.6rem;
+        --font-size-4xl: 2rem;
+        --font-size-5xl: 2.5rem;
+    }
+}
+
+/* Font Loading Error Handling */
+@supports not (font-display: swap) {
+    /* Fallback for older browsers */
+    @font-face {
+        font-family: 'Roboto';
+        src: local('Arial');
+    }
+    
+    @font-face {
+        font-family: 'Open Sans';
+        src: local('Arial');
+    }
+    
+    @font-face {
+        font-family: 'Merriweather';
+        src: local('Georgia');
+    }
+    
+    @font-face {
+        font-family: 'Playfair Display';
+        src: local('Georgia');
+    }
+}
+
+/* Performance Optimization */
+.preload-fonts {
+    font-family: var(--font-roboto), var(--font-open-sans), var(--font-merriweather), var(--font-playfair);
+    visibility: hidden;
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    body {
+        font-weight: 500;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        font-size: 12pt !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        color: #000 !important;
+        page-break-after: avoid;
+    }
+}
+
+/* Font Loading States */
+.fonts-loading body {
+    visibility: hidden;
+}
+
+.fonts-loaded body {
+    visibility: visible;
+}
+
+.fonts-failed body {
+    font-family: var(--font-system) !important;
+}
+
+/* Critical Font Loading */
+.critical-font {
+    font-display: block;
+}
+
+.optional-font {
+    font-display: optional;
+}
+
+/* Font Metrics Adjustment */
+.font-metrics-adjusted {
+    font-size-adjust: 0.5;
+}
+
+/* Language-Specific Font Adjustments */
+:lang(ar) {
+    font-family: 'Noto Sans Arabic', Arial, sans-serif;
+    direction: rtl;
+}
+
+:lang(zh) {
+    font-family: 'Noto Sans CJK SC', Arial, sans-serif;
+}
+
+:lang(ja) {
+    font-family: 'Noto Sans CJK JP', Arial, sans-serif;
+}
+
+:lang(ko) {
+    font-family: 'Noto Sans CJK KR', Arial, sans-serif;
+}
+
+/* Font Feature Settings */
+.font-features {
+    font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1;
+    font-variant-ligatures: common-ligatures;
+    font-kerning: normal;
+}
+
+/* Variable Font Support */
+@supports (font-variation-settings: normal) {
+    .variable-font {
+        font-variation-settings: 'wght' 400, 'slnt' 0;
+    }
+}
+
+/* Font Loading Performance */
+.font-preload {
+    font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Ensure consistent font rendering across browsers */
+* {
+    -webkit-font-feature-settings: 'kern' 1;
+    -moz-font-feature-settings: 'kern' 1;
+    -o-font-feature-settings: 'kern' 1;
+    font-feature-settings: 'kern' 1;
+    font-kerning: normal;
+}

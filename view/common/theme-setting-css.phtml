@@ -1,0 +1,913 @@
+<?php
+// =================================================================
+// COMPREHENSIVE THEME SETTINGS DEBUG CSS PARTIAL
+// This file generates dynamic CSS based on theme settings with full debugging
+// =================================================================
+
+echo "<!-- =================================================================\n";
+echo "     STEP 2: THEME SETTINGS CSS PARTIAL DEBUG OUTPUT\n";
+echo "     ================================================================= -->\n";
+
+echo "<script>\n";
+echo "console.log('🔍 DEBUG STEP 2: Theme Settings CSS Partial Processing');\n";
+echo "console.log('='.repeat(60));\n";
+echo "</script>\n";
+
+// Get theme settings with safe fallbacks and comprehensive error handling
+echo "<script>console.log('📊 RETRIEVING THEME SETTINGS...');</script>\n";
+
+// Font family mapping arrays (inline approach to avoid function conflicts)
+$fontFamilyMap = [
+    // Sans-Serif Fonts
+    'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+    'roboto' => 'Roboto, Arial, sans-serif',
+    'open_sans' => 'Open Sans, Arial, sans-serif',
+    'lato' => 'Lato, Arial, sans-serif',
+    'arial' => 'Arial, sans-serif',
+    'verdana' => 'Verdana, Arial, sans-serif',
+    // Serif Fonts
+    'georgia' => 'Georgia, serif',
+    'times' => 'Times New Roman, serif',
+    'playfair' => 'Playfair Display, Georgia, serif',
+    'merriweather' => 'Merriweather, Georgia, serif',
+    'crimson' => 'Crimson Text, Georgia, serif',
+    'cormorant' => '"Cormorant Garamond", Georgia, serif',
+    'cormorant_sc' => '"Cormorant SC", Georgia, serif',
+    'cormorant_infant' => '"Cormorant Infant", Georgia, serif',
+    // Display Fonts
+    'oswald' => 'Oswald, Arial, sans-serif',
+    'raleway' => 'Raleway, Arial, sans-serif',
+    'bebas_neue' => 'Bebas Neue, Arial, sans-serif',
+    'anton' => 'Anton, Arial, sans-serif',
+    'dancing_script' => 'Dancing Script, cursive',
+    'pacifico' => 'Pacifico, cursive',
+    // Monospace Fonts
+    'fira_code' => 'Fira Code, Consolas, monospace',
+    'source_code' => 'Source Code Pro, Consolas, monospace',
+    'courier' => 'Courier New, monospace',
+    // System Default
+    'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+];
+
+// Font size mapping array
+$fontSizeMap = [
+    'small' => '0.8rem',
+    'medium' => '0.9rem',
+    'normal' => '1.0rem',
+    'large' => '1.1rem',
+    'extra_large' => '1.2rem',
+    'huge' => '1.5rem'
+];
+
+// Get Table of Contents font settings with debug logging
+$tocFontFamily = $this->themeSetting('toc_font_family', 'helvetica');
+$tocFontSize = $this->themeSetting('toc_font_size', 'normal');
+$tocFontSizeRem = $this->themeSetting('toc_font_size_rem', '');
+$tocFontWeight = $this->themeSetting('toc_font_weight', '400');
+$tocTextColor = $this->themeSetting('toc_text_color', '#2c4a6b');
+$tocFontStyle = $this->themeSetting('toc_font_style', 'normal');
+// Back-compat: old 'toc_hover_color' was text color; prefer new explicit names
+$tocHoverTextColor = $this->themeSetting('toc_hover_text_color', '');
+if ($tocHoverTextColor === '' || $tocHoverTextColor === null) {
+    $tocHoverTextColor = $this->themeSetting('toc_hover_color', '#ffffff');
+}
+$tocHoverBgColor = $this->themeSetting('toc_hover_background_color', '#D4AF37');
+$tocBackgroundColor = $this->themeSetting('toc_background_color', '#ffffff');
+$tocBorderColor = $this->themeSetting('toc_border_color', '#D4AF37');
+$tocBorderWidth = $this->themeSetting('toc_border_width', '2px');
+$tocBorderRadius = $this->themeSetting('toc_border_radius', '8px');
+
+echo "<script>console.log('TOC Settings:', " . json_encode([
+    'fontFamily' => $tocFontFamily,
+    'fontSize' => $tocFontSize,
+    'fontWeight' => $tocFontWeight,
+    'textColor' => $tocTextColor,
+    'hoverText' => $tocHoverTextColor,
+    'hoverBg' => $tocHoverBgColor
+]) . ");</script>";
+
+// Get Header settings with debug logging
+$headerHeight = $this->themeSetting('header_height', '140');
+$logoHeight = $this->themeSetting('logo_height', '80');
+
+// Get Tagline settings (used by CSS below)
+$taglineFont = $this->themeSetting('tagline_font_family', 'georgia');
+$taglineFontWeight = $this->themeSetting('tagline_font_weight', '400');
+$taglineFontStyle = $this->themeSetting('tagline_font_style', 'normal');
+$taglineFontColor = $this->themeSetting('tagline_font_color', '#f7c97f');
+$taglineFontSize = $this->themeSetting('tagline_font_size', '0.9');
+
+echo "<script>console.log('Header Settings:', " . json_encode([
+    'headerHeight' => $headerHeight,
+    'logoHeight' => $logoHeight,
+    'tagline' => [
+        'family' => $taglineFont,
+        'weight' => $taglineFontWeight,
+        'style' => $taglineFontStyle,
+        'color' => $taglineFontColor,
+        'size' => $taglineFontSize
+    ]
+]) . ");</script>";
+
+// Get Typography settings with debug logging
+$h1FontFamily = $this->themeSetting('h1_font_family', 'helvetica');
+$h1FontSize = $this->themeSetting('h1_font_size', '2.5rem');
+$h1FontColor = $this->themeSetting('h1_font_color', '#2c5aa0');
+$h1FontWeight = $this->themeSetting('h1_font_weight', '600');
+$h1FontStyle = $this->themeSetting('h1_font_style', 'normal');
+
+echo "<script>console.log('H1 Typography Settings:', " . json_encode([
+    'fontFamily' => $h1FontFamily,
+    'fontSize' => $h1FontSize,
+    'fontColor' => $h1FontColor,
+    'fontWeight' => $h1FontWeight
+]) . ");</script>";
+
+$h2FontFamily = $this->themeSetting('h2_font_family', 'helvetica');
+$h2FontSize = $this->themeSetting('h2_font_size', '2rem');
+$h2FontColor = $this->themeSetting('h2_font_color', '#2c5aa0');
+$h2FontWeight = $this->themeSetting('h2_font_weight', '600');
+$h2FontStyle = $this->themeSetting('h2_font_style', 'normal');
+
+echo "<script>console.log('H2 Typography Settings:', " . json_encode([
+    'fontFamily' => $h2FontFamily,
+    'fontSize' => $h2FontSize,
+    'fontColor' => $h2FontColor,
+    'fontWeight' => $h2FontWeight
+]) . ");</script>";
+
+$h3FontFamily = $this->themeSetting('h3_font_family', 'helvetica');
+$h3FontSize = $this->themeSetting('h3_font_size', '1.5rem');
+$h3FontColor = $this->themeSetting('h3_font_color', '#2c5aa0');
+$h3FontWeight = $this->themeSetting('h3_font_weight', '500');
+$h3FontStyle = $this->themeSetting('h3_font_style', 'normal');
+
+echo "<script>console.log('H3 Typography Settings:', " . json_encode([
+    'fontFamily' => $h3FontFamily,
+    'fontSize' => $h3FontSize,
+    'fontColor' => $h3FontColor,
+    'fontWeight' => $h3FontWeight
+]) . ");</script>";
+
+$bodyFontFamily = $this->themeSetting('body_font_family', 'helvetica');
+$bodyFontSize = $this->themeSetting('body_font_size', '1rem');
+$bodyFontColor = $this->themeSetting('body_font_color', '#4a5568');
+$bodyFontWeight = $this->themeSetting('body_font_weight', '400');
+$bodyFontStyle = $this->themeSetting('body_font_style', 'normal');
+// Hover colors per typography group (defaults: white on gold)
+$h1HoverTextColor = $this->themeSetting('h1_hover_text_color', '#ffffff');
+$h1HoverBgColor = $this->themeSetting('h1_hover_background_color', '#D4AF37');
+$h2HoverTextColor = $this->themeSetting('h2_hover_text_color', '#ffffff');
+$h2HoverBgColor = $this->themeSetting('h2_hover_background_color', '#D4AF37');
+$h3HoverTextColor = $this->themeSetting('h3_hover_text_color', '#ffffff');
+$h3HoverBgColor = $this->themeSetting('h3_hover_background_color', '#D4AF37');
+$bodyHoverTextColor = $this->themeSetting('body_hover_text_color', '#ffffff');
+$bodyHoverBgColor = $this->themeSetting('body_hover_background_color', '#D4AF37');
+$taglineHoverTextColor = $this->themeSetting('tagline_hover_text_color', '#ffffff');
+$taglineHoverBgColor = $this->themeSetting('tagline_hover_background_color', '#D4AF37');
+
+
+echo "<script>console.log('Body Typography Settings:', " . json_encode([
+    'fontFamily' => $bodyFontFamily,
+    'fontSize' => $bodyFontSize,
+    'fontColor' => $bodyFontColor,
+    'fontWeight' => $bodyFontWeight
+]) . ");</script>";
+
+// Get Color settings
+$primaryColor = $this->themeSetting('primary_color', '#2C4A6B');
+$sacredGold = $this->themeSetting('sacred_gold', '#D4AF37');
+
+// Preset handling (server-side only)
+$presetKey = $this->themeSetting('style_preset', 'traditional');
+$presetMode = $this->themeSetting('preset_mode', 'baseline'); // baseline | override_at_render
+
+$presetTraditional = [
+    // Sophisticated, conservative palette: dark blue, gray, burgundy accents
+    'h1_font_family' => 'georgia', 'h1_font_size' => '2rem',   'h1_font_color' => '#1F3A5F', 'h1_font_weight' => '600', 'h1_font_style' => 'normal',
+    'h2_font_family' => 'georgia', 'h2_font_size' => '1.5rem', 'h2_font_color' => '#1F3A5F', 'h2_font_weight' => '600', 'h2_font_style' => 'normal',
+    'h3_font_family' => 'georgia', 'h3_font_size' => '1.25rem','h3_font_color' => '#1F3A5F', 'h3_font_weight' => '500',
+    'body_font_family' => 'helvetica', 'body_font_size' => '1rem', 'body_font_color' => '#2F3542', 'body_font_weight' => '400', 'body_font_style' => 'normal',
+    'tagline_font_family' => 'georgia', 'tagline_font_weight' => '400', 'tagline_font_style' => 'italic', 'tagline_font_color' => '#5A6470',
+    'tagline_hover_text_color' => '#ffffff', 'tagline_hover_background_color' => '#7A1E3A',
+    'primary_color' => '#1F3A5F', 'sacred_gold' => '#7A1E3A',
+    'toc_font_family' => 'helvetica','toc_font_size' => 'normal','toc_font_weight' => '400','toc_text_color' => '#1F3A5F','toc_hover_text_color' => '#ffffff','toc_hover_background_color' => '#7A1E3A','toc_background_color' => '#ffffff','toc_border_color' => '#7A1E3A','toc_border_width' => '2px','toc_border_radius' => '8px',
+    'pagination_font_color' => '#ffffff','pagination_background_color' => '#1F3A5F','pagination_hover_color' => '#7A1E3A',
+    'menu_background_color' => '#1F3A5F','menu_text_color' => '#ffffff','menu_font_family' => 'helvetica',
+    'footer_background_color' => '#f7f8fa','footer_text_color' => '#111111',
+    'header_height' => '100','logo_height' => '100'
+];
+
+$presetModern = [
+    // Static modern preset (Sufism-inspired)
+    'h1_font_family' => 'cormorant','h1_font_size' => '2.5rem','h1_font_color' => '#111111','h1_font_weight' => '600','h1_font_style' => 'normal',
+    'h2_font_family' => 'cormorant','h2_font_size' => '2rem',  'h2_font_color' => '#2c4a6b','h2_font_weight' => '600','h2_font_style' => 'normal',
+    'h3_font_family' => 'georgia',  'h3_font_size' => '1.5rem','h3_font_color' => '#2c4a6b','h3_font_weight' => '500','h3_font_style' => 'normal',
+    'body_font_family' => 'helvetica','body_font_size' => '1.125rem','body_font_color' => '#111111','body_font_weight' => '400','body_font_style' => 'normal',
+    'tagline_font_family' => 'georgia','tagline_font_weight' => '400','tagline_font_style' => 'normal','tagline_font_color' => '#f7c97f',
+    'primary_color' => '#2C4A6B','sacred_gold' => '#D4AF37',
+    'toc_font_family' => 'helvetica','toc_font_size' => 'normal','toc_font_weight' => '700','toc_text_color' => '#2c4a6b','toc_hover_text_color' => '#ffffff','toc_hover_background_color' => '#d4af37','toc_background_color' => '#ffffff','toc_border_color' => '#D4AF37','toc_border_width' => '2px','toc_border_radius' => '8px',
+    'pagination_font_color' => '#ffffff','pagination_background_color' => '#2c5aa0','pagination_hover_color' => '#1a365d',
+    'menu_background_color' => '#2C4A6B','menu_text_color' => '#ffffff','menu_font_family' => 'helvetica',
+    'footer_background_color' => '#ffffff','footer_text_color' => '#000000',
+    'header_height' => '100','logo_height' => '100',
+    'toc_font_size_rem' => ''
+];
+
+$presetMap = [ 'traditional' => $presetTraditional, 'modern' => $presetModern ];
+$active = isset($presetMap[$presetKey]) ? $presetMap[$presetKey] : $presetTraditional;
+
+// Helper to resolve a value from settings or preset depending on mode
+$resolve = function($key, $settingValue) use ($active, $presetMode) {
+    $presetVal = $active[$key] ?? null;
+    if ($presetMode === 'override_at_render' || $presetMode === 'override_all') return $presetVal ?? $settingValue;
+    // baseline/load_into_settings: use setting if non-empty, else preset
+    if ($settingValue === null || $settingValue === '' ) return $presetVal;
+    return $settingValue;
+};
+
+// Normalize CSS size values: if numeric, append rem; if unit provided, use as-is
+$normalizeSize = function ($val, $default) {
+    $val = trim((string)($val ?? ''));
+    if ($val === '') return $default;
+    if (preg_match('/(px|rem|em|%)$/', $val)) return $val;
+    if (preg_match('/^-?\d*(?:\.\d+)?$/', $val)) return $val . 'rem';
+    return $default;
+};
+
+// Recompute all values using resolver
+$h1FontFamily = $resolve('h1_font_family', $h1FontFamily);
+$h1FontSize = $resolve('h1_font_size', $h1FontSize);
+$h1FontColor = $resolve('h1_font_color', $h1FontColor);
+$h1FontWeight = $resolve('h1_font_weight', $h1FontWeight);
+$h1FontStyle = $resolve('h1_font_style', $h1FontStyle);
+
+$h2FontFamily = $resolve('h2_font_family', $h2FontFamily);
+$h2FontSize = $resolve('h2_font_size', $h2FontSize);
+$h2FontColor = $resolve('h2_font_color', $h2FontColor);
+$h2FontWeight = $resolve('h2_font_weight', $h2FontWeight);
+$h2FontStyle = $resolve('h2_font_style', $h2FontStyle);
+
+$h3FontFamily = $resolve('h3_font_family', $h3FontFamily);
+$h3FontSize = $resolve('h3_font_size', $h3FontSize);
+$h3FontColor = $resolve('h3_font_color', $h3FontColor);
+$h3FontWeight = $resolve('h3_font_weight', $h3FontWeight);
+$h3FontStyle = $resolve('h3_font_style', $h3FontStyle);
+
+$bodyFontFamily = $resolve('body_font_family', $bodyFontFamily);
+$bodyFontSize = $resolve('body_font_size', $bodyFontSize);
+$bodyFontColor = $resolve('body_font_color', $bodyFontColor);
+$bodyFontWeight = $resolve('body_font_weight', $bodyFontWeight);
+$bodyFontStyle = $resolve('body_font_style', $bodyFontStyle);
+
+$taglineFont = $resolve('tagline_font_family', $taglineFont);
+$taglineFontWeight = $resolve('tagline_font_weight', $taglineFontWeight);
+$taglineFontStyle = $resolve('tagline_font_style', $taglineFontStyle);
+$taglineFontColor = $resolve('tagline_font_color', $taglineFontColor);
+$taglineHoverTextColor = $resolve('tagline_hover_text_color', $taglineHoverTextColor);
+$taglineHoverBgColor = $resolve('tagline_hover_background_color', $taglineHoverBgColor);
+
+$primaryColor = $resolve('primary_color', $primaryColor);
+$sacredGold = $resolve('sacred_gold', $sacredGold);
+
+$tocFontFamily = $resolve('toc_font_family', $tocFontFamily);
+$tocFontSize = $resolve('toc_font_size', $tocFontSize);
+$tocFontSizeRem = $resolve('toc_font_size_rem', $tocFontSizeRem);
+$tocFontWeight = $resolve('toc_font_weight', $tocFontWeight);
+$tocFontStyle = $resolve('toc_font_style', $tocFontStyle ?? 'normal');
+$tocTextColor = $resolve('toc_text_color', $tocTextColor);
+$tocHoverTextColor = $resolve('toc_hover_text_color', $tocHoverTextColor);
+$tocHoverBgColor = $resolve('toc_hover_background_color', $tocHoverBgColor);
+$tocBackgroundColor = $resolve('toc_background_color', $tocBackgroundColor);
+$tocBorderColor = $resolve('toc_border_color', $tocBorderColor);
+$tocBorderWidth = $resolve('toc_border_width', $tocBorderWidth);
+$tocBorderRadius = $resolve('toc_border_radius', $tocBorderRadius);
+
+$paginationFontColor = $resolve('pagination_font_color', $paginationFontColor);
+$paginationBackgroundColor = $resolve('pagination_background_color', $paginationBackgroundColor);
+$paginationHoverColor = $resolve('pagination_hover_color', $paginationHoverColor);
+
+$menuBackgroundColor = $resolve('menu_background_color', $menuBackgroundColor);
+$menuTextColor = $resolve('menu_text_color', $menuTextColor);
+$menuFontFamily = $resolve('menu_font_family', $menuFontFamily);
+
+$footerBackgroundColor = $resolve('footer_background_color', $footerBackgroundColor);
+$footerTextColor = $resolve('footer_text_color', $footerTextColor);
+
+echo "<script>console.log('Color Settings:', " . json_encode([
+    'primaryColor' => $primaryColor,
+    'sacredGold' => $sacredGold,
+    'enableToc' => (bool) $this->themeSetting('enable_toc', 1),
+    'enablePagination' => (bool) $this->themeSetting('enable_pagination', 1)
+]) . ");</script>";
+
+// Get Menu settings
+$menuBackgroundColor = $this->themeSetting('menu_background_color', '#2c5aa0');
+$menuTextColor = $this->themeSetting('menu_text_color', '#ffffff');
+$menuFontFamily = $this->themeSetting('menu_font_family', 'helvetica');
+$menuFontStyle = $this->themeSetting('menu_font_style', 'normal');
+$menuFontWeight = $this->themeSetting('menu_font_weight', '400');
+
+// Get Footer settings
+$footerBackgroundColor = $this->themeSetting('footer_background_color', '#ffffff');
+$footerTextColor = $this->themeSetting('footer_text_color', '#ffffff');
+$footerFontFamily = $this->themeSetting('footer_font_family', 'helvetica');
+$footerFontStyle = $this->themeSetting('footer_font_style', 'normal');
+$footerFontWeight = $this->themeSetting('footer_font_weight', '400');
+// Get Pagination settings
+$paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
+$paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
+$paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
+$paginationFontFamily = $this->themeSetting('pagination_font_family', 'helvetica');
+$paginationFontStyle = $this->themeSetting('pagination_font_style', 'normal');
+$paginationFontWeight = $this->themeSetting('pagination_font_weight', '400');
+
+// Apply preset defaults for Menu/Footer/Pagination if preset is selected (after reading settings)
+if ($presetKey === 'sufism_reoriented') {
+    // Menu (keep primary blue for menu if desired)
+    $menuBackgroundColor = $menuBackgroundColor ?: '#2C4A6B';
+    $menuTextColor = $menuTextColor ?: '#ffffff';
+    $menuFontFamily = $menuFontFamily ?: 'helvetica';
+
+    // Footer (reference site uses simple light footer)
+    $footerBackgroundColor = '#ffffff';
+    $footerTextColor = '#000000';
+
+    // Pagination (light background with gold border handled in CSS)
+    $paginationFontColor = '#000000';
+    $paginationBackgroundColor = '#ffffff';
+    $paginationHoverColor = '#D4AF37';
+}
+
+
+// =================================================================
+// STEP 2B: DEBUG OUTPUT OF ALL RETRIEVED SETTINGS
+// =================================================================
+echo "<script>\n";
+echo "console.log('📊 THEME SETTINGS VALUES RETRIEVED:');\n";
+echo "console.log('  h1_font_family: \"" . addslashes($h1FontFamily ?? 'NULL') . "\"');\n";
+echo "console.log('  h2_font_family: \"" . addslashes($h2FontFamily ?? 'NULL') . "\"');\n";
+    echo "console.log('  toc_background_color: \"" . addslashes($tocBackgroundColor ?? 'NULL') . "\"');\n";
+    echo "console.log('  toc_border_color: \"" . addslashes($tocBorderColor ?? 'NULL') . "\"');\n";
+    echo "console.log('  toc_border_width: \"" . addslashes($tocBorderWidth ?? 'NULL') . "\"');\n";
+    echo "console.log('  toc_border_radius: \"" . addslashes($tocBorderRadius ?? 'NULL') . "\"');\n";
+
+echo "console.log('  h3_font_family: \"" . addslashes($h3FontFamily ?? 'NULL') . "\"');\n";
+echo "console.log('  body_font_family: \"" . addslashes($bodyFontFamily ?? 'NULL') . "\"');\n";
+echo "console.log('  h1_font_size: \"" . addslashes($h1FontSize ?? 'NULL') . "\"');\n";
+echo "console.log('  h1_font_color: \"" . addslashes($h1FontColor ?? 'NULL') . "\"');\n";
+echo "console.log('  h2_font_color: \"" . addslashes($h2FontColor ?? 'NULL') . "\"');\n";
+echo "console.log('  body_font_color: \"" . addslashes($bodyFontColor ?? 'NULL') . "\"');\n";
+echo "console.log('  toc_font_family: \"" . addslashes($tocFontFamily ?? 'NULL') . "\"');\n";
+echo "console.log('  toc_text_color: \"" . addslashes($tocTextColor ?? 'NULL') . "\"');\n";
+echo "console.log('  toc_hover_text_color: \"" . addslashes($tocHoverTextColor ?? 'NULL') . "\"');\n";
+echo "console.log('  toc_hover_background_color: \"" . addslashes($tocHoverBgColor ?? 'NULL') . "\"');\n";
+
+// Convert font family keys to actual CSS values
+$h1FontFamilyCSS = isset($fontFamilyMap[$h1FontFamily]) ? $fontFamilyMap[$h1FontFamily] : $fontFamilyMap['helvetica'];
+$h2FontFamilyCSS = isset($fontFamilyMap[$h2FontFamily]) ? $fontFamilyMap[$h2FontFamily] : $fontFamilyMap['helvetica'];
+$h3FontFamilyCSS = isset($fontFamilyMap[$h3FontFamily]) ? $fontFamilyMap[$h3FontFamily] : $fontFamilyMap['helvetica'];
+$bodyFontFamilyCSS = isset($fontFamilyMap[$bodyFontFamily]) ? $fontFamilyMap[$bodyFontFamily] : $fontFamilyMap['helvetica'];
+$tocFontFamilyCSS = isset($fontFamilyMap[$tocFontFamily]) ? $fontFamilyMap[$tocFontFamily] : $fontFamilyMap['helvetica'];
+$taglineFontFamilyCSS = isset($fontFamilyMap[$taglineFont]) ? $fontFamilyMap[$taglineFont] : $fontFamilyMap['helvetica'];
+
+echo "console.log('📊 CONVERTED CSS FONT VALUES:');\n";
+echo "console.log('  h1_font_family_css: \"" . addslashes($h1FontFamilyCSS) . "\"');\n";
+echo "console.log('  h2_font_family_css: \"" . addslashes($h2FontFamilyCSS) . "\"');\n";
+echo "console.log('  h3_font_family_css: \"" . addslashes($h3FontFamilyCSS) . "\"');\n";
+echo "console.log('  body_font_family_css: \"" . addslashes($bodyFontFamilyCSS) . "\"');\n";
+echo "console.log('  toc_font_family_css: \"" . addslashes($tocFontFamilyCSS) . "\"');\n";
+// Hover variables moved to CSS :root
+
+echo "</script>\n";
+?>
+
+<script>
+console.log('🔍 DEBUG STEP 2C: CSS Generation Starting');
+console.log('About to generate CSS with maximum specificity...');
+</script>
+
+<style>
+/* ==========================================================================
+   DYNAMIC THEME SETTINGS CSS - MAXIMUM SPECIFICITY OVERRIDE SYSTEM
+   Generated from theme settings - Ensures theme settings take absolute precedence
+   ========================================================================== */
+
+/* DEBUG INFO */
+/* Generated: <?php echo date('Y-m-d H:i:s'); ?> */
+/* TOC Font Family: <?php echo $tocFontFamily; ?> -> <?php echo $tocFontFamilyCSS; ?> */
+/* TOC Font Size: <?php echo $tocFontSize; ?> */
+/* H1 Font Family: <?php echo $h1FontFamily; ?> -> <?php echo $h1FontFamilyCSS; ?> */
+/* H2 Font Family: <?php echo $h2FontFamily; ?> -> <?php echo $h2FontFamilyCSS; ?> */
+/* H3 Font Family: <?php echo $h3FontFamily; ?> -> <?php echo $h3FontFamilyCSS; ?> */
+/* Body Font Family: <?php echo $bodyFontFamily; ?> -> <?php echo $bodyFontFamilyCSS; ?> */
+
+/* =================================================================
+   STEP 2D: CSS VARIABLES DEFINITION WITH DEBUG MARKERS
+   ================================================================= */
+:root {
+    /* Typography Variables - Generated from theme settings */
+    --h1-font-family: <?php echo $h1FontFamilyCSS; ?>;
+    --h1-font-style: <?php echo $h1FontStyle; ?>;
+    --h2-font-family: <?php echo $h2FontFamilyCSS; ?>;
+    --h2-font-style: <?php echo $h2FontStyle; ?>;
+    --h3-font-family: <?php echo $h3FontFamilyCSS; ?>;
+    --h3-font-style: <?php echo $h3FontStyle; ?>;
+    --body-font-family: <?php echo $bodyFontFamilyCSS; ?>;
+    --body-font-style: <?php echo $bodyFontStyle; ?>;
+    --toc-font-family: <?php echo $tocFontFamilyCSS; ?>;
+    --toc-font-style: <?php echo $tocFontStyle ?? 'normal'; ?>;
+
+    /* Tagline CSS variables for font-overrides.css compatibility */
+    --tagline-font-family: <?php echo $taglineFontFamilyCSS; ?>;
+    --tagline-font-style: <?php echo $taglineFontStyle; ?>;
+    --tagline-font-weight: <?php echo $taglineFontWeight; ?>;
+    --tagline-color: <?php echo $taglineFontColor; ?>;
+    --tagline-font-size: <?php echo $normalizeSize($taglineFontSize, '0.9rem'); ?>;
+
+    --h1-font-size: <?php echo $h1FontSize; ?>;
+    --h2-font-size: <?php echo $h2FontSize; ?>;
+    --h3-font-size: <?php echo $h3FontSize; ?>;
+    --body-font-size: <?php echo $bodyFontSize; ?>;
+    --toc-font-size: <?php echo $tocFontSizeRem ? $normalizeSize($tocFontSizeRem, $fontSizeMap[$tocFontSize] ?? $fontSizeMap['normal']) : ($fontSizeMap[$tocFontSize] ?? $fontSizeMap['normal']); ?>;
+
+    --h1-font-color: <?php echo $h1FontColor; ?>;
+    --h2-font-color: <?php echo $h2FontColor; ?>;
+    --h3-font-color: <?php echo $h3FontColor; ?>;
+    --body-font-color: <?php echo $bodyFontColor; ?>;
+    --toc-text-color: <?php echo $tocTextColor; ?>;
+    --toc-hover-text-color: <?php echo $tocHoverTextColor; ?>;
+    --toc-hover-background-color: <?php echo $tocHoverBgColor; ?>;
+
+    /* Hover variables per typography group */
+    --h1-hover-text-color: <?php echo $h1HoverTextColor; ?>;
+    --h1-hover-background-color: <?php echo $h1HoverBgColor; ?>;
+    --h2-hover-text-color: <?php echo $h2HoverTextColor; ?>;
+    --h2-hover-background-color: <?php echo $h2HoverBgColor; ?>;
+    --h3-hover-text-color: <?php echo $h3HoverTextColor; ?>;
+    --h3-hover-background-color: <?php echo $h3HoverBgColor; ?>;
+    --body-hover-text-color: <?php echo $bodyHoverTextColor; ?>;
+    --body-hover-background-color: <?php echo $bodyHoverBgColor; ?>;
+    --tagline-hover-text-color: <?php echo $taglineHoverTextColor; ?>;
+    --tagline-hover-background-color: <?php echo $taglineHoverBgColor; ?>;
+}
+
+/* HEADER SETTINGS */
+html body .site-header,
+html body.omeka-s .site-header {
+    min-height: <?php echo $headerHeight; ?>px !important;
+}
+
+html body .site-logo img,
+html body.omeka-s .site-logo img {
+    max-height: <?php echo $logoHeight; ?>px !important;
+}
+
+/* TAGLINE - MAX SPECIFICITY */
+html body .site-tagline,
+html body.omeka-s .site-tagline,
+html body #content .site-tagline,
+html body.omeka-s #content .site-tagline,
+html body p.site-tagline,
+html body.omeka-s p.site-tagline {
+    font-family: <?php echo $fontFamilyMap[$taglineFont] ?? $fontFamilyMap['system']; ?> !important;
+    font-weight: <?php echo $taglineFontWeight; ?> !important;
+    font-style: <?php echo $taglineFontStyle; ?> !important;
+    color: <?php echo $taglineFontColor; ?> !important;
+    font-size: <?php echo $normalizeSize($taglineFontSize, '0.9rem'); ?> !important;
+    display: inline-block !important;
+    border-radius: 999px !important;
+    padding: 0.1rem 0.45rem !important;
+}
+
+
+/* Ensure tagline anchor inherits explicit typography (override any framework resets) */
+html body .site-tagline a,
+html body.omeka-s .site-tagline a,
+html body #content .site-tagline a,
+html body.omeka-s #content .site-tagline a,
+html body p.site-tagline a,
+html body.omeka-s p.site-tagline a,
+html body .site-tagline .tagline-link,
+html body.omeka-s .site-tagline .tagline-link {
+    font-family: <?php echo $fontFamilyMap[$taglineFont] ?? $fontFamilyMap['system']; ?> !important;
+    font-weight: <?php echo $taglineFontWeight; ?> !important;
+    font-style: <?php echo $taglineFontStyle; ?> !important;
+    color: <?php echo $taglineFontColor; ?> !important;
+    font-size: <?php echo $normalizeSize($taglineFontSize, '0.9rem'); ?> !important;
+}
+
+/* MAXIMUM SPECIFICITY TYPOGRAPHY OVERRIDES */
+/* H1 HEADINGS */
+html body h1,
+html body.omeka-s h1,
+html body div h1,
+html body main h1,
+html body .main-content h1,
+html body .page-title,
+html body.omeka-s div h1,
+html body.omeka-s main h1,
+html body.omeka-s .main-content h1,
+html body.omeka-s .page-title {
+    font-family: <?php echo $fontFamilyMap[$h1FontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $h1FontSize; ?> !important;
+    color: <?php echo $h1FontColor; ?> !important;
+    font-weight: <?php echo $h1FontWeight; ?> !important;
+    font-style: <?php echo $h1FontStyle; ?> !important;
+    line-height: 1.3 !important;
+}
+
+/* H2 HEADINGS */
+html body h2,
+html body.omeka-s h2,
+html body div h2,
+html body main h2,
+html body .main-content h2,
+html body.omeka-s div h2,
+html body.omeka-s main h2,
+html body.omeka-s .main-content h2 {
+    font-family: <?php echo $fontFamilyMap[$h2FontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $h2FontSize; ?> !important;
+    color: <?php echo $h2FontColor; ?> !important;
+    font-weight: <?php echo $h2FontWeight; ?> !important;
+    font-style: <?php echo $h2FontStyle; ?> !important;
+    line-height: 1.3 !important;
+}
+/* Hover styles for typography groups (optional usage where applicable) */
+html body h1:hover:not(.site-tagline) { color: var(--h1-hover-text-color) !important; background: var(--h1-hover-background-color) !important; }
+html body h2:hover:not(.site-tagline) { color: var(--h2-hover-text-color) !important; background: var(--h2-hover-background-color) !important; }
+html body h3:hover:not(.site-tagline) { color: var(--h3-hover-text-color) !important; background: var(--h3-hover-background-color) !important; }
+html body p:hover { color: var(--body-hover-text-color) !important; background: transparent !important; }
+html body .site-tagline:hover { color: var(--tagline-hover-text-color) !important; background: var(--tagline-hover-background-color) !important; border-radius: 999px !important; padding: 0.1rem 0.45rem !important; }
+/* Neutralize any nested element hover backgrounds inside tagline */
+html body .site-tagline a,
+html body .site-tagline a:hover,
+html body .site-tagline *:hover,
+html body .site-tagline::before,
+html body .site-tagline::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+
+/* H3 HEADINGS */
+html body h3,
+html body.omeka-s h3,
+html body div h3,
+html body main h3,
+html body .main-content h3,
+html body.omeka-s div h3,
+html body.omeka-s main h3,
+html body.omeka-s .main-content h3 {
+    font-family: <?php echo $fontFamilyMap[$h3FontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $h3FontSize; ?> !important;
+    color: <?php echo $h3FontColor; ?> !important;
+    font-weight: <?php echo $h3FontWeight; ?> !important;
+    font-style: <?php echo $h3FontStyle; ?> !important;
+    line-height: 1.3 !important;
+}
+
+/* BODY TEXT */
+html body,
+html body.omeka-s,
+html body div,
+html body p,
+html body span,
+html body .main-content p,
+html body .main-content div,
+html body.omeka-s div,
+html body.omeka-s p,
+html body.omeka-s span,
+html body.omeka-s .main-content p,
+html body.omeka-s .main-content div {
+    font-family: <?php echo $fontFamilyMap[$bodyFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $bodyFontSize; ?> !important;
+    color: <?php echo $bodyFontColor; ?> !important;
+    font-weight: <?php echo $bodyFontWeight; ?> !important;
+    font-style: <?php echo $bodyFontStyle; ?> !important;
+    line-height: 1.7 !important;
+}
+
+/* TABLE OF CONTENTS - MAXIMUM SPECIFICITY OVERRIDE */
+html body main ul.navigation,
+html body main ul.navigation li,
+html body .list-of-pages,
+html body .toc,
+html body .table-of-contents,
+html body .page-list,
+html body .block-listOfPages ul,
+html body .block ul.list-of-pages,
+html body.omeka-s main ul.navigation,
+html body.omeka-s main ul.navigation li,
+html body.omeka-s .list-of-pages,
+html body.omeka-s .toc,
+html body.omeka-s .table-of-contents,
+html body.omeka-s .page-list,
+html body.omeka-s .block-listOfPages ul,
+html body.omeka-s .block ul.list-of-pages {
+    font-family: <?php echo $fontFamilyMap[$tocFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $fontSizeMap[$tocFontSize] ?? $fontSizeMap['normal']; ?> !important;
+    font-weight: <?php echo $tocFontWeight; ?> !important;
+    font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
+    line-height: 1.6 !important;
+    margin: 1rem 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    border-left: none !important;
+    border: none !important; /* remove rectangular container border */
+    background-color: transparent !important; /* let link pills stand out */
+    border-radius: 0 !important;
+}
+/* Center TOC entries and size to content width: apply to inner lists */
+html body .table-of-contents ul,
+html body .toc ul,
+html body .list-of-pages ul,
+html body main ul.navigation {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px 12px !important;
+    justify-content: center !important;
+}
+
+/* TOC LINKS - MAXIMUM SPECIFICITY */
+html body main ul.navigation li a,
+html body main ul.navigation a,
+html body .list-of-pages a,
+html body .toc a,
+html body .table-of-contents a,
+html body .page-list a,
+html body .block-listOfPages ul a,
+html body .block ul.list-of-pages a,
+html body.omeka-s main ul.navigation li a,
+html body.omeka-s main ul.navigation a,
+html body.omeka-s .list-of-pages a,
+html body.omeka-s .toc a,
+html body.omeka-s .table-of-contents a,
+html body.omeka-s .page-list a,
+html body.omeka-s .block-listOfPages ul a,
+html body.omeka-s .block ul.list-of-pages a,
+html body .table-of-contents a:visited,
+html body .toc a:visited,
+html body .list-of-pages a:visited,
+html body .page-list a:visited {
+    color: <?php echo $tocTextColor; ?> !important;
+    text-decoration: none !important;
+    display: inline-block !important; /* shrink to content width */
+    padding: 0.5rem 0.75rem !important;
+    margin: 0.25rem 0 !important; /* vertical spacing; horizontal spacing via gap */
+    font-weight: <?php echo $tocFontWeight; ?> !important;
+    font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$tocFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: var(--toc-font-size) !important;
+    /* Pill shape: fully rounded ends with visible outline */
+    border-radius: 999px !important;
+    border: 1px solid <?php echo $tocBorderColor; ?> !important;
+    background: <?php echo $tocBackgroundColor; ?> !important; /* visible pill */
+    border: 1px solid <?php echo $tocBorderColor; ?> !important;
+    transition: color 0.3s ease, background-color 0.3s ease !important;
+}
+
+/* TOC HOVER STATES - MAXIMUM SPECIFICITY */
+html body main ul.navigation li a:hover,
+html body main ul.navigation a:hover,
+html body .list-of-pages a:hover,
+html body .toc a:hover,
+html body .table-of-contents a:hover,
+html body .page-list a:hover,
+html body .block-listOfPages ul a:hover,
+html body .block ul.list-of-pages a:hover,
+html body.omeka-s main ul.navigation li a:hover,
+html body.omeka-s main ul.navigation a:hover,
+html body.omeka-s .list-of-pages a:hover,
+html body.omeka-s .toc a:hover,
+html body.omeka-s .table-of-contents a:hover,
+html body.omeka-s .page-list a:hover,
+html body.omeka-s .block-listOfPages ul a:hover,
+html body.omeka-s .block ul.list-of-pages a:hover {
+    color: <?php echo $tocHoverTextColor; ?> !important;
+    background: <?php echo $tocHoverBgColor; ?> !important;
+    border-color: <?php echo $tocHoverBgColor; ?> !important;
+}
+
+/* MENU STYLING */
+.navigation ul {
+    background-color: <?php echo $menuBackgroundColor; ?> !important;
+}
+
+.navigation a {
+    color: <?php echo $menuTextColor; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$menuFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-style: <?php echo $menuFontStyle; ?> !important;
+    font-weight: <?php echo $menuFontWeight; ?> !important;
+}
+
+/* Search/Browse action buttons in header nav - Traditional palette */
+html body .site-header .navigation a[href*="search"],
+html body .site-header .navigation a[href*="browse"] {
+    color: <?php echo $menuTextColor; ?> !important;
+    background: <?php echo $primaryColor; ?> !important;
+    border: 1px solid <?php echo $sacredGold; ?> !important;
+    border-radius: 999px !important;
+    padding: 0.35rem 0.75rem !important;
+}
+html body .site-header .navigation a[href*="search"]:hover,
+html body .site-header .navigation a[href*="browse"]:hover {
+    color: #ffffff !important;
+    background: <?php echo $sacredGold; ?> !important;
+    border-color: <?php echo $sacredGold; ?> !important;
+}
+
+/* Fallback for non-header listings */
+html body .navigation a[href*="search"],
+html body .navigation a[href*="browse"] {
+    color: <?php echo $bodyFontColor; ?> !important;
+    background: transparent !important;
+    border: 1px solid <?php echo $bodyFontColor; ?>20 !important; /* subtle */
+    border-radius: 999px !important;
+    padding: 0.25rem 0.6rem !important;
+}
+html body .navigation a[href*="search"]:hover,
+html body .navigation a[href*="browse"]:hover {
+    color: #ffffff !important;
+    background: <?php echo $sacredGold; ?> !important;
+    border-color: <?php echo $sacredGold; ?> !important;
+}
+
+/* Respect toggles for visibility */
+<?php if (!$this->themeSetting('enable_pagination', 1)) : ?>
+.pagination { display: none !important; }
+<?php endif; ?>
+<?php if (!$this->themeSetting('enable_toc', 1)) : ?>
+.toc-block, .list-of-pages, .toc, .table-of-contents, .content-links, .page-toc, .toc-panel { display: none !important; }
+<?php endif; ?>
+
+    font-family: <?php echo $fontFamilyMap[$menuFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+}
+
+/* FOOTER STYLING */
+.site-footer {
+    background-color: <?php echo $footerBackgroundColor; ?> !important;
+    color: <?php echo $footerTextColor; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$footerFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-style: <?php echo $footerFontStyle; ?> !important;
+    font-weight: <?php echo $footerFontWeight; ?> !important;
+}
+
+/* PAGINATION STYLING */
+
+/* Table of Contents panel - limit rectangular styling to .toc-panel wrappers only */
+.toc-panel {
+    background: <?php echo $tocBackgroundColor; ?> !important;
+    border: <?php echo $tocBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
+    border-radius: <?php echo $tocBorderRadius; ?> !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* Keep raw .table-of-contents/.page-toc/.content-links minimal so pill links dominate */
+.table-of-contents, .page-toc, .content-links {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* TOC links use configured colors */
+.toc-panel a, .table-of-contents a, .page-toc a, .content-links a {
+    color: <?php echo $tocTextColor; ?> !important;
+    font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
+}
+/* Hover uses theme settings */
+.toc-panel a:hover, .table-of-contents a:hover, .page-toc a:hover, .content-links a:hover {
+    color: <?php echo $tocHoverTextColor; ?> !important;
+    background: <?php echo $tocHoverBgColor; ?> !important;
+    border-color: <?php echo $tocHoverBgColor; ?> !important;
+}
+/* Force pagination styles with high specificity to override base theme */
+body main .pagination .button,
+body main .pagination a,
+body main .pagination li,
+body main .pagination span,
+body main a[href*="Next"],
+body main a[href*="Prev"],
+body main a[href*="page/"],
+body main a[href*="collections"],
+body .pagination .button,
+body .pagination a,
+body a[href*="Next"],
+body a[href*="Prev"],
+body a[href*="page/"],
+body a[href*="collections"] {
+    background: <?php echo $paginationBackgroundColor; ?> !important;
+    color: <?php echo $paginationFontColor; ?> !important;
+    border: 2px solid <?php echo $sacredGold; ?> !important;
+    border-radius: 999px !important; /* pill buttons */
+    font-family: <?php echo $fontFamilyMap[$paginationFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-style: <?php echo $paginationFontStyle; ?> !important;
+    font-weight: <?php echo $paginationFontWeight; ?> !important;
+}
+
+body main .pagination .button:hover,
+body main .pagination a:hover,
+body main a[href*="Next"]:hover,
+body main a[href*="Prev"]:hover,
+body main a[href*="page/"]:hover,
+body main a[href*="collections"]:hover,
+body .pagination .button:hover,
+body .pagination a:hover,
+body a[href*="Next"]:hover,
+body a[href*="Prev"]:hover,
+body a[href*="page/"]:hover,
+body a[href*="collections"]:hover {
+    background: <?php echo $sacredGold; ?> !important;
+    color: #ffffff !important;
+    border-color: <?php echo $sacredGold; ?> !important;
+}
+
+/* Breadcrumbs: use body font color (gray) for links */
+html body nav[aria-label="breadcrumb"] a,
+html body nav.breadcrumbs a,
+html body .breadcrumbs a,
+html body .breadcrumb a,
+html body .site-breadcrumbs a {
+    color: <?php echo $bodyFontColor; ?> !important;
+}
+
+/* Breadcrumb pills follow TOC settings */
+html body nav[aria-label="breadcrumb"] a,
+html body nav.breadcrumbs a,
+html body .breadcrumbs a,
+html body .breadcrumb a,
+html body .site-breadcrumbs a {
+    display: inline-block !important;
+    padding: 0.5rem 0.75rem !important;
+    margin: 0.25rem 0 !important;
+    font-weight: <?php echo $tocFontWeight; ?> !important;
+    font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$tocFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: var(--toc-font-size) !important;
+    border-radius: 999px !important;
+    border: 1px solid <?php echo $tocBorderColor; ?> !important;
+    background: <?php echo $tocBackgroundColor; ?> !important;
+    color: <?php echo $tocTextColor; ?> !important;
+}
+html body nav[aria-label="breadcrumb"] a:hover,
+html body nav.breadcrumbs a:hover,
+html body .breadcrumbs a:hover,
+html body .breadcrumb a:hover,
+html body .site-breadcrumbs a:hover {
+    color: <?php echo $tocHoverTextColor; ?> !important;
+    background: <?php echo $tocHoverBgColor; ?> !important;
+    border-color: <?php echo $tocHoverBgColor; ?> !important;
+}
+
+
+/* Minimal container styling so pill links are the visual boxes */
+.toc-block ul.navigation,
+.site-content .list-of-pages,
+.site-content .toc,
+.site-content .table-of-contents,
+.main-content .list-of-pages,
+.main-content .toc,
+.main-content .table-of-contents,
+.content-links,
+.page-toc {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+/* .toc-panel retains framed look when used */
+.toc-panel {
+    background: <?php echo $tocBackgroundColor; ?> !important;
+    border: <?php echo $tocBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
+    border-radius: <?php echo $tocBorderRadius; ?> !important;
+}
+
+
+.pagination a, .pagination span, .pagination li {
+    color: <?php echo $paginationFontColor; ?> !important;
+    background-color: <?php echo $paginationBackgroundColor; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$paginationFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-style: <?php echo $paginationFontStyle; ?> !important;
+    font-weight: <?php echo $paginationFontWeight; ?> !important;
+}
+
+.pagination a:hover {
+    background-color: <?php echo $paginationHoverColor; ?> !important;
+}
+
+/* COLOR VARIABLES */
+:root {
+    /* Ensure TOC and Pagination use preset when active */
+    --toc-bg: <?php echo $tocBackgroundColor; ?>;
+    --toc-border: <?php echo $tocBorderColor; ?>;
+    --pagination-bg: <?php echo $paginationBackgroundColor; ?>;
+    --pagination-color: <?php echo $paginationFontColor; ?>;
+    --primary-color: <?php echo $primaryColor; ?>;
+    --sacred-gold: <?php echo $sacredGold; ?>;
+    --toc-text-color: <?php echo $tocTextColor; ?>;
+    --toc-hover-text-color: <?php echo $tocHoverTextColor; ?>;
+    --toc-hover-background-color: <?php echo $tocHoverBgColor; ?>;
+}
+
+</style>

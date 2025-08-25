@@ -150,121 +150,107 @@ $itemSets = $item->itemSets();
             </div>
             <?php endif; ?>
 
-    <!-- Enhanced Metadata Display -->
-    <div class="library-metadata-section">
-        <div class="grid-x grid-margin-x">
-            <!-- Main Content Area -->
-            <div class="cell large-8">
-                <?php if ($itemDescription): ?>
-                <div class="item-description">
-                    <h3><?= $translate('Description') ?></h3>
-                    <div class="description-content">
-                        <?= $this->truncate($escape($itemDescription), 500, '...', false) ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-
-                <!-- Resource Page Blocks -->
-                <?php if ($mainWithSidebarHasBlocks): ?>
-                <div class="resource-blocks">
-                    <?php echo $mainWithSidebarBlockContent->getBlocks(); ?>
-                </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Metadata Sidebar -->
-            <div class="cell large-4">
-                <div class="metadata-panel">
-                    <h3><?= $translate('Details') ?></h3>
-
-                    <div class="metadata-groups">
-                        <!-- Core Metadata -->
-                        <?php if ($creator || $date): ?>
-                        <div class="metadata-group">
-                            <h4><?= $translate('Creation') ?></h4>
-                            <dl class="metadata-list">
-                                <?php if ($creator): ?>
-                                <dt><?= $translate('Creator') ?></dt>
-                                <dd><?= $escape($creator) ?></dd>
-                                <?php endif; ?>
-
-                                <?php if ($date): ?>
-                                <dt><?= $translate('Date') ?></dt>
-                                <dd><?= $escape($date) ?></dd>
-                                <?php endif; ?>
-                            </dl>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Subjects -->
-                        <?php if (!empty($subject)): ?>
-                        <div class="metadata-group">
-                            <h4><?= $translate('Subjects') ?></h4>
-                            <div class="subject-tags">
-                                <?php foreach ($subject as $subjectValue): ?>
-                                <span class="subject-tag"><?= $escape($subjectValue) ?></span>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Collections -->
-                        <?php if (!empty($itemSets)): ?>
-                        <div class="metadata-group">
-                            <h4><?= $translate('Collections') ?></h4>
-                            <ul class="collection-list">
-                                <?php foreach ($itemSets as $itemSet): ?>
-                                <li>
-                                    <a href="<?= $escape($itemSet->url()) ?>">
-                                        <?= $escape($itemSet->displayTitle()) ?>
-                                    </a>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Rights -->
-                        <?php if ($rights): ?>
-                        <div class="metadata-group">
-                            <h4><?= $translate('Rights') ?></h4>
-                            <p class="rights-statement"><?= $escape($rights) ?></p>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Technical Details -->
-                        <div class="metadata-group">
-                            <h4><?= $translate('Technical') ?></h4>
-                            <dl class="metadata-list">
-                                <dt><?= $translate('Item ID') ?></dt>
-                                <dd><?= $item->id() ?></dd>
-
-                                <?php if ($item->resourceClass()): ?>
-                                <dt><?= $translate('Resource Class') ?></dt>
-                                <dd><?= $escape($item->resourceClass()->label()) ?></dd>
-                                <?php endif; ?>
-
-                                <dt><?= $translate('Media Count') ?></dt>
-                                <dd><?= count($itemMedia) ?></dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar Blocks -->
-                <?php if ($leftSidebarHasBlocks || $rightSidebarHasBlocks): ?>
-                <div class="sidebar-blocks">
-                    <?php if ($leftSidebarHasBlocks): ?>
-                        <?php echo $leftSidebarBlockContent->getBlocks(); ?>
-                    <?php endif; ?>
-
-                    <?php if ($rightSidebarHasBlocks): ?>
-                        <?php echo $rightSidebarBlockContent->getBlocks(); ?>
-                    <?php endif; ?>
-                </div>
-                <?php endif; ?>
-            </div>
+    <!-- Resource Regions Layout (Cumulus-style) -->
+    <?php
+        // Compute responsive widths based on which sidebars are populated
+        if ($leftSidebarHasBlocks && $rightSidebarHasBlocks) {
+            $sidebarWidth = '3';
+            $mainWidth = '6';
+        } else {
+            $sidebarWidth = '4';
+            $mainWidth = '8';
+        }
+    ?>
+    <div class="grid-x grid-margin-x">
+        <?php if ($leftSidebarHasBlocks): ?>
+        <div class="left-sidebar cell medium-<?= $sidebarWidth; ?>">
+            <?= $leftSidebarBlockContent->getBlocks(); ?>
         </div>
+        <?php endif; ?>
+
+        <div class="main-with-sidebar cell medium-<?= $mainWidth; ?>">
+            <?php if ($itemDescription): ?>
+            <div class="item-description">
+                <h3><?= $translate('Description') ?></h3>
+                <div class="description-content">
+                    <?= $this->truncate($escape($itemDescription), 500, '...', false) ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($mainWithSidebarHasBlocks): ?>
+            <div class="resource-blocks">
+                <?= $mainWithSidebarBlockContent->getBlocks(); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($rightSidebarHasBlocks): ?>
+        <div class="right-sidebar cell medium-<?= $sidebarWidth; ?>">
+            <!-- Optional theme-specific details panel lives at top of right sidebar -->
+            <div class="metadata-panel">
+                <h3><?= $translate('Details') ?></h3>
+                <div class="metadata-groups">
+                    <?php if ($creator || $date): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Creation') ?></h4>
+                        <dl class="metadata-list">
+                            <?php if ($creator): ?>
+                            <dt><?= $translate('Creator') ?></dt>
+                            <dd><?= $escape($creator) ?></dd>
+                            <?php endif; ?>
+                            <?php if ($date): ?>
+                            <dt><?= $translate('Date') ?></dt>
+                            <dd><?= $escape($date) ?></dd>
+                            <?php endif; ?>
+                        </dl>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($subject)): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Subjects') ?></h4>
+                        <div class="subject-tags">
+                            <?php foreach ($subject as $subjectValue): ?>
+                            <span class="subject-tag"><?= $escape($subjectValue) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($itemSets)): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Collections') ?></h4>
+                        <ul class="collection-list">
+                            <?php foreach ($itemSets as $itemSet): ?>
+                            <li><a href="<?= $escape($itemSet->url()) ?>"><?= $escape($itemSet->displayTitle()) ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($rights): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Rights') ?></h4>
+                        <p class="rights-statement"><?= $escape($rights) ?></p>
+                    </div>
+                    <?php endif; ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Technical') ?></h4>
+                        <dl class="metadata-list">
+                            <dt><?= $translate('Item ID') ?></dt>
+                            <dd><?= $item->id() ?></dd>
+                            <?php if ($item->resourceClass()): ?>
+                            <dt><?= $translate('Resource Class') ?></dt>
+                            <dd><?= $escape($item->resourceClass()->label()) ?></dd>
+                            <?php endif; ?>
+                            <dt><?= $translate('Media Count') ?></dt>
+                            <dd><?= count($itemMedia) ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <?= $rightSidebarBlockContent->getBlocks(); ?>
+        </div>
+        <?php endif; ?>
     </div>
 
     <?php $this->trigger('view.show.after'); ?>

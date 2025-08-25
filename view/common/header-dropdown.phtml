@@ -2,6 +2,57 @@
 $plugins = $this->getHelperPluginManager();
 
 $searchingForm = $plugins->has('searchingForm') ? $plugins->get('searchingForm') : null;
+
+// Safe access to ThemeFunctions helper with fallback shim
+$themeFunctionsLocal = null;
+if ($plugins) {
+    if ($plugins->has('themeFunctions')) {
+        $themeFunctionsLocal = $plugins->get('themeFunctions');
+    } elseif ($plugins->has('ThemeFunctions')) {
+        $themeFunctionsLocal = $plugins->get('ThemeFunctions');
+    }
+}
+if (!$themeFunctionsLocal) {
+    $themeFunctionsLocal = new class {
+        public function getFontFamily($fontKey) {
+            $fontMap = [
+                'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+                'roboto' => 'Roboto, Arial, sans-serif',
+                'open_sans' => 'Open Sans, Arial, sans-serif',
+                'lato' => 'Lato, Arial, sans-serif',
+                'montserrat' => 'Montserrat, Arial, sans-serif',
+                'source_sans' => 'Source Sans Pro, Arial, sans-serif',
+                'nunito' => 'Nunito, Arial, sans-serif',
+                'poppins' => 'Poppins, Arial, sans-serif',
+                'inter' => 'Inter, Arial, sans-serif',
+                'work_sans' => 'Work Sans, Arial, sans-serif',
+                'fira_sans' => 'Fira Sans, Arial, sans-serif',
+                'verdana' => 'Verdana, Arial, sans-serif',
+                'arial' => 'Arial, sans-serif',
+                'merriweather' => 'Merriweather, Georgia, serif',
+                'playfair' => 'Playfair Display, Georgia, serif',
+                'crimson' => 'Crimson Text, Georgia, serif',
+                'libre_baskerville' => 'Libre Baskerville, Georgia, serif',
+                'lora' => 'Lora, Georgia, serif',
+                'pt_serif' => 'PT Serif, Georgia, serif',
+                'source_serif' => 'Source Serif Pro, Georgia, serif',
+                'georgia' => 'Georgia, serif',
+                'times' => 'Times New Roman, serif',
+                'oswald' => 'Oswald, Arial, sans-serif',
+                'raleway' => 'Raleway, Arial, sans-serif',
+                'bebas_neue' => 'Bebas Neue, Arial, sans-serif',
+                'anton' => 'Anton, Arial, sans-serif',
+                'dancing_script' => 'Dancing Script, cursive',
+                'pacifico' => 'Pacifico, cursive',
+                'fira_code' => 'Fira Code, Consolas, monospace',
+                'source_code' => 'Source Code Pro, Consolas, monospace',
+                'courier' => 'Courier New, monospace',
+                'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            ];
+            return $fontMap[$fontKey] ?? $fontMap['system'];
+        }
+    };
+}
 ?>
 
 <div class="top-bar">
@@ -34,14 +85,7 @@ $searchingForm = $plugins->has('searchingForm') ? $plugins->get('searchingForm')
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($siteTagline)): ?>
-                <div class="tagline-container" style="margin-top: 25px; padding-top: 10px;">
-                    <p class="site-tagline centered-tagline"
-                       style="font-size: <?php echo $taglineFontSize; ?>rem; color: #666; margin: 20px 0 0 0; text-align: center; line-height: 1.4; padding-top: 15px;">
-                        <?php echo $this->escapeHtml($siteTagline); ?>
-                    </p>
-                </div>
-            <?php endif; ?>
+            <?php /* Tagline is rendered centrally in layout header to avoid duplicates. */ ?>
         </div>
     </nav>
     <!-- Navigation menu removed from header - now only in off-canvas mobile menu -->

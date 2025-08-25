@@ -1,0 +1,69 @@
+/* TABLE OF CONTENTS STYLES - DYNAMIC THEME INTEGRATION */
+/* This file uses CSS variables that are set by the theme settings */
+
+/* TOC Container Styles */
+.toc-block ul.navigation,
+.site-content .list-of-pages,
+.site-content .toc,
+.site-content .table-of-contents,
+.main-content .list-of-pages,
+.main-content .toc,
+.main-content .table-of-contents {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;               /* lay out entries side-by-side for centering */
+    flex-wrap: wrap;             /* allow wrapping to next line */
+    gap: 8px 12px;               /* row/column spacing between boxes */
+    justify-content: center;     /* center within the TOC container */
+}
+
+/* TOC Link Styles - USES DYNAMIC THEME COLORS */
+.toc-block ul.navigation li a,
+.site-content .list-of-pages a,
+.site-content .toc a,
+.site-content .table-of-contents a,
+.main-content .list-of-pages a,
+.main-content .toc a,
+.main-content .table-of-contents a,
+main ul.navigation li a {
+    display: inline-block;       /* shrink to content width */
+    padding: 8px 12px;
+    margin: 4px 0;               /* vertical margin only; horizontal comes from gap */
+    text-decoration: none !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    /* USES DYNAMIC THEME COLORS FROM CSS VARIABLES */
+    color: var(--toc-text-color) !important;
+    font-family: var(--toc-font-family) !important;
+    font-size: var(--toc-font-size) !important;
+}
+
+/* Hover effect with dynamic theme hover color */
+.toc-block ul.navigation li a:hover,
+.site-content .list-of-pages a:hover,
+.site-content .toc a:hover,
+.site-content .table-of-contents a:hover,
+.main-content .list-of-pages a:hover,
+.main-content .toc a:hover,
+.main-content .table-of-contents a:hover,
+main ul.navigation li a:hover {
+    background: rgba(0, 0, 0, 0.05);
+    /* USES DYNAMIC THEME HOVER COLOR */
+    color: var(--toc-hover-color) !important;
+}
+
+/* Optional: ensure list items don’t force full width */
+.toc-block ul.navigation li,
+.site-content .list-of-pages li,
+.site-content .toc li,
+.site-content .table-of-contents li,
+.main-content .list-of-pages li,
+.main-content .toc li,
+.main-content .table-of-contents li,
+main ul.navigation li {
+    list-style: none;
+    display: inline-block;        /* let LI wrap to content as well */
+}
+
+/* TOC CSS File - Updated for Dynamic Theme Integration: 2025-08-08 */

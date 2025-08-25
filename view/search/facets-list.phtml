@@ -64,15 +64,18 @@ if (!empty($itemSet)) {
         <?= $this->hiddenInputsFromFilteredQuery(null, ['facet', 'refine', 'page', 'limit', 'offset', 'per_page']) ?>
         <?php endif; ?>
 
-        <?= $this->partial('search/facets-buttons', [
-            'position' => 'above',
-            'displayReset' => $displayReset,
-            'displaySubmit' => $displaySubmit,
-            'displayFacetButton' => $displayFacetButton,
-            'labelSubmit' => $labelSubmit,
-            'labelReset' => $labelReset,
-            'escape' => $escape
-        ]) ?>
+        <?php $displayButtonReset = $displayReset === 'above' || $displayReset === 'both'; ?>
+        <?php $displayButtonSubmit = $displayFacetButton && ($displaySubmit === 'above' || $displaySubmit === 'both'); ?>
+        <?php if ($displayButtonReset || $displayButtonSubmit): ?>
+        <div class="facets-actions facets-actions-top">
+            <?php if ($displayButtonSubmit): ?>
+            <button id="facets-apply" class="facets-apply button" type="submit"><?= $escape($labelSubmit) ?></button>
+            <?php endif; ?>
+            <?php if ($displayButtonReset): ?>
+            <button id="facets-reset" class="facets-reset button" type="reset"><?= $escape($labelReset) ?></button>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
 
         <?php if ($displayRefine): ?>
         <div class="facets-refine">
@@ -115,15 +118,18 @@ if (!empty($itemSet)) {
         </ul>
         <?php endif; ?>
 
-        <?= $this->partial('search/facets-buttons', [
-            'position' => 'below',
-            'displayReset' => $displayReset,
-            'displaySubmit' => $displaySubmit,
-            'displayFacetButton' => $displayFacetButton,
-            'labelSubmit' => $labelSubmit,
-            'labelReset' => $labelReset,
-            'escape' => $escape
-        ]) ?>
+        <?php $displayButtonReset = $displayReset === 'below' || $displayReset === 'both'; ?>
+        <?php $displayButtonSubmit = $displayFacetButton && ($displaySubmit === 'below' || $displaySubmit === 'both'); ?>
+        <?php if ($displayButtonReset || $displayButtonSubmit): ?>
+        <div class="facets-actions facets-actions-bottom">
+            <?php if ($displayButtonSubmit): ?>
+            <button id="facets-apply" class="facets-apply button" type="submit"><?= $escape($labelSubmit) ?></button>
+            <?php endif; ?>
+            <?php if ($displayButtonReset): ?>
+            <button id="facets-reset" class="facets-reset button" type="reset"><?= $escape($labelReset) ?></button>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
 
     </form>
 

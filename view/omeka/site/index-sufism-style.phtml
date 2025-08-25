@@ -1,7 +1,7 @@
 <?php
 /**
- * Sufism Reoriented Style Homepage Template
- * Elegant, minimal homepage matching sufismreoriented.org design
+ * Library Style Homepage Template
+ * Elegant, minimal homepage matching the Library Theme design
  */
 
 $translate = $this->plugin('translate');
@@ -13,7 +13,7 @@ $url = $this->plugin('url');
 
 // Get site data
 $site = $this->vars()->site ?? null;
-$siteTitle = $site ? $site->title() : 'Sufism Library';
+$siteTitle = $site ? $site->title() : 'Library';
 $siteDescription = $site ? $site->summary() : '';
 
 // Get featured collections (first 6 item sets)
@@ -45,18 +45,13 @@ if ($site) {
 
 // Add custom CSS for homepage
 $this->headLink()->appendStylesheet($this->assetUrl('css/homepage.css'));
-$this->htmlElement('body')->appendAttribute('class', 'homepage library-homepage sufism-style-homepage');
+$this->htmlElement('body')->appendAttribute('class', 'homepage library-homepage library-style-homepage');
 ?>
 
 <!-- Hero Section (elegant and minimal) -->
 <section class="hero-section">
     <div class="main-content">
-        <h1 class="site-title"><?php echo $escape($siteTitle); ?></h1>
-        <?php if ($siteDescription): ?>
-        <div class="site-description">
-            <p><?php echo $escape($siteDescription); ?></p>
-        </div>
-        <?php endif; ?>
+        <?php /* Site title/tagline are rendered in the global header; avoid duplication here. */ ?>
     </div>
 </section>
 

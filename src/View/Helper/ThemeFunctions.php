@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace OmekaTheme\Helper;
+namespace Theme\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 
@@ -13,10 +13,13 @@ class ThemeFunctions extends AbstractHelper
 
     public function getFontFamily($fontKey)
     {
-        // Trace for debugging in Apache logs
-        error_log('THEME HELPER: getFontFamily called with key: ' . var_export($fontKey, true));
+        // COMPREHENSIVE FONT MAPPING TRACING
+        error_log('FONT TRACE: getFontFamily() called with: ' . var_export($fontKey, true));
+        error_log('FONT TRACE: getFontFamily() input type: ' . gettype($fontKey));
 
+        // Handle null or empty values
         if (empty($fontKey)) {
+            error_log('FONT TRACE: getFontFamily() - empty input, returning system font');
             return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         }
 
@@ -33,9 +36,7 @@ class ThemeFunctions extends AbstractHelper
             'inter' => 'Inter, Arial, sans-serif',
             'work_sans' => 'Work Sans, Arial, sans-serif',
             'fira_sans' => 'Fira Sans, Arial, sans-serif',
-            'verdana' => 'Verdana, Arial, sans-serif',
             'arial' => 'Arial, sans-serif',
-
             // Serif Fonts
             'merriweather' => 'Merriweather, Georgia, serif',
             'playfair' => 'Playfair Display, Georgia, serif',
@@ -46,7 +47,6 @@ class ThemeFunctions extends AbstractHelper
             'source_serif' => 'Source Serif Pro, Georgia, serif',
             'georgia' => 'Georgia, serif',
             'times' => 'Times New Roman, serif',
-
             // Display Fonts
             'oswald' => 'Oswald, Arial, sans-serif',
             'raleway' => 'Raleway, Arial, sans-serif',
@@ -54,16 +54,18 @@ class ThemeFunctions extends AbstractHelper
             'anton' => 'Anton, Arial, sans-serif',
             'dancing_script' => 'Dancing Script, cursive',
             'pacifico' => 'Pacifico, cursive',
-
             // Monospace Fonts
             'fira_code' => 'Fira Code, Consolas, monospace',
             'source_code' => 'Source Code Pro, Consolas, monospace',
             'courier' => 'Courier New, monospace',
-
             // System Default
-            'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         ];
 
-        return $fontMap[$fontKey] ?? $fontMap['system'];
+        // Use the direct mapping or fallback to system default
+        $result = isset($fontMap[$fontKey]) ? $fontMap[$fontKey] : $fontMap['system'];
+
+        error_log('FONT TRACE: getFontFamily() - mapped "' . $fontKey . '" to: ' . $result);
+        return $result;
     }
 }

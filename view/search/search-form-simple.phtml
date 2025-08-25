@@ -12,23 +12,8 @@ $plugins = $this->getHelperPluginManager();
 $translate = $plugins->get('translate');
 $formHelper = $plugins->get('form');
 $formElement = $plugins->get('formElement');
-$escape = $this->plugin('escapeHtml');
 
-// Sanitize query parameters to prevent XSS vulnerabilities
-$rawParams = $this->params()->fromQuery() ?: [];
-$params = [];
-foreach ($rawParams as $key => $value) {
-    if (is_array($value)) {
-        // Recursively sanitize array values
-        $params[$key] = array_map(function($item) use ($escape) {
-            return is_string($item) ? $escape($item) : $item;
-        }, $value);
-    } else {
-        // Sanitize string values
-        $params[$key] = is_string($value) ? $escape($value) : $value;
-    }
-}
-
+$params = $this->params()->fromQuery() ?: [];
 $form
     ->setAttribute('id', 'form-search-simple')
     ->setData($params)

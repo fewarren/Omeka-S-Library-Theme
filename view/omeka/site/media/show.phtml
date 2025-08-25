@@ -3,7 +3,7 @@ $translate = $this->plugin('translate');
 $showLayout = $this->themeSetting('show_layout');
 $tabLayout = ($this->themeSetting('tab_navigation_layout')) ? $this->themeSetting('tab_navigation_layout') : 'vertical';
 $tabContent = ($this->themeSetting('tab_navigation_content')) ? $this->themeSetting('tab_navigation_content') : 'main';
-$this->headLink()->appendStylesheet($this->assetUrl('css/resource-page-blocks.css', 'Omeka'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/resource-page-blocks.css'));
 $fullWidthMainBlockContent = $this->resourcePageBlocks($media, 'full_width_main');
 $fullWidthMainHasBlocks = $fullWidthMainBlockContent->hasBlocks();
 $mainWithSidebarBlockContent = $this->resourcePageBlocks($media);
@@ -33,11 +33,11 @@ $valueLang = $filterLocale ? [$lang, ''] : null;
     <div class="full-width-main">
         <?php $fullWidthBlockArray = $fullWidthMainBlockContent->getBlocksArray(); ?>
         <?php if ($tabNavigationRegion == 'full_width_main'): ?>
-            <?php echo $tabManager->renderTabsOnly($resource, $tabContent); ?>
+            <?php echo $tabManager->renderTabsOnly($media, $tabContent); ?>
         <?php endif; ?>
 
         <?php if ($tabContent == 'full_width_main'): ?>
-            <?php echo $tabManager->renderPanels($resource, $tabContent, $tabLayout); ?>
+            <?php echo $tabManager->renderPanels($media, $tabContent, $tabLayout); ?>
         <?php else: ?>
             <?php echo $fullWidthMainBlockContent->getBlocks(); ?>
         <?php endif; ?>
@@ -69,10 +69,10 @@ $valueLang = $filterLocale ? [$lang, ''] : null;
         <?php if ($mainWithSidebarHasBlocks): ?>
         <div class="main-with-sidebar cell medium-<?php echo $mainWidth; ?>">
             <?php if ($tabNavigationRegion == 'main'): ?>
-                <?php echo $tabManager->renderTabsOnly($resource, $tabContent); ?>
+                <?php echo $tabManager->renderTabsOnly($media, $tabContent, $tabLayout); ?>
             <?php endif; ?>
             <?php if ($tabNavigationRegion && ($tabContent == 'main')): ?>
-                <?php echo $tabManager->renderPanels($resource, $tabContent, $tabLayout); ?>
+                <?php echo $tabManager->renderPanels($media, $tabContent, $tabLayout); ?>
             <?php else: ?>
                 <?php echo $mainWithSidebarBlockContent->getBlocks(); ?>
             <?php endif; ?>

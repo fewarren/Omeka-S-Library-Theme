@@ -1,0 +1,46 @@
+<?php
+// Dynamic preset preview using current theme settings (safe HTML)
+// Allow admin page to pass overrides via querystring for live preview without saving
+$qs = $_GET ?? [];
+$hex = '/^#?[0-9a-fA-F]{3,8}$/';
+$fontKey = '/^[a-z0-9_\-]+$/i';
+
+$primaryColor = isset($qs['override_primary']) && preg_match($hex, $qs['override_primary'])
+    ? (strpos($qs['override_primary'], '#') === 0 ? $qs['override_primary'] : '#' . $qs['override_primary'])
+    : $this->themeSetting('primary_color', '#2C4A6B');
+
+$sacredGold = isset($qs['override_gold']) && preg_match($hex, $qs['override_gold'])
+    ? (strpos($qs['override_gold'], '#') === 0 ? $qs['override_gold'] : '#' . $qs['override_gold'])
+    : $this->themeSetting('sacred_gold', '#D4AF37');
+
+$bodyColor = isset($qs['override_body_color']) && preg_match($hex, $qs['override_body_color'])
+    ? (strpos($qs['override_body_color'], '#') === 0 ? $qs['override_body_color'] : '#' . $qs['override_body_color'])
+    : $this->themeSetting('body_font_color', '#000000');
+
+$h1FontFamily = isset($qs['override_h1_font']) && preg_match($fontKey, $qs['override_h1_font'])
+    ? $qs['override_h1_font']
+    : $this->themeSetting('h1_font_family', 'cormorant');
+
+$bodyFontFamily = isset($qs['override_body_font']) && preg_match($fontKey, $qs['override_body_font'])
+    ? $qs['override_body_font']
+    : $this->themeSetting('body_font_family', 'helvetica');
+?>
+<div class="preset-preview" style="padding:12px;border:1px solid #ddd;border-radius:6px;">
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+    <div title="Surface" style="width:28px;height:28px;border:1px solid #ccc;background:#ffffff;border-radius:4px;"></div>
+    <div title="Gold" style="width:28px;height:28px;background:<?= htmlspecialchars($sacredGold) ?>;border-radius:4px;"></div>
+    <div title="Primary" style="width:28px;height:28px;background:<?= htmlspecialchars($primaryColor) ?>;border-radius:4px;"></div>
+    <div title="Text" style="width:28px;height:28px;background:<?= htmlspecialchars($bodyColor) ?>;border-radius:4px;"></div>
+  </div>
+  <div style="display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;">
+    <div>
+      <div style="font-family: <?= $this->escapeHtml($this->themeFunctions()->getFontFamily($h1FontFamily)) ?>; font-size:24px; color:#000;">Heading sample</div>
+      <div style="color:#666;font-size:12px;">Heading (<?= $this->escapeHtml($h1FontFamily) ?>)</div>
+    </div>
+    <div>
+      <div style="font-family: <?= $this->escapeHtml($this->themeFunctions()->getFontFamily($bodyFontFamily)) ?>; font-size:18px; color:#000;">Body sample</div>
+      <div style="color:#666;font-size:12px;">Body (<?= $this->escapeHtml($bodyFontFamily) ?>)</div>
+    </div>
+  </div>
+</div>
+

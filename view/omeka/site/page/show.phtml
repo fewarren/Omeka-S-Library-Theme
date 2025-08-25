@@ -1,18 +1,26 @@
 <?php
 $this->headLink()->prependStylesheet($this->assetUrl('css/page-blocks.css', 'Omeka'));
-$this->htmlElement('body')->appendAttribute('class', 'page ' . $page->slug() . ' sufism-page-style sufism-reoriented-page');
-$this->pageTitle($page->title(), 2);
+$this->htmlElement('body')->appendAttribute('class', 'page ' . $page->slug() . ' library-page-style library-reoriented-page');
+
+// Mark homepage so we can target hero-only tweaks without affecting inner pages
+$homepage = method_exists($site, 'homepage') ? $site->homepage() : null;
+if ($homepage && $homepage->id() === $page->id()) {
+    $this->htmlElement('body')->appendAttribute('class', 'is-homepage');
+}
+// Suppress default page title to avoid duplicate below hero
+// $this->pageTitle($page->title(), 2);
 $showPagePagination = $this->siteSetting('show_page_pagination', true);
 
-// Add Sufism Reoriented styling for pages
+// Add Library styling for pages
 $this->headLink()->appendStylesheet($this->assetUrl('css/library.css'));
 
-// Force load the JavaScript for hamburger menu
-$this->headScript()->appendFile($this->assetUrl('js/sufism-menu.js'));
+// JS loaded centrally by Module.php with cache-busting; avoid duplicate includes here
 
 // Add inline CSS to ensure styles are applied
 $this->headStyle()->appendStyle('
 /* FORCE SUFISM REORIENTED STYLES */
+/* Hide hero image caption on homepage only */
+body.is-homepage .block.block-asset.image .caption { display: none !important; }
 .page-title-top {
     font-family: "Cormorant Garamond", serif !important;
     font-size: 112px !important;
@@ -87,8 +95,8 @@ if ($activePage):
 <!-- Sufism Reoriented Page Structure -->
 <div class="main-content">
     <div class="content-section">
-        <!-- PAGE TITLE AT THE TOP -->
-        <h1 class="page-title-top"><?php echo $this->escapeHtml($page->title()); ?></h1>
+        <!-- PAGE TITLE suppressed to avoid duplicate tagline under hero -->
+        <!-- <h1 class="page-title-top"><?php echo $this->escapeHtml($page->title()); ?></h1> -->
 
         <div class="section-content">
             <div id="blocks" class="blocks">

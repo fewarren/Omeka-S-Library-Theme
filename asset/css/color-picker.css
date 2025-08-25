@@ -1,0 +1,42 @@
+/* Minimal, dependency-free color picker styles */
+
+.color-picker-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.color-input {
+  width: 110px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(6, 20px);
+  gap: 6px;
+}
+
+.color-swatch-btn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.color-swatch-btn:focus {
+  outline: 2px solid #2C4A6B;
+  outline-offset: 2px;
+}
+

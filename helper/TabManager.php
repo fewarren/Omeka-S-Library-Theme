@@ -8,6 +8,8 @@ class TabManager extends AbstractHelper
     public function getResourcePageBlocks($resource) {
         $regions = ['full_width_main', 'left', 'main', 'right'];
         $view = $this->getView();
+        $tabLayout = $view->themeSetting('tab_navigation_layout');
+        $tabContent = $view->themeSetting('tab_navigation_content');
         $regionContent = [];
         foreach ($regions as $region) {
             $regionResourcePageBlocks = $view->resourcePageBlocks($resource, $region);
@@ -40,13 +42,13 @@ class TabManager extends AbstractHelper
         ]);
     }
 
-    public function renderTabsOnly($resource, $contentRegion = 'main')
+    public function renderTabsOnly($resource, $contentRegion = 'main', $layout = 'vertical') 
     {
         $view = $this->getView();
         $tabContentBlocksArray = $view->resourcePageBlocks($resource, $contentRegion)->getBlocksArray();
         return $view->partial('common/tab-navigation-markup.phtml', [
             'resource' => $resource,
-            'resourcePageBlockArray' => $tabContentBlocksArray
+            'resourcePageBlocksArray' => $tabContentBlocksArray
         ]);
     }
 
@@ -54,7 +56,7 @@ class TabManager extends AbstractHelper
     {
         $view = $this->getView();
         $regionBlockContentArray = $view->resourcePageBlocks($resource, $currentRegion)->getBlocksArray();
-        $regionBlockContentArray['tab_navigation'] = $this->renderTabsOnly($resource, $contentRegion);
+        $regionBlockContentArray['tab_navigation'] = $this->renderTabsOnly($resource, $contentRegion, $layout);
         return implode('', $regionBlockContentArray);
     }
 }

@@ -1,1220 +1,745 @@
-<?php
-// Font family mapping function - MUST be defined first
-function getFontFamily($fontKey) {
-    // Handle null or empty values
-    if (empty($fontKey)) {
-        return 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+    // CORRECTED LAYOUT - Fixes design issues to match Library Theme style
+
+    $escape = $this->plugin('escapeHtml');
+    $siteTitle = $site->title();
+    echo $this->headTitle($siteTitle)->setSeparator(' · ');
+
+    // Prepare CSS includes with cache-busting BEFORE rendering headLink
+    $libraryCssPath = __DIR__ . '/../../asset/css/library.css';
+    $libraryCssUrl = $this->assetUrl('css/library.css');
+    if (file_exists($libraryCssPath)) {
+        $this->headLink()->appendStylesheet($libraryCssUrl . '?v=' . filemtime($libraryCssPath));
+    } else {
+        $this->headLink()->appendStylesheet($libraryCssUrl);
+    }
+    $polishPath = __DIR__ . '/../../asset/css/library-polish.css';
+    if (file_exists($polishPath)) {
+        $this->headLink()->appendStylesheet($this->assetUrl('css/library-polish.css') . '?v=' . filemtime($polishPath));
+    }
+        // Include SR-inspired layout CSS; rules are scoped to opt-in body classes
+        $srCssPath = __DIR__ . '/../../asset/css/library-reoriented-design.css';
+        if (file_exists($srCssPath)) {
+            $this->headLink()->appendStylesheet($this->assetUrl('css/library-reoriented-design.css') . '?v=' . filemtime($srCssPath));
+        }
+
+        // Ensure font-overrides.css loads last for maximum specificity
+        $fontOverridesPath = __DIR__ . '/../../asset/css/font-overrides.css';
+        if (file_exists($fontOverridesPath)) {
+            $this->headLink()->appendStylesheet($this->assetUrl('css/font-overrides.css') . '?v=' . filemtime($fontOverridesPath));
+        }
+
+
+
+
+    /* Using Omeka S helpers only: $this->themeSetting() and $this->themeSettingAssetUrl() */
+
+    // Read theme settings (helpers only)
+    $builtinH1Size = $this->themeSetting('h1_font_size');
+    $builtinLogo = $this->themeSetting('logo');
+
+    // Get current preset
+    $currentPreset = $this->themeSetting('style_preset', 'traditional');
+
+    // Preset definitions
+    $presetDefinitions = [
+        'traditional' => [
+            // Sophisticated Traditional: dark blue, gray, burgundy accents
+            'h1_font_family' => 'georgia',
+            'h1_font_color' => '#1F3A5F',
+            'h1_font_size' => '2.2rem',
+            'h2_font_family' => 'georgia',
+            'h2_font_color' => '#1F3A5F',
+            'h2_font_size' => '1.8rem',
+            'h3_font_family' => 'georgia',
+            'h3_font_color' => '#1F3A5F',
+            'h3_font_size' => '1.4rem',
+            'body_font_family' => 'helvetica',
+            'body_font_color' => '#2F3542',
+            'body_font_size' => '1rem',
+            'tagline_font_family' => 'georgia',
+            'tagline_font_color' => '#5A6470',
+            'primary_color' => '#1F3A5F',
+            'accent_color' => '#7A1E3A',
+            'toc_background_color' => '#ffffff',
+            'toc_border_color' => '#7A1E3A',
+            'toc_text_color' => '#1F3A5F',
+            'pagination_background_color' => '#1F3A5F',
+            'pagination_font_color' => '#FFFFFF',
+            'pagination_hover_color' => '#7A1E3A',
+            'zone_background_color' => '#fffaf7'
+        ],
+        'modern' => [
+            'h1_font_family' => 'helvetica',
+            'h1_font_color' => '#B8860B',
+            'h1_font_size' => '2.4rem',
+            'h2_font_family' => 'helvetica',
+            'h2_font_color' => '#DAA520',
+            'h2_font_size' => '1.9rem',
+            'h3_font_family' => 'helvetica',
+            'h3_font_color' => '#CD853F',
+            'h3_font_size' => '1.5rem',
+            'body_font_family' => 'helvetica',
+            'body_font_color' => '#000000',
+            'body_font_size' => '1rem',
+            'tagline_font_family' => 'helvetica',
+            'tagline_font_color' => '#B8860B',
+            'primary_color' => '#B8860B',
+            'accent_color' => '#DAA520',
+            'toc_background_color' => '#fffaf7',
+            'toc_border_color' => '#DAA520',
+            'toc_text_color' => '#000000',
+            'pagination_background_color' => '#FFFFFF',
+            'pagination_font_color' => '#B8860B',
+            'pagination_hover_color' => '#DAA520',
+            'zone_background_color' => '#fffaf7'
+        ]
+    ];
+
+    // Build settings using saved values with preset fallback
+    $settings = [];
+    if (isset($presetDefinitions[$currentPreset])) {
+        $presetValues = $presetDefinitions[$currentPreset];
+        foreach ($presetValues as $key => $presetValue) {
+            $savedValue = $this->themeSetting($key, null);
+            $settings[$key] = ($savedValue !== null && $savedValue !== '') ? $savedValue : $presetValue;
+        }
+    } else {
+        $settings = $presetDefinitions['traditional'];
     }
 
-    $fontMap = [
-        // Sans-Serif Fonts
-        'helvetica' => 'Helvetica Neue, Arial, sans-serif',
-        'roboto' => 'Roboto, Arial, sans-serif',
-        'open_sans' => 'Open Sans, Arial, sans-serif',
-        'lato' => 'Lato, Arial, sans-serif',
-        'montserrat' => 'Montserrat, Arial, sans-serif',
-        'source_sans' => 'Source Sans Pro, Arial, sans-serif',
-        'nunito' => 'Nunito, Arial, sans-serif',
-        'poppins' => 'Poppins, Arial, sans-serif',
-        'inter' => 'Inter, Arial, sans-serif',
-        'work_sans' => 'Work Sans, Arial, sans-serif',
-        'fira_sans' => 'Fira Sans, Arial, sans-serif',
-        'arial' => 'Arial, sans-serif',
-        // Serif Fonts
-        'merriweather' => 'Merriweather, Georgia, serif',
-        'playfair' => 'Playfair Display, Georgia, serif',
-        'crimson' => 'Crimson Text, Georgia, serif',
-        'libre_baskerville' => 'Libre Baskerville, Georgia, serif',
-        'lora' => 'Lora, Georgia, serif',
-        'pt_serif' => 'PT Serif, Georgia, serif',
-        'source_serif' => 'Source Serif Pro, Georgia, serif',
+    // Add non-preset settings (these are not overridden by presets)
+    $settings['style_preset'] = $currentPreset;
+    $settings['site_tagline'] = $this->themeSetting('site_tagline', '');
+    $settings['footer_content'] = $this->themeSetting('footer_content', 'Powered by Omeka S');
+
+    // Ensure font sizes are included from preset (fix font size override issue)
+    if (!isset($settings['h1_font_size'])) {
+        $settings['h1_font_size'] = $presetDefinitions[$currentPreset]['h1_font_size'] ?? '2.2rem';
+    }
+    if (!isset($settings['h2_font_size'])) {
+        $settings['h2_font_size'] = $presetDefinitions[$currentPreset]['h2_font_size'] ?? '1.8rem';
+    }
+    if (!isset($settings['h3_font_size'])) {
+        $settings['h3_font_size'] = $presetDefinitions[$currentPreset]['h3_font_size'] ?? '1.4rem';
+    }
+
+    // Font mapping
+    $fontMapping = [
         'georgia' => 'Georgia, serif',
-        'times' => 'Times New Roman, serif',
-        // Display Fonts
-        'oswald' => 'Oswald, Arial, sans-serif',
-        'raleway' => 'Raleway, Arial, sans-serif',
-        'bebas_neue' => 'Bebas Neue, Arial, sans-serif',
-        'anton' => 'Anton, Arial, sans-serif',
-        'dancing_script' => 'Dancing Script, cursive',
-        'pacifico' => 'Pacifico, cursive',
-        // Monospace Fonts
-        'fira_code' => 'Fira Code, Consolas, monospace',
-        'source_code' => 'Source Code Pro, Consolas, monospace',
-        'courier' => 'Courier New, monospace',
-        // System Default
-        'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        'cormorant' => 'Cormorant Garamond, serif',
+        'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+        'arial' => 'Arial, sans-serif',
+        'verdana' => 'Verdana, sans-serif'
     ];
-    return $fontMap[$fontKey] ?? $fontMap['system'];
-}
 
-// SIMPLIFIED SUFISM REORIENTED THEME
-// Get site information
-$site = $this->vars()->site ?? null;
-$siteTitle = $site ? $site->title() : 'Murshids of Sufism Reoriented';
+    // Apply font mapping
+    foreach ($settings as $key => $value) {
+        if (strpos($key, 'font_family') !== false && isset($fontMapping[$value])) {
+            $settings[$key] = $fontMapping[$value];
+        }
+    }
 
-// Get theme settings with safe fallbacks
-try {
-    // Logo and branding settings
-    $siteLogo = $this->themeSetting('site_logo', '');
-    $logoLinkPage = $this->themeSetting('logo_link_page', '/');
-    $tagline = $this->themeSetting('site_tagline', 'Menu');
-    $taglineFont = $this->themeSetting('tagline_font_family', 'Georgia');
-    $taglineColor = $this->themeSetting('tagline_font_color', '#f7c97f');
-    $logoHeight = $this->themeSetting('logo_height', '100px');
-    $headerHeight = $this->themeSetting('header_height', '100px');
-    $headerLayout = $this->themeSetting('header_layout', 'logo_with_tagline');
-
-    // Typography settings
-    $h1FontFamily = $this->themeSetting('h1_font_family', 'Helvetica Neue');
-    $h1FontSize = $this->themeSetting('h1_font_size', '2.5rem');
-    $h1FontColor = $this->themeSetting('h1_font_color', '#2c5aa0');
-    $h1FontWeight = $this->themeSetting('h1_font_weight', '600');
-    $h1FontStyle = $this->themeSetting('h1_font_style', 'normal');
-
-    // TEMPORARILY COMMENTED OUT NEW FONT SETTINGS
-    // $h2FontFamily = $this->themeSetting('h2_font_family', 'Helvetica Neue');
-    // $h2FontSize = $this->themeSetting('h2_font_size', '2rem');
-    // $h2FontColor = $this->themeSetting('h2_font_color', '#2c5aa0');
-    // $h2FontWeight = $this->themeSetting('h2_font_weight', '600');
-    // $h2FontStyle = $this->themeSetting('h2_font_style', 'normal');
-
-    // $h3FontFamily = $this->themeSetting('h3_font_family', 'Helvetica Neue');
-    // $h3FontSize = $this->themeSetting('h3_font_size', '1.5rem');
-    // $h3FontColor = $this->themeSetting('h3_font_color', '#2c5aa0');
-    // $h3FontWeight = $this->themeSetting('h3_font_weight', '500');
-    // $h3FontStyle = $this->themeSetting('h3_font_style', 'normal');
-
-    // $bodyFontFamily = $this->themeSetting('body_font_family', 'Helvetica Neue');
-    // $bodyFontSize = $this->themeSetting('body_font_size', '1rem');
-    // $bodyFontColor = $this->themeSetting('body_font_color', '#4a5568');
-    // $bodyFontWeight = $this->themeSetting('body_font_weight', '400');
-    // $bodyFontStyle = $this->themeSetting('body_font_style', 'normal');
-
-    // $taglineFontWeight = $this->themeSetting('tagline_font_weight', '400');
-    // $taglineFontStyle = $this->themeSetting('tagline_font_style', 'normal');
-
-    // Pagination settings
-    $paginationFontColor = $this->themeSetting('pagination_font_color', '#ffffff');
-    $paginationBackgroundColor = $this->themeSetting('pagination_background_color', '#2c5aa0');
-    $paginationHoverColor = $this->themeSetting('pagination_hover_color', '#1a365d');
-    $paginationFontSize = $this->themeSetting('pagination_font_size', '1rem');
-    $paginationButtonSize = $this->themeSetting('pagination_button_size', 'extra_small');
-
-    // Footer settings
-    $footerBackgroundColor = $this->themeSetting('footer_background_color', '#4a6fa5');
-    $footerTextColor = $this->themeSetting('footer_text_color', '#ffffff');
-    $footerCopyrightText = $this->themeSetting('footer_copyright_text', '© ' . date('Y') . ' The Library. All rights reserved.');
-    $footerPoweredByText = $this->themeSetting('footer_powered_by_text', 'Powered by Omeka S');
-    $footerBannerHeight = $this->themeSetting('footer_banner_height', 'standard');
-
-    // Sophisticated Color Palette
-    $primaryColor = $this->themeSetting('primary_color', '#2C4A6B');
-    $sacredGold = $this->themeSetting('sacred_gold', '#D4AF37');
-    $warmEarth = $this->themeSetting('warm_earth', '#8B4513');
-    $softSage = $this->themeSetting('soft_sage', '#9CAF88');
-    $warmCream = $this->themeSetting('warm_cream', '#F5F5DC');
-    $gentleLavender = $this->themeSetting('gentle_lavender', '#E6E6FA');
-    $sunsetOrange = $this->themeSetting('sunset_orange', '#FF8C42');
-    $deepBurgundy = $this->themeSetting('deep_burgundy', '#800020');
-    $charcoal = $this->themeSetting('charcoal', '#36454F');
-    $lightGray = $this->themeSetting('light_gray', '#F8F9FA');
-    $mediumGray = $this->themeSetting('medium_gray', '#6C757D');
-
-    // Legacy compatibility
-    $secondaryColor = $sacredGold;
-    $accentColor = $warmCream;
-} catch (Exception $e) {
-    // Fallback values if theme settings fail
-    $siteLogo = '';
-    $logoLinkPage = '/';
-    $tagline = 'Menu';
-    $taglineFont = 'Georgia';
-    $taglineColor = '#f7c97f';
-    $logoHeight = '100px';
-    $headerHeight = '100px';
-    $headerLayout = 'logo_with_tagline';
-    $h1FontFamily = 'Helvetica Neue';
-    $h1FontSize = '2.5rem';
-    $h1FontColor = '#2c5aa0';
-    $h1FontWeight = '600';
-    $h1FontStyle = 'normal';
-    // TEMPORARILY COMMENTED OUT NEW FONT FALLBACKS
-    // $h2FontFamily = 'Helvetica Neue';
-    // $h2FontSize = '2rem';
-    // $h2FontColor = '#2c5aa0';
-    // $h2FontWeight = '600';
-    // $h2FontStyle = 'normal';
-    // $h3FontFamily = 'Helvetica Neue';
-    // $h3FontSize = '1.5rem';
-    // $h3FontColor = '#2c5aa0';
-    // $h3FontWeight = '500';
-    // $h3FontStyle = 'normal';
-    // $bodyFontFamily = 'Helvetica Neue';
-    // $bodyFontSize = '1rem';
-    // $bodyFontColor = '#4a5568';
-    // $bodyFontWeight = '400';
-    // $bodyFontStyle = 'normal';
-    // $taglineFontWeight = '400';
-    // $taglineFontStyle = 'normal';
-    $paginationFontColor = $paginationFontColor ?? '#ffffff';
-    $paginationBackgroundColor = $paginationBackgroundColor ?? '#2c5aa0';
-    $paginationHoverColor = $paginationHoverColor ?? '#1a365d';
-    $paginationFontSize = $paginationFontSize ?? '1rem';
-    $paginationButtonSize = $paginationButtonSize ?? 'extra_small';
-    $footerBackgroundColor = $footerBackgroundColor ?? '#4a6fa5';
-    $footerTextColor = $footerTextColor ?? '#ffffff';
-    $footerCopyrightText = $footerCopyrightText ?? '© ' . date('Y') . ' The Library. All rights reserved.';
-    $footerPoweredByText = $footerPoweredByText ?? 'Powered by Omeka S';
-    $footerBannerHeight = $footerBannerHeight ?? 'standard';
-    $primaryColor = '#f7c97f';
-    $secondaryColor = '#f7c97f';
-    $accentColor = '#fffaf7';
-
-    // Convert footer banner height setting to padding value
-    $footerPaddingMap = [
-        'compact' => '20px 0',
-        'standard' => '30px 0',
-        'spacious' => '40px 0',
-        'extra_spacious' => '50px 0'
-    ];
-    $footerPadding = $footerPaddingMap[$footerBannerHeight] ?? '30px 0';
-}
-
-// Convert button size setting to CSS values
-$buttonSizeMap = [
-    'extra_small' => ['padding' => '8px 16px', 'font-size' => '12px'],
-    'small' => ['padding' => '10px 20px', 'font-size' => '14px'],
-    'medium' => ['padding' => '12px 24px', 'font-size' => '16px'],
-    'large' => ['padding' => '16px 32px', 'font-size' => '18px'],
-    'extra_large' => ['padding' => '20px 40px', 'font-size' => '20px']
-];
-$buttonStyles = $buttonSizeMap[$paginationButtonSize] ?? $buttonSizeMap['medium'];
-
-// Add basic head elements
-$this->headMeta()->setCharset('utf-8');
-$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
-$this->headTitle($siteTitle);
-
-// Add minimal CSS - only what's essential
-try {
-    $this->headLink()->appendStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
-} catch (Exception $e) {
-    // Skip if file doesn't exist
-}
-
-// Add jQuery safely
-$this->headScript()->prependFile('https://code.jquery.com/jquery-3.6.0.min.js');
-
-$this->trigger('view.layout.head');
-?>
-<!DOCTYPE html>
-<html>
-<head>
-    <?php echo $this->headMeta() ?>
-    <?php echo $this->headTitle() ?>
-    <title>Sufism Library - Professional Theme</title>
-
-    <!-- Optimized Google Fonts for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Load only essential fonts for better performance -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-    <!-- Performance and Accessibility Meta Tags -->
-    <meta name="theme-color" content="<?php echo $primaryColor; ?>">
-    <meta name="color-scheme" content="light dark">
-    <link rel="preload" as="style" href="<?php echo $this->assetUrl('css/app.css', 'Omeka'); ?>">
-
-    <!-- Accessibility Enhancements -->
-    <meta name="description" content="<?php echo $this->escapeHtml($site ? $site->summary() : 'Sufism Reoriented Digital Library - A comprehensive collection of spiritual teachings and resources'); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    ?>
+    <?php echo $this->headMeta(); ?>
+    <?php echo $this->headLink(); ?>
 
     <style>
-        /* SOPHISTICATED SPIRITUAL DESIGN SYSTEM */
-        :root {
-            /* Sophisticated Color Palette */
-            --primary-color: <?php echo $primaryColor; ?>;
-            --sacred-gold: <?php echo $sacredGold; ?>;
-            --warm-earth: <?php echo $warmEarth; ?>;
-            --soft-sage: <?php echo $softSage; ?>;
-            --warm-cream: <?php echo $warmCream; ?>;
-            --gentle-lavender: <?php echo $gentleLavender; ?>;
-            --sunset-orange: <?php echo $sunsetOrange; ?>;
-            --deep-burgundy: <?php echo $deepBurgundy; ?>;
-            --charcoal: <?php echo $charcoal; ?>;
-            --light-gray: <?php echo $lightGray; ?>;
-            --medium-gray: <?php echo $mediumGray; ?>;
-
-            /* Typography Scale */
-            --font-size-xs: 0.75rem;
-            --font-size-sm: 0.875rem;
-            --font-size-base: 1rem;
-            --font-size-lg: 1.125rem;
-            --font-size-xl: 1.25rem;
-            --font-size-2xl: 1.5rem;
-            --font-size-3xl: 1.875rem;
-            --font-size-4xl: 2.25rem;
-            --font-size-5xl: 3rem;
-
-            /* Spacing Scale */
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-5: 1.25rem;
-            --space-6: 1.5rem;
-            --space-8: 2rem;
-            --space-10: 2.5rem;
-            --space-12: 3rem;
-            --space-16: 4rem;
-            --space-20: 5rem;
-
-            /* Shadows for Depth */
-            --shadow-sm: 0 1px 2px 0 rgba(44, 74, 107, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(44, 74, 107, 0.1), 0 2px 4px -1px rgba(44, 74, 107, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(44, 74, 107, 0.1), 0 4px 6px -2px rgba(44, 74, 107, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(44, 74, 107, 0.1), 0 10px 10px -5px rgba(44, 74, 107, 0.04);
-
-            /* Border Radius */
-            --radius-sm: 0.125rem;
-            --radius-md: 0.375rem;
-            --radius-lg: 0.5rem;
-            --radius-xl: 0.75rem;
-            --radius-2xl: 1rem;
-
-            /* Transitions */
-            --transition-fast: 150ms ease-in-out;
-            --transition-normal: 250ms ease-in-out;
-            --transition-slow: 350ms ease-in-out;
-
-            /* Legacy Theme Settings */
-            --pagination-background-color: <?php echo $paginationBackgroundColor; ?>;
-            --pagination-font-color: <?php echo $paginationFontColor; ?>;
-            --pagination-hover-color: <?php echo $paginationHoverColor; ?>;
-            --pagination-button-padding: <?php echo $buttonStyles['padding']; ?>;
-            --pagination-button-font-size: <?php echo $buttonStyles['font-size']; ?>;
-        }
-
-        /* SOPHISTICATED BASE STYLES */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.7;
-            color: var(--charcoal);
-            background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-gray) 100%);
-            font-size: var(--font-size-base);
-            font-weight: 400;
-            letter-spacing: 0.01em;
-            min-height: 100vh;
-        }
-
-        /* ELEGANT TYPOGRAPHY SYSTEM */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', 'Georgia', serif;
-            font-weight: 600;
-            line-height: 1.3;
-            color: var(--primary-color);
-            margin-bottom: var(--space-4);
-            letter-spacing: -0.02em;
-        }
-
-        h1 {
-            font-size: var(--font-size-4xl);
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: var(--space-6);
-        }
-
-        h2 {
-            font-size: var(--font-size-3xl);
-            color: var(--warm-earth);
-            margin-bottom: var(--space-5);
-        }
-
-        h3 {
-            font-size: var(--font-size-2xl);
-            color: var(--deep-burgundy);
-            margin-bottom: var(--space-4);
-        }
-
-        p {
-            margin-bottom: var(--space-4);
-            line-height: 1.8;
-            color: var(--charcoal);
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: var(--transition-normal);
-            border-bottom: 1px solid transparent;
-        }
-
-        a:hover {
-            color: var(--sacred-gold);
-            border-bottom-color: var(--sacred-gold);
-            transform: translateY(-1px);
-        }
-
-        /* HIDE DEFAULT OMEKA NAVIGATION AND HEADERS */
-
-        /* SHOW CONTENT NAVIGATION */
-        nav.sub-menu, .sub-menu {
-            display: block !important;
-            visibility: visible !important;
-        }
-
-        /* STYLE CONTENT NAVIGATION PROPERLY - FORCE OVERRIDE */
-        main nav ul, main nav ol, .sub-menu ul, .sub-menu ol,
-        main navigation ul, main navigation ol,
-        nav.sub-menu ul, nav.sub-menu ol,
-        ul.navigation, ol.navigation {
-            list-style: none !important;
-            list-style-type: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border-left: none !important; /* Remove the gray vertical bar */
-        }
-
-        /* SPECIFIC FIX FOR VERTICAL BAR ISSUE - HIGH SPECIFICITY */
-        html body main ul.navigation,
-        html body main div ul.navigation,
-        html body .main-content-wrapper ul.navigation,
-        html body div main ul.navigation {
-            border-left: none !important;
-            border: none !important;
-        }
-
-        /* ADDITIONAL OVERRIDE FOR OMEKA DEFAULT STYLES */
-        ul.navigation {
-            border-left: none !important;
-            border: none !important;
-            padding-left: 0 !important;
-            margin-left: 0 !important;
-        }
-
-        main nav li, .sub-menu li,
-        main navigation li,
-        nav.sub-menu li {
-            list-style: none !important;
-            list-style-type: none !important;
-            margin: 10px 0 !important;
-            padding: 0 !important;
-            padding-left: 0 !important;
-        }
-
-        main nav li::before, .sub-menu li::before,
-        main navigation li::before,
-        nav.sub-menu li::before {
-            content: none !important;
-            display: none !important;
-        }
-
-        /* ADDITIONAL FORCE OVERRIDES */
-        body main nav ul li,
-        body main navigation ul li,
-        body nav.sub-menu ul li {
-            list-style: none !important;
-            list-style-type: none !important;
-        }
-
-        /* REMOVE ALL BULLETS FROM MAIN CONTENT LISTS */
-        main ul, main ol,
-        body main ul, body main ol,
-        .main-content ul, .main-content ol {
-            list-style: none !important;
-            list-style-type: none !important;
-            padding-left: 0 !important;
-            margin-left: 0 !important;
-        }
-
-        main li, body main li,
-        .main-content li {
-            list-style: none !important;
-            list-style-type: none !important;
-            margin: 10px 0 !important;
-            padding-left: 0 !important;
-        }
-
-        main li::before, body main li::before,
-        .main-content li::before {
-            content: none !important;
-            display: none !important;
-        }
-        .top-bar, #navigation, .title-bar, .site-title, .user-bar,
-        main h1:first-child, .page-header h1,
-        .top-bar-left, .top-bar-right, #responsive-menu {
-            display: none !important;
-        }
-
-        /* Hide the duplicate page title that appears in main content */
-        main > div > h1:first-child {
-            display: none !important;
-        }
-
-        /* SUFISM REORIENTED INSPIRED DESIGN */
-        body {
-            background: #ffffff;
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            color: #333333;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-
-        /* SOPHISTICATED HEADER STYLING */
-        .site-header {
-            background: linear-gradient(135deg, var(--warm-cream) 0%, rgba(255, 255, 255, 0.95) 100%);
-            padding: var(--space-8) 0;
-            text-align: center;
-            border-bottom: 3px solid var(--sacred-gold);
-            position: relative;
-            box-shadow: var(--shadow-md);
-            backdrop-filter: blur(10px);
-        }
-
-        .site-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 50%, var(--gentle-lavender) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 50%, var(--soft-sage) 0%, transparent 50%);
-            opacity: 0.3;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .site-logo {
-            margin-bottom: var(--space-4);
-            position: relative;
-            z-index: 2;
-            transition: var(--transition-normal);
-        }
-
-        .site-logo:hover {
-            transform: translateY(-2px);
-            filter: drop-shadow(var(--shadow-lg));
-        }
-
-        .site-logo .logo-image {
-            max-height: <?php echo $logoHeight; ?>;
-            width: auto;
-            display: block;
-            margin: 0 auto;
-            background: transparent !important;
-            border-radius: var(--radius-lg);
-            transition: var(--transition-normal);
-        }
-
-        /* FIX LOGO BACKGROUND - ENSURE IT MATCHES HEADER */
-        .site-header, .site-header .logo-container {
-            background: #ffffff !important;
-        }
-
-        /* FIX LOGO LINK BACKGROUND - REMOVE BLUE BACKGROUND */
-        .site-logo .logo-link,
-        .logo-link {
-            background: transparent !important;
-            background-color: transparent !important;
-            padding: 0 !important;
-        }
-
-        .site-logo {
-            background: transparent !important;
-            background-color: transparent !important;
-        }
-
-        /* APPLY THEME SETTINGS */
-        .site-header {
-            height: <?php echo $headerHeight; ?>;
-            background: #ffffff !important;
-        }
-
-        .site-tagline {
-            color: <?php echo $taglineColor; ?>;
-            font-size: 16px;
-            font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif;
-            font-weight: 400;
-            font-style: normal;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        /* TYPOGRAPHY SETTINGS FROM ADMIN */
-        body {
-            font-family: <?php echo $bodyFontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
-            font-size: <?php echo $bodyFontSize; ?>;
-            color: <?php echo $bodyFontColor; ?>;
-        }
-
-        h1 {
-            font-family: <?php echo $h1FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
-            font-size: <?php echo $h1FontSize; ?>;
-            color: <?php echo $h1FontColor; ?>;
-            font-weight: <?php echo $h1FontWeight; ?>;
-        }
-
-        /* TEMPORARILY COMMENTED OUT NEW FONT CSS */
-        /*
-        h2 {
-            font-family: <?php echo $h2FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
-            font-size: <?php echo $h2FontSize; ?>;
-            color: <?php echo $h2FontColor; ?>;
-            font-weight: <?php echo $h2FontWeight; ?>;
-            font-style: <?php echo $h2FontStyle; ?>;
-        }
-
-        h3 {
-            font-family: <?php echo $h3FontFamily ?? 'Helvetica Neue'; ?>, Arial, sans-serif;
-            font-size: <?php echo $h3FontSize; ?>;
-            color: <?php echo $h3FontColor; ?>;
-            font-weight: <?php echo $h3FontWeight; ?>;
-            font-style: <?php echo $h3FontStyle; ?>;
-        }
-        */
-
-        /* SOPHISTICATED MAIN CONTENT AREA */
-        .main-content-wrapper {
-            max-width: 900px;
-            margin: var(--space-8) auto;
-            padding: var(--space-16) var(--space-8);
-            text-align: center;
-            background: var(--warm-cream);
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-xl);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .main-content-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 0%, rgba(212, 175, 55, 0.05) 50%, transparent 100%);
-            pointer-events: none;
-        }
-
-        .main-content-wrapper::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, var(--gentle-lavender) 0%, transparent 70%);
-            opacity: 0.1;
-            animation: gentle-float 20s ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes gentle-float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
-        }
-
-        /* SOPHISTICATED INTERACTIVE ELEMENTS */
-
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Enhanced focus states for accessibility */
-        a:focus, button:focus {
-            outline: 3px solid var(--sacred-gold);
-            outline-offset: 2px;
-            border-radius: var(--radius-sm);
-        }
-
-        /* Elegant selection styling */
-        ::selection {
-            background: var(--sacred-gold);
-            color: var(--primary-color);
-        }
-
-        /* Custom scrollbar for webkit browsers */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--light-gray);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(var(--primary-color), var(--sacred-gold));
-            border-radius: var(--radius-lg);
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(var(--sacred-gold), var(--sunset-orange));
-        }
-
-        /* Sophisticated loading animation */
-        @keyframes spiritual-pulse {
-            0%, 100% {
-                opacity: 0.7;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
-        }
-
-        /* Page transition effects */
-        body {
-            animation: page-fade-in 0.6s ease-out;
-        }
-
-        @keyframes page-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* RESPONSIVE DESIGN ENHANCEMENTS */
-
-        /* Mobile-first responsive breakpoints */
-        @media (max-width: 768px) {
-            :root {
-                --space-16: 2rem;
-                --space-12: 1.5rem;
-                --space-8: 1rem;
-                --font-size-4xl: 2rem;
-                --font-size-3xl: 1.5rem;
-                --font-size-2xl: 1.25rem;
-            }
-
-            .site-header {
-                padding: var(--space-6) 0;
-            }
-
-            .main-content-wrapper {
-                margin: var(--space-4) auto;
-                padding: var(--space-8) var(--space-4);
-                border-radius: var(--radius-lg);
-            }
-
-            .pagination {
-                flex-direction: column;
-                gap: var(--space-2);
-            }
-
-            body main .pagination .button,
-            body main .pagination a,
-            body main a[href*="Next"],
-            body main a[href*="Prev"],
-            body main a[href*="page/"],
-            body main a[href*="collections"],
-            body .pagination .button,
-            body .pagination a,
-            body a[href*="Next"],
-            body a[href*="Prev"],
-            body a[href*="page/"],
-            body a[href*="collections"] {
-                width: 100% !important;
-                max-width: 200px !important;
-                margin: var(--space-1) 0 !important;
-            }
-
-            .simple-footer {
-                padding: var(--space-8) var(--space-4) !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-content-wrapper {
-                margin: var(--space-2) var(--space-2);
-                padding: var(--space-6) var(--space-3);
-            }
-
-            h1 {
-                font-size: var(--font-size-3xl);
-            }
-
-            h2 {
-                font-size: var(--font-size-2xl);
-            }
-        }
-
-        /* Tablet and larger screens */
-        @media (min-width: 769px) {
-            .main-content-wrapper {
-                max-width: 1000px;
-            }
-
-            .pagination {
-                justify-content: center;
-            }
-        }
-
-        /* Large screens */
-        @media (min-width: 1200px) {
-            .main-content-wrapper {
-                max-width: 1200px;
-                padding: var(--space-20) var(--space-12);
-            }
-
-            .site-header {
-                padding: var(--space-12) 0;
-            }
-        }
-
-        /* High DPI displays */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .site-header::before,
-            .main-content-wrapper::before,
-            .simple-footer::before {
-                background-size: 50px 50px;
-            }
-        }
-
-        /* Reduced motion preferences */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-
-            .main-content-wrapper::after {
-                animation: none !important;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --warm-cream: #2a2a2a;
-                --light-gray: #1a1a1a;
-                --charcoal: #e0e0e0;
-            }
-        }
-
-        /* ACCESSIBILITY ENHANCEMENTS */
-
-        /* Skip to main content link */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            background: var(--primary-color);
-            color: var(--warm-cream);
-            padding: 8px;
-            text-decoration: none;
-            border-radius: var(--radius-md);
-            z-index: 1000;
-            font-weight: 600;
-        }
-
-        .skip-link:focus {
-            top: 6px;
-        }
-
-        /* Improved focus indicators */
-        a:focus-visible,
-        button:focus-visible,
-        input:focus-visible,
-        select:focus-visible,
-        textarea:focus-visible {
-            outline: 3px solid var(--sacred-gold);
-            outline-offset: 2px;
-            border-radius: var(--radius-sm);
-        }
-
-        /* Screen reader only content */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            :root {
-                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-                --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-            }
-
-            body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
-            body .content-links a,
-            body .resource-list a,
-            body .main-content-wrapper a {
-                border: 2px solid var(--primary-color) !important;
-            }
-        }
-
-        /* Performance optimizations */
-        .main-content-wrapper::after {
-            will-change: transform;
-        }
-
-        /* Ensure proper text contrast */
-        .main-content-wrapper {
-            color-contrast: AA;
-        }
-
-        /* Large Blue Heading - matching sufismreoriented.org style */
-        .page-title {
-            font-family: "Times New Roman", serif;
-            font-size: 2.5rem;
-            color: #4a6fa5;
-            font-weight: normal;
-            margin: 40px 0;
-            line-height: 1.2;
-        }
-
-        /* Content Links - gold/orange like reference site */
-        .content-links {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        /* SOPHISTICATED CONTENT LINKS */
-        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]),
-        body .content-links a,
-        body .resource-list a,
-        body .main-content-wrapper a {
-            color: var(--primary-color) !important;
-            text-decoration: none !important;
-            font-size: var(--font-size-lg) !important;
-            line-height: 1.8 !important;
-            display: block !important;
-            margin: var(--space-3) 0 !important;
-            padding: var(--space-4) var(--space-6) !important;
-            transition: var(--transition-normal) !important;
-            background: linear-gradient(135deg, var(--light-gray) 0%, var(--warm-cream) 100%) !important;
-            border-radius: var(--radius-lg) !important;
-            border: 2px solid transparent !important;
-            position: relative !important;
-            overflow: hidden !important;
-            font-weight: 500 !important;
-            box-shadow: var(--shadow-sm) !important;
-        }
-
-        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):before,
-        body .content-links a:before,
-        body .resource-list a:before,
-        body .main-content-wrapper a:before {
-            content: '' !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: -100% !important;
-            width: 100% !important;
-            height: 100% !important;
-            background: linear-gradient(90deg, transparent, var(--sacred-gold), transparent) !important;
-            transition: var(--transition-slow) !important;
-            opacity: 0.3 !important;
-        }
-
-        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover,
-        body .content-links a:hover,
-        body .resource-list a:hover,
-        body .main-content-wrapper a:hover {
-            color: var(--sacred-gold) !important;
-            background: linear-gradient(135deg, var(--gentle-lavender) 0%, var(--soft-sage) 100%) !important;
-            border-color: var(--sacred-gold) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: var(--shadow-lg) !important;
-        }
-
-        body main a:not([href*="Next"]):not([href*="Prev"]):not([href*="page/"]):hover:before,
-        body .content-links a:hover:before,
-        body .resource-list a:hover:before,
-        body .main-content-wrapper a:hover:before {
-            left: 100% !important;
-        }
-
-        /* SOPHISTICATED FOOTER STYLING */
-        .simple-footer {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--warm-earth) 100%) !important;
-            color: var(--warm-cream) !important;
-            padding: var(--space-16) var(--space-8) !important;
-            margin-top: var(--space-16);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .simple-footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="footerPattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23D4AF37" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23footerPattern)"/></svg>') repeat;
-            pointer-events: none;
-        }
-
-        .simple-footer p {
-            margin: var(--space-2) 0;
-            font-size: var(--font-size-sm);
-            color: var(--warm-cream) !important;
-            position: relative;
-            z-index: 1;
-            font-weight: 300;
-            letter-spacing: 0.5px;
-        }
-
-        .simple-footer p:first-child {
-            font-weight: 500;
-            font-size: var(--font-size-base);
-            margin-bottom: var(--space-4);
-        }
-
-        /* Content Styling - matching sufismreoriented.org */
-        .main-content-wrapper h2,
-        .main-content-wrapper h3 {
-            font-family: "Times New Roman", serif;
-            color: #333333;
-            font-weight: normal;
-            margin: 30px 0 20px 0;
-            text-align: center;
-        }
-
-        .main-content-wrapper p {
-            color: #333333;
-            line-height: 1.8;
-            margin: 15px 0;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Resource listings - styled like reference site content */
-        .resource-list {
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        .resource-list .resource {
-            margin: 20px 0;
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .resource-list .resource:last-child {
-            border-bottom: none;
-        }
-
-        .resource-list .resource-link {
-            color: #d4a574 !important;
-            text-decoration: none !important;
-            font-size: 16px !important;
-            display: block;
-            margin: 10px 0;
-            transition: color 0.3s ease;
-        }
-
-        .resource-list .resource-link:hover {
-            color: #b8935f !important;
-        }
-
-        .resource-list .resource-name {
-            color: #d4a574 !important;
-            font-size: 16px !important;
-            font-weight: normal !important;
-            text-decoration: none !important;
-        }
-
-        /* SOPHISTICATED PAGINATION STYLING */
-        .pagination {
-            text-align: center;
-            margin: var(--space-12) 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: var(--space-4);
+    /* CORRECTED SUFISM LIBRARY THEME - Following sufismreoriented.org design */
+
+    /* Reset and base styles */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: <?php echo $escape($settings['body_font_family']); ?> !important;
+        color: <?php echo $escape($settings['body_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['body_font_size']); ?> !important;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    /* Heavy use of white backgrounds with zone backgrounds (sufismreoriented.org style) */
+    main, .content, .resource {
+        background: #ffffff;
+    }
+
+    /* Zone backgrounds for content areas (#fffaf7) */
+    .content-zone, .item-showcase, .resource-list, .browse-controls {
+        background: <?php echo $escape($settings['zone_background_color'] ?? '#fffaf7'); ?>;
+        padding: 25px;
+        margin: 20px 0;
+        border-radius: 8px;
+        border: 1px solid rgba(218, 165, 32, 0.2);
+    }
+
+    /* Site title fallback styling */
+    .site-title-fallback {
+        font-family: <?php echo $escape($settings['h1_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h1_font_color']); ?> !important;
+        font-size: 2.2rem !important;
+        margin: 0 0 12px 0;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Header structure - following sufismreoriented.org pattern */
+    header {
+        background: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 30px 20px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+    }
+
+    /* Logo area - centered following sufismreoriented.org */
+    .logo-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
+        gap: 12px; /* space between logo and tagline without relying on image margin */
+    }
+
+    .site-logo {
+        display: block !important; /* eliminate inline baseline gap */
+        max-height: 100px;
+        width: auto;
+        margin: 0 !important; /* no extra space that could show hover effects */
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        vertical-align: middle !important;
+        pointer-events: none !important; /* ensure not clickable even if JS tries */
+    }
+
+    /* Remove any hover/box/border on logo link */
+    .logo-link, .logo-link:hover, .logo-link:focus, .logo-link:active {
+        display: contents !important; /* remove box completely; children remain clickable */
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 0 !important;  /* kill underline baseline space */
+        font-size: 0 !important;    /* prevent stray underline width calc */
+        background: transparent !important;
+        background-image: none !important;
+        border: 0 !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
+        text-decoration: none !important;
+        color: inherit !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* Fallback for browsers not supporting display: contents */
+    @supports not (display: contents) {
+      .logo-link, .logo-link:hover, .logo-link:focus, .logo-link:active {
+        display: inline-block !important;
+      }
+    }
+
+    /* Ensure no hover transform on logo image */
+    .site-logo:hover { transform: none !important; }
+
+    /* Site tagline - smaller text centered below logo (sufismreoriented.org style) */
+    .site-tagline {
+        /* Let dynamic theme CSS control family/color/size/style/weight; keep this minimal */
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+    .site-tagline a.tagline-link { color: inherit !important; text-decoration: none; }
+    .site-tagline a.tagline-link:hover { text-decoration: underline; }
+
+    /* Hide redundant site title */
+    .site-title {
+        display: none !important;
+    }
+
+    /* Navigation - centered horizontal layout (sufismreoriented.org style) */
+    nav {
+        width: 100%;
+    }
+    :root {
+        --color-primary: <?php echo $escape($settings['primary_color']); ?>;
+        --color-accent: <?php echo $escape($settings['accent_color']); ?>;
+        --zone-bg: <?php echo $escape($settings['zone_background_color'] ?? '#fffaf7'); ?>;
+    }
+
+
+    nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+    }
+
+    nav li {
+        margin: 0;
+    }
+
+    nav a {
+        color: var(--color-primary) !important;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1rem;
+        padding: 12px 20px;
+        border: 1px solid var(--color-primary);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.9);
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    /* Never treat the logo link like a nav button */
+    .logo-area .logo-link { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+
+    nav a:hover {
+        color: var(--color-accent) !important;
+        border-color: var(--color-accent);
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+
+    /* Hide unwanted "Home" link */
+    nav a[href="/"], nav a[href="#home"] {
+        display: none !important;
+    }
+
+    /* Main content area */
+    main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 30px;
+        min-height: 500px;
+    }
+
+    /* Typography - NUCLEAR OPTION - Override everything */
+    * h1, *[class*="h1"], *[id*="h1"],
+    html body main h1, html body .content h1, html body .resource h1,
+    html body h1, html body .h1, html body main h1.page-title,
+    html body main h1:not(.site-title-fallback),
+    html body div h1, html body section h1, html body article h1 {
+        font-family: <?php echo $escape($settings['h1_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h1_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h1_font_size']); ?> !important;
+        margin: 0 0 25px 0 !important;
+        line-height: 1.3 !important;
+        font-weight: 600 !important;
+    }
+
+    h2, .h2, main h2, .content h2, .resource h2, body h2 {
+        font-family: <?php echo $escape($settings['h2_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h2_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h2_font_size']); ?> !important;
+        margin: 30px 0 20px 0 !important;
+        line-height: 1.4 !important;
+        font-weight: 500 !important;
+    }
+
+    h3, .h3, main h3, .content h3, .resource h3, body h3 {
+        font-family: <?php echo $escape($settings['h3_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h3_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h3_font_size']); ?> !important;
+        margin: 25px 0 15px 0 !important;
+        line-height: 1.4 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Links - sufismreoriented.org style with gold borders */
+    a {
+        color: <?php echo $escape($settings['primary_color']); ?>;
+        text-decoration: none;
+    }
+
+    /* Disable hover decoration on the logo link specifically */
+    .logo-link:hover {
+        text-decoration: none !important;
+    }
+
+    a:hover {
+        color: <?php echo $escape($settings['accent_color']); ?>;
+        text-decoration: underline;
+    }
+
+    /* Content links in boxes (sufismreoriented.org style) */
+    main a, .content a, .resource a {
+        display: inline-block;
+        padding: 6px 12px;
+        margin: 2px;
+        border: 1px solid <?php echo $escape($settings['primary_color']); ?>;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.9);
+        color: <?php echo $escape($settings['primary_color']); ?> !important;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    /* Ensure the logo link never picks up these box styles */
+    .logo-area .logo-link { border: 0 !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+    .logo-area .logo-link:hover { border: 0 !important; background: transparent !important; }
+
+    main a:hover, .content a:hover, .resource a:hover {
+        border-color: <?php echo $escape($settings['accent_color']); ?>;
+        background: rgba(255,255,255,1);
+        color: <?php echo $escape($settings['accent_color']); ?> !important;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Table of Contents - zone background style */
+    .toc, .table-of-contents, #toc {
+        background-color: <?php echo $escape($settings['toc_background_color']); ?> !important;
+        border: 2px solid <?php echo $escape($settings['toc_border_color']); ?> !important;
+        color: <?php echo $escape($settings['toc_text_color']); ?> !important;
+        padding: 30px;
+        border-radius: 10px;
+        margin: 30px 0;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .toc h2, .toc h3 {
+        color: <?php echo $escape($settings['toc_text_color']); ?> !important;
+        margin-top: 0;
+    }
+
+    .toc a {
+        color: <?php echo $escape($settings['primary_color']); ?> !important;
+    }
+
+    .toc a:hover,
+    .table-of-contents a:hover,
+    #toc a:hover,
+    .content-links a:hover,
+    .page-toc a:hover,
+    .toc-panel a:hover {
+        color: #ffffff !important;
+        background: <?php echo $escape($settings['accent_color']); ?> !important;
+        border-color: <?php echo $escape($settings['accent_color']); ?> !important;
+    }
+
+    /* Pagination */
+    .pagination, .browse-controls {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    /* Pagination - FORCE preset values */
+    .pagination a, .pagination span, .browse-controls a, .browse-controls span,
+    .pagination li a, .pagination li span, .browse-controls li a, .browse-controls li span {
+        background-color: <?php echo $escape($settings['pagination_background_color']); ?> !important;
+        color: <?php echo $escape($settings['pagination_font_color']); ?> !important;
+        padding: 12px 18px !important;
+        margin: 0 4px !important;
+        text-decoration: none !important;
+        border-radius: 6px !important;
+        border: 1px solid <?php echo $escape($settings['primary_color']); ?> !important;
+        display: inline-block !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .pagination a:hover, .browse-controls a:hover,
+    .pagination li a:hover, .browse-controls li a:hover {
+        border-color: <?php echo $escape($settings['pagination_hover_color']); ?> !important;
+        color: <?php echo $escape($settings['pagination_hover_color']); ?> !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }
+
+    .pagination .current, .browse-controls .current,
+    .pagination li.current a, .browse-controls li.current a {
+        background-color: <?php echo $escape($settings['accent_color']); ?> !important;
+        color: #FFFFFF !important;
+        border-color: <?php echo $escape($settings['accent_color']); ?> !important;
+    }
+
+    /* Footer */
+    footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        padding: 30px 0;
+        margin-top: 60px;
+        text-align: center;
+        color: <?php echo $escape($settings['primary_color']); ?>;
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 30px;
+    }
+
+    /* User bar */
+    #user-bar {
+        background: rgba(0,0,0,0.85);
+        color: white;
+        padding: 10px 30px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        font-size: 14px;
+    }
+
+    #user-bar a {
+        color: white !important;
+        text-decoration: none;
+        margin-right: 20px;
+        padding: 5px 10px;
+        border-radius: 3px;
+    }
+
+    #user-bar a:hover {
+        background: rgba(255,255,255,0.2);
+        text-decoration: none;
+    }
+
+    /* Responsive design - maintaining centered layout */
+    @media (max-width: 768px) {
+        .header-container {
+            padding: 25px 20px 20px 20px;
+        }
+
+        .logo-area {
+            margin-bottom: 20px;
+        }
+
+        nav ul {
             flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
 
-        /* Target all pagination buttons including Next/Prev links - FORCE BLUE STYLING */
-        body main .pagination .button,
-        body main .pagination a,
-        body main a[href*="Next"],
-        body main a[href*="Prev"],
-        body main a[href*="page/"],
-        body main a[href*="collections"],
-        body .pagination .button,
-        body .pagination a,
-        body a[href*="Next"],
-        body a[href*="Prev"],
-        body a[href*="page/"],
-        body a[href*="collections"] {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--warm-earth) 100%) !important;
-            color: var(--warm-cream) !important;
-            padding: var(--space-3) var(--space-6) !important;
-            margin: 0 var(--space-2) !important;
-            text-decoration: none !important;
-            border: 2px solid transparent !important;
-            font-size: var(--font-size-sm) !important;
-            border-radius: var(--radius-xl) !important;
-            transition: var(--transition-normal) !important;
-            display: inline-block !important;
-            font-weight: 500 !important;
-            box-shadow: var(--shadow-md) !important;
-            position: relative !important;
-            overflow: hidden !important;
-            min-width: 80px !important;
-            text-align: center !important;
+        main {
+            padding: 30px 20px;
         }
 
-        body main .pagination .button:hover,
-        body main .pagination a:hover,
-        body main a[href*="Next"]:hover,
-        body main a[href*="Prev"]:hover,
-        body main a[href*="page/"]:hover,
-        body main a[href*="collections"]:hover,
-        body .pagination .button:hover,
-        body .pagination a:hover,
-        body a[href*="Next"]:hover,
-        body a[href*="Prev"]:hover,
-        body a[href*="page/"]:hover,
-        body a[href*="collections"]:hover {
-            background: linear-gradient(135deg, var(--sacred-gold) 0%, var(--sunset-orange) 100%) !important;
-            color: var(--primary-color) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: var(--shadow-lg) !important;
-            border-color: var(--sacred-gold) !important;
+        h1 {
+            font-size: 2rem;
         }
 
-        /* Dynamic tagline styling */
-        .site-tagline {
-            font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif !important;
-            font-weight: 400 !important;
-            font-style: normal !important;
-            color: <?php echo $taglineColor; ?> !important;
+        h2 {
+            font-size: 1.6rem;
         }
 
-        /* FINAL OVERRIDE FOR VERTICAL BAR - MAXIMUM SPECIFICITY */
-        html body div.main-content-wrapper main div ul.navigation,
-        html body main div ul.navigation,
-        html body main ul.navigation,
-        html body ul.navigation,
-        body ul.navigation,
-        ul.navigation {
-            border-left: 0px none transparent !important;
-            border: 0px none transparent !important;
+        h3 {
+            font-size: 1.3rem;
         }
+
+        /* Adjust link boxes for mobile */
+        main a, .content a, .resource a {
+            padding: 8px 12px;
+            margin: 3px;
+        }
+    }
+
+    /* Tagline duplication is resolved by rendering it only in the header.
+       Do not hide main content elements here to preserve hero images and TOC. */
+
+    /* Text box highlighting - Gold borders for links */
+    .browse-controls a, .pagination a, .item-set-browse a,
+    .resource-link, .item-link, .media-link,
+    main a[href*="item-sets"], main a[href*="items"], main a[href*="browse"] {
+        border: 2px solid <?php echo $escape($settings['accent_color']); ?> !important;
+        border-radius: 6px !important;
+    }
     </style>
 
-    <!-- VERTICAL BAR FIX - IMMEDIATE EXECUTION -->
+
+    <style>
+
+    .browse-controls a:hover, .pagination a:hover, .item-set-browse a:hover,
+    main a[href*="item-sets"]:hover, main a[href*="items"]:hover, main a[href*="browse"]:hover {
+        background: <?php echo $escape($settings['accent_color']); ?> !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Use JavaScript to remove text nodes containing "The Library" */
+    </style>
+
     <script>
-        // Fix vertical bar issue immediately when DOM is ready
-        function fixVerticalBar() {
-            const navigationElements = document.querySelectorAll('ul.navigation');
-            navigationElements.forEach(function(el) {
-                el.style.setProperty('border-left', 'none', 'important');
-                el.style.setProperty('border', 'none', 'important');
-            });
+    // TARGETED fixes for specific issues
+    document.addEventListener('DOMContentLoaded', function() {
+        function targetedFixes() {
+            // Keep JS minimal. Header/tagline is controlled in templates and CSS only.
+            // No DOM overrides required.
 
-            // Add permanent style fix
-            if (!document.getElementById('vertical-bar-fix-permanent')) {
-                const style = document.createElement('style');
-                style.id = 'vertical-bar-fix-permanent';
-                style.textContent = 'ul.navigation { border-left: none !important; border: none !important; }';
-                document.head.appendChild(style);
-            }
+            // No JS DOM massaging needed for links.
         }
-
-        // Apply fix when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fixVerticalBar);
-        } else {
-            fixVerticalBar();
-        }
-
-        // Also apply with delays to catch any late-loading content
-        setTimeout(fixVerticalBar, 100);
-        setTimeout(fixVerticalBar, 500);
+        // Run targeted fixes
+        targetedFixes();
+        setTimeout(targetedFixes, 500);
+    });
     </script>
 
-    <?php echo $this->headLink() ?>
-    <?php echo $this->headStyle() ?>
-    <?php echo $this->headScript() ?>
+    <style>
+
+    /* Content styling - removed border-left that was causing gray bar */
+    .resource {
+        margin: 30px 0;
+        padding: 25px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid rgba(218, 165, 32, 0.2);
+    }
+
+    .resource h3 {
+        margin-top: 0;
+    }
+
+    /* Remove any default border-left from TOC and other elements */
+    .toc, .table-of-contents, #toc, .content-zone {
+        border-left: none !important;
+    }
+    </style>
+
+    <?php echo $this->partial('common/theme-setting-css'); ?>
+
+    <?php echo $this->headStyle(); ?>
+
+    <script>
+    // Quick check to ensure font-overrides.css is last and tagline anchor inherits style
+    (function(){
+      function moveFontOverridesLast(){
+        var links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+        var idx = links.findIndex(function(l){ return l.href && l.href.indexOf('font-overrides.css') !== -1; });
+        if (idx === -1) return; // not present
+        if (idx !== links.length - 1) {
+          var link = links[idx];
+          link.parentNode.removeChild(link);
+          document.head.appendChild(link);
+          console.warn('[Theme] Moved font-overrides.css to end of stylesheet list for maximum specificity');
+        }
+      }
+      function enforceTaglineLinkTypography(){
+        var root = getComputedStyle(document.documentElement);
+        var expected = {
+          style: (root.getPropertyValue('--tagline-font-style')||'normal').trim(),
+          family: (root.getPropertyValue('--tagline-font-family')||'inherit').trim(),
+          weight: (root.getPropertyValue('--tagline-font-weight')||'400').trim(),
+          color: (root.getPropertyValue('--tagline-color')||'inherit').trim(),
+          size: (root.getPropertyValue('--tagline-font-size')||'inherit').trim()
+        };
+        var a = document.querySelector('.site-tagline a, .site-tagline .tagline-link');
+        if (!a) return;
+        var cs = getComputedStyle(a);
+        if (cs.fontStyle !== expected.style) {
+          console.warn('[Theme] Tagline anchor font-style mismatch', cs.fontStyle, '!=', expected.style, 'Applying emergency fix.');
+          var s = document.createElement('style');
+          s.textContent = 'html body .site-tagline a, html body .site-tagline .tagline-link{ font-style:'+expected.style+' !important; font-family:'+expected.family+' !important; font-weight:'+expected.weight+' !important; color:'+expected.color+' !important; font-size:'+expected.size+' !important; }';
+          document.head.appendChild(s);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function(){
+          moveFontOverridesLast();
+          enforceTaglineLinkTypography();
+        });
+      } else {
+        moveFontOverridesLast();
+        enforceTaglineLinkTypography();
+      }
+    })();
+    </script>
+
 </head>
 <body>
-    <!-- Accessibility: Skip to main content -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <?php
+    // User bar
+    try {
+        $userIsAllowed = $this->userIsAllowed('Omeka\Entity\Site', 'update');
+        $showUserBar = $this->siteSetting('show_user_bar', 1) && $this->identity();
 
-    <!-- Header with Logo and Menu - matching reference screenshot -->
-    <header class="site-header">
-        <div class="site-logo">
-            <?php
-            // Get proper asset URL for logo using Omeka's themeSettingAssetUrl helper
-            $logoUrl = '';
-            try {
-                $logoUrl = $this->themeSettingAssetUrl('site_logo');
-            } catch (Exception $e) {
-                // Fallback if themeSettingAssetUrl doesn't work
-                if ($siteLogo) {
-                    if (is_array($siteLogo) && isset($siteLogo['original_url'])) {
-                        $logoUrl = $siteLogo['original_url'];
-                    } elseif (is_string($siteLogo) && $siteLogo !== '9') {
-                        $logoUrl = $siteLogo;
-                    } elseif (is_object($siteLogo) && method_exists($siteLogo, 'originalUrl')) {
-                        $logoUrl = $siteLogo->originalUrl();
-                    }
-                }
-            }
-            ?>
-
-            <!-- Wrap logo in clickable link -->
-            <a href="<?php echo $this->escapeHtml($logoLinkPage); ?>" class="logo-link" style="text-decoration: none; display: block;">
-                <?php if ($logoUrl && $logoUrl !== '9'): ?>
-                    <img src="<?php echo $this->escapeHtml($logoUrl); ?>" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
-                <?php else: ?>
-                    <!-- Default logo placeholder -->
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjU2IiBzdHJva2U9IiNkNGE1NzQiIHN0cm9rZS13aWR0aD0iOCIvPgo8cGF0aCBkPSJNNjAgMzBMNzAgNTBINTBMNjAgMzBaIiBmaWxsPSIjZDRhNTc0Ii8+CjxwYXRoIGQ9Ik02MCA5MEw1MCA3MEg3MEw2MCA5MFoiIGZpbGw9IiNkNGE1NzQiLz4KPHN2Zz4K" alt="<?php echo $this->escapeHtml($siteTitle); ?>" class="logo-image">
+        if ($showUserBar): ?>
+        <div id="user-bar">
+            <nav class="user-bar-nav">
+                <?php if ($userIsAllowed): ?>
+                <a href="<?php echo $escape($this->url('admin')); ?>">Admin</a>
                 <?php endif; ?>
-            </a>
+                <a href="<?php echo $escape($this->url('logout')); ?>">Logout</a>
+            </nav>
         </div>
+        <?php endif;
+    } catch (Exception $e) {
+        // Silent fallback
+    }
+    ?>
 
-        <div class="site-tagline" style="font-family: <?php echo $taglineFont ?? 'Georgia'; ?>, serif; font-weight: 400; font-style: normal; color: <?php echo $this->escapeHtml($taglineColor); ?>;">
-            <?php echo $this->escapeHtml($tagline); ?>
+    <header>
+        <div class="header-container">
+            <div class="logo-area">
+                <?php
+                // Logo display (helpers only) with fallback and enable switch
+                $logoEnabled = (string)$this->themeSetting('logo_enabled', '1') === '1';
+                $logoUrl = $this->themeSettingAssetUrl('logo') ?: $this->themeSettingAssetUrl('site_logo');
+                $logoFound = !empty($logoUrl);
+
+                if ($logoEnabled && $logoFound): ?>
+                        <img src="<?php echo $escape($logoUrl); ?>" alt="<?php echo $escape($siteTitle); ?>" class="site-logo" style="height: <?php echo (int)$this->themeSetting('logo_height', '100'); ?>px;" data-logo-click-disabled="true">
+
+                <?php else: ?>
+                    <h1 class="site-title-fallback"><?php echo $escape($siteTitle); ?></h1>
+                <?php endif; ?>
+
+                <?php if ($this->themeSetting('site_tagline')): ?>
+                <?php $tagline = $this->themeSetting('site_tagline'); $logoTarget = $this->themeSetting('logo_link_page', '/'); ?>
+                <div class="site-tagline"><a class="tagline-link" href="<?php echo $escape($logoTarget); ?>"><?php echo $escape($tagline); ?></a></div>
+                <?php endif; ?>
+            </div>
+
+            <nav>
+                <ul>
+                    <?php if ($this->themeSetting('show_browse_button', '1')): ?>
+                        <li><a href="<?php echo $escape($this->themeSetting('browse_button_target', '/browse')); ?>">Browse</a></li>
+                    <?php endif; ?>
+                    <?php if ($this->themeSetting('show_search_button', '1')): ?>
+                        <li><a href="<?php echo $escape($this->themeSetting('search_button_target', '/search')); ?>">Search</a></li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
         </div>
     </header>
 
-    <!-- Main Content Wrapper - centered like sufismreoriented.org -->
-    <div class="main-content-wrapper">
-        <!-- Main Content -->
-        <main id="main-content">
-            <?php echo $this->content; ?>
-        </main>
-    </div>
+    <main>
+        <!-- DEBUGGING: Built-in vs Custom theme setting methods -->
+        <!-- DEPLOYMENT TEST: <?php echo date('Y-m-d H:i:s'); ?> - Files deployed correctly! -->
 
-    <!-- Simple Footer - matching reference site -->
-    <footer class="simple-footer">
-        <p><?php echo $footerCopyrightText; ?></p>
-        <p><?php echo $footerPoweredByText; ?></p>
+
+        <?php echo $this->content; ?>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <?php echo $escape($settings['footer_content']); ?>
+        </div>
     </footer>
+
+    <?php echo $this->headScript(); ?>
 </body>
 </html>

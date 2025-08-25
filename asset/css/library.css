@@ -1,0 +1,130 @@
+/* Breadcrumbs styling driven by theme settings */
+.breadcrumbs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 1rem 0;
+  padding: 0;
+}
+
+.breadcrumbs li a,
+.breadcrumbs li.active,
+.breadcrumbs li {
+  font-family: var(--theme-body-font, var(--body-font-family, 'Helvetica Neue, Arial, sans-serif')) !important;
+  color: var(--body-font-color, #4a5568) !important;
+}
+
+.breadcrumbs li a {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.breadcrumbs li a:hover,
+.breadcrumbs li a:focus {
+  color: var(--primary-color, #2C4A6B) !important;
+  border-bottom-color: var(--primary-color, #2C4A6B) !important;
+}
+
+.breadcrumbs li.active {
+  color: var(--primary-color, #2C4A6B) !important;
+  font-weight: 500;
+}
+
+/**
+/* Search results styling driven by theme settings */
+.search-results-list .resource-meta,
+.search-results-list .resource-meta * {
+  font-family: var(--theme-body-font, var(--body-font-family, 'Helvetica Neue, Arial, sans-serif')) !important;
+  color: var(--body-font-color, #4a5568) !important;
+}
+.search-results-count-total,
+.search-results-display a,
+.facets h3,
+.facets h4,
+.facets .facets-actions .button,
+.facets .facet-button,
+.facets .facet-see-more button {
+  font-family: var(--theme-body-font, var(--body-font-family, 'Helvetica Neue, Arial, sans-serif')) !important;
+  color: var(--body-font-color, #4a5568) !important;
+}
+.search-results-display a.active,
+.facets .facet-button.collapse,
+.facets .facet-button.expand:hover,
+.facets .facets-actions .button:hover {
+  color: var(--primary-color, #2C4A6B) !important;
+}
+/* Selected facet tags from active facets widget should be readable */
+.facet-actives .active-facet,
+.search-results-count-total {
+  border-color: var(--primary-color, #2C4A6B) !important;
+}
+/* Format color chips: read format classes via data attribute */
+.has-format {
+  display:inline-block;
+  vertical-align:middle;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* Generic fallback for chips if JS not present */
+[data-has-format] {
+  background-color: var(--sacred-gold, #D4AF37);
+}
+
+
+ * Library Theme CSS
+ *
+ * Basic styles for the library theme to prevent 404 errors
+ */
+
+/* Placeholder CSS file to prevent 404 errors */
+/* This file exists to satisfy any references to library.css */
+
+
+/* Header right search positioning with responsive fallback */
+.site-header { position: relative; }
+.header-right-search { position: absolute; right: 16px; top: 16px; }
+.header-right-search form { display:flex; gap:6px; align-items:center; padding:6px 8px; border:1px solid var(--sacred-gold, #D4AF37); border-radius:6px; background: var(--search-bg, #ffffff); color: var(--search-text, #000000); font-family: var(--search-font-family, inherit); font-weight: var(--search-font-weight, 400); }
+.header-right-search input[type="text"] { border:none; outline:none; background:transparent; color: inherit; font: inherit; }
+.header-right-search button { border:none; background:transparent; color: inherit; font-weight:600; }
+
+@media (max-width: 768px) {
+  .header-right-search { position: static; margin: 8px auto 0 auto; display:flex; justify-content:center; }
+}
+.search-button { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.search-button .icon { line-height: 1; }
+.search-button .label { line-height: 1; }
+
+.preset-preview-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999; }
+.preset-preview-modal { background:#fff; width:min(900px, 92vw); height:min(70vh, 720px); border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.2); position:relative; overflow:hidden; }
+.preset-preview-modal .close { position:absolute; top:8px; right:10px; border:none; background:transparent; font-size:24px; line-height:1; cursor:pointer; }
+.preset-preview-frame { width:100%; height:100%; display:block; }
+.admin-inline-preview{ border:1px solid #e2e8f0; border-radius:8px; margin:12px 0; background:#fff; }
+.admin-inline-preview__head{ font-weight:600; font-size:14px; padding:8px 10px; border-bottom:1px solid #e2e8f0; background:#f8fafc; }
+.admin-inline-preview__body{ padding:8px; }
+.admin-inline-preview__frame{ width:100%; height:420px; border:1px solid #e2e8f0; border-radius:6px; }
+
+
+
+body {
+    /* Ensure basic styling is available */
+    margin: 0;
+    padding: 0;
+}
+
+/* Basic reset */
+* {
+    box-sizing: border-box;
+}
+
+/* Ensure fonts are inherited properly */
+h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+}
+
+p, div, span {
+    font-family: inherit;
+}

@@ -2,7 +2,13 @@
 $this->headLink()->prependStylesheet($this->assetUrl('css/page-blocks.css', 'Omeka'));
 $this->htmlElement('body')->appendAttribute('class', 'page ' . $page->slug());
 $this->htmlElement('body')->appendAttribute('class', 'full-width');
-$this->pageTitle($page->title(), 2);
+
+// Suppress page title when rendering the site's homepage to avoid duplicate tagline under hero
+$homepage = method_exists($site, 'homepage') ? $site->homepage() : null;
+$isHomepage = $homepage && $homepage->id() === $page->id();
+if (!$isHomepage) {
+    $this->pageTitle($page->title(), 2);
+}
 $showPagePagination = $this->siteSetting('show_page_pagination', true);
 ?>
 

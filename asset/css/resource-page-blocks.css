@@ -1,0 +1,42 @@
+/* Resource Page Regions/Blocks (Cumulus-style)
+   Provides basic grid and region styles for full_width_main, main, left, right
+   Used by item, item-set, and media show templates. */
+
+/* Container layout helpers */
+.resource.show .stack { display: block; }
+.resource.show .inline { display: block; }
+
+/* Full width main area */
+.full-width-main { margin: 1rem 0; }
+
+/* Two/three column layout for sidebars + main */
+.grid-x { display: flex; flex-wrap: wrap; margin-left: -0.5rem; margin-right: -0.5rem; }
+.grid-x > .cell { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+/* Main content and sidebars */
+.main-with-sidebar { min-width: 0; }
+.left-sidebar, .right-sidebar { min-width: 0; }
+
+/* Basic responsive widths (Foundation-like) */
+@media (min-width: 640px) {
+  .cell.medium-3 { flex: 0 0 25%; max-width: 25%; }
+  .cell.medium-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+  .cell.medium-6 { flex: 0 0 50%; max-width: 50%; }
+  .cell.medium-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+}
+
+/* Optional light visual treatment for blocks */
+.full-width-main, .left-sidebar, .right-sidebar, .main-with-sidebar .resource-blocks {
+  /* Keep neutral by default; theme-setting-css applies colors/borders */
+}
+
+/* Tab navigation basics (used by TabManager + tab-navigation block) */
+#tab-navigation.tabs { list-style: none; display: flex; gap: .5rem; padding: 0; margin: 0 0 .75rem 0; justify-content: flex-start; }
+#tab-navigation.tabs.vertical { flex-direction: column; }
+#tab-navigation .tabs-title a { text-decoration: none; padding: .35rem .6rem; border: 1px solid rgba(0,0,0,.15); border-radius: 6px; display: inline-block; }
+#tab-navigation .tabs-title.is-active a { border-color: var(--toc-border, #d4af37); color: var(--toc-hover-text-color, #fff); background: var(--toc-hover-background-color, #d4af37); }
+
+.tabs-content { border-top: 1px solid rgba(0,0,0,.08); padding-top: .5rem; }
+.tabs-panel { display: none; }
+.tabs-panel.is-active { display: block; }
+

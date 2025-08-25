@@ -1,87 +1,141 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Sufism Library Theme - Ultra-Optimized Deployment Script
-# This theme is already optimized and ready for production!
+# Minimal, safe deploy script for LibraryTheme
+# - Uses rsync include-only rules to deploy just the files needed in production
+# - Excludes dev-only tools and directories
+# - Supports DRY_RUN=1 to preview actions
+# - Optional BACKUP=1 creates a timestamped tar.gz of the remote/local target before syncing
+# - Ensures ownership/permissions and restarts Apache unless SKIP_RESTART=1
+#
+# Usage:
+#   # Dry-run preview
+#   #   DRY_RUN=1 ./DEPLOY.sh [/var/www/omeka-s/themes/LibraryTheme]
+#   # Actual deploy
+#   #   ./DEPLOY.sh [/var/www/omeka-s/themes/LibraryTheme]
+#   # Example (remote):
+#   #   ./DEPLOY.sh deploy@prod.example.org:/var/www/omeka-s/themes/LibraryTheme
+#   # If no argument is provided, defaults to /var/www/omeka-s/themes/LibraryTheme (local)
+#
+# Env options:
+#   DIR_MODE=755 FILE_MODE=644      # permissions applied after deploy (default)
+#   BACKUP=1                        # create backup tar.gz before syncing
+#   SKIP_RESTART=1                  # do not restart apache2
+#   REMOTE_SUDO=sudo                # command used for privileged remote operations
+#
+# Note: Ownership is set with a fixed path using sudo chown -R www-data:www-data /var/www/omeka-s/themes/LibraryTheme
 
-echo "🚀 Sufism Library Theme - Ultra-Optimized Deployment"
-echo "=================================================="
+OWNER=${OWNER:-www-data}
+GROUP=${GROUP:-www-data}
+DIR_MODE=${DIR_MODE:-755}
+FILE_MODE=${FILE_MODE:-644}
+REMOTE_SUDO=${REMOTE_SUDO:-sudo}
 
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+TARGET=${1:-/var/www/omeka-s/themes/LibraryTheme}
 
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
+# Assign production directory variable for reuse
+PROD_DIR="${TARGET}"
 
-print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-# Check if we're in the right directory
-if [[ ! -f "config/theme.ini" ]]; then
-    echo "❌ Error: theme.ini not found. Please run this script from the optimized theme directory."
-    exit 1
+RSYNC_FLAGS=("-avz" "--delete" )
+# If BACKUP=1, create a timestamped archive of the destination
+# Determine if target is remote (contains ':'); derive host and path
+if [[ "${PROD_DIR}" == *:* ]]; then
+  IS_REMOTE=1
+  REMOTE_HOST="${PROD_DIR%%:*}"
+  REMOTE_PATH="${PROD_DIR#*:}"
+else
+  IS_REMOTE=0
+  REMOTE_HOST=""
+  REMOTE_PATH="${PROD_DIR}"
 fi
 
-print_success "Theme validation passed!"
+if [[ "${BACKUP:-0}" == "1" ]]; then
+  ts=$(date +%Y%m%d-%H%M%S)
+  if [[ ${IS_REMOTE} -eq 1 ]]; then
+    echo "Creating backup ${PROD_DIR}.${ts}.tar.gz on remote..."
+    ssh "${REMOTE_HOST}" "${REMOTE_SUDO} tar -czf '${PROD_DIR}.${ts}.tar.gz' -C '$(dirname "${REMOTE_PATH}")' '$(basename "${REMOTE_PATH}")'"
+  else
+    echo "Creating backup ${PROD_DIR}.${ts}.tar.gz locally..."
+    ${REMOTE_SUDO} tar -czf "${PROD_DIR}.${ts}.tar.gz" -C "$(dirname "${REMOTE_PATH}")" "$(basename "${REMOTE_PATH}")"
+  fi
+fi
 
-# Count files in optimized theme
-OPTIMIZED_COUNT=$(find . -type f | wc -l)
+if [[ "${DRY_RUN:-0}" == "1" ]]; then
+  RSYNC_FLAGS+=("--dry-run")
+fi
 
-echo ""
-print_info "📊 OPTIMIZATION RESULTS:"
-print_success "  📁 Files in optimized theme: $OPTIMIZED_COUNT"
-print_success "  🎯 Original files eliminated: 6,420+"
-print_success "  📉 File reduction: 98.7%"
-print_success "  💾 Size reduction: ~98%"
+# Build include/exclude rules: include essential files and dirs, exclude everything else
+RSYNC_INCLUDE=(
+  "--include=Module.php"
+  "--include=LICENSE"
+  "--include=README.md"
+  "--include=MAINTENANCE.md"
+  "--include=theme.jpg"
+  "--include=config/***"
+  "--include=view/***"
+  "--include=asset/***"
+  "--include=helper/***"
+  "--include=src/***"
+  # Exclude everything else by default
+  "--exclude=*"
+)
 
-echo ""
-print_info "🎉 OPTIMIZATION ACHIEVEMENTS:"
-print_success "  ✨ Zero dependencies"
-print_success "  ⚡ No build process required"
-print_success "  🚀 Instant deployment ready"
-print_success "  🛡️ No security vulnerabilities"
-print_success "  🔧 No maintenance overhead"
+# Exclude dev-only directories explicitly (defense in depth)
+RSYNC_EXCLUDE=(
+  "--exclude=dev-tools/"
+  "--exclude=dev-archive/"
+  "--exclude=scripts/"
+  "--exclude=backup-*/"
 
-echo ""
-print_info "📋 DEPLOYMENT INSTRUCTIONS:"
-echo "  1. Upload this entire directory to your Omeka S themes folder"
-echo "  2. Rename it to 'library-theme' or your preferred name"
-echo "  3. Activate the theme in Omeka S admin panel"
-echo "  4. Configure theme settings as needed"
+  "--exclude=multilevel-accordion-menu/"
+  "--exclude=library-theme/"
+)
 
-echo ""
-print_warning "💡 CUSTOMIZATION TIPS:"
-echo "  • Edit CSS directly in view/layout/layout.phtml (lines 232-1127)"
-echo "  • Modify theme settings in config/theme.ini"
-echo "  • All styles are inlined - no external dependencies!"
+CMD=(rsync "${RSYNC_FLAGS[@]}" "${RSYNC_INCLUDE[@]}" "${RSYNC_EXCLUDE[@]}" ./ "${PROD_DIR}")
+echo "Running: ${CMD[*]}"
+"${CMD[@]}"
+# Remote verification, ownership, permissions, and restart
+if [[ "${DRY_RUN:-0}" != "1" ]]; then
+  REMOTE_HOST="${PROD_DIR%%:*}"
+  REMOTE_PATH="${PROD_DIR#*:}"
 
-echo ""
-print_info "🔗 WHAT'S INCLUDED:"
-echo "  • Complete theme functionality"
-echo "  • Responsive design"
-echo "  • Accessibility features"
-echo "  • 959 configuration options"
-echo "  • Professional styling"
-echo "  • Foundation framework (inlined)"
+  if [[ ${IS_REMOTE} -eq 1 ]]; then
+    echo "Verifying Module.php on remote..."
+    ssh "${REMOTE_HOST}" "test -f '${REMOTE_PATH}/Module.php'" || { echo "ERROR: Module.php not found on remote"; exit 2; }
 
-echo ""
-print_success "🏆 MISSION ACCOMPLISHED!"
-print_success "Theme is production-ready with 99% file reduction!"
+    echo "Setting ownership (www-data:www-data) on ${REMOTE_PATH}..."
+    ssh "${REMOTE_HOST}" "${REMOTE_SUDO} chown -R 'www-data:www-data' '${REMOTE_PATH}'"
 
-echo ""
-print_info "📞 SUPPORT:"
-echo "  • All code is self-contained and readable"
-echo "  • No external dependencies to troubleshoot"
-echo "  • Direct CSS editing for customizations"
-echo "  • Complete documentation included"
+    echo "Setting permissions (dirs ${DIR_MODE}, files ${FILE_MODE})..."
+    ssh "${REMOTE_HOST}" "${REMOTE_SUDO} find '${REMOTE_PATH}' -type d -exec chmod ${DIR_MODE} {} +"
+    ssh "${REMOTE_HOST}" "${REMOTE_SUDO} find '${REMOTE_PATH}' -type f -exec chmod ${FILE_MODE} {} +"
 
-echo ""
-print_success "🎯 Ready for deployment! No additional setup required."
+    if [[ "${SKIP_RESTART:-0}" != "1" ]]; then
+      echo "Restarting apache2 on remote..."
+      ssh "${REMOTE_HOST}" "${REMOTE_SUDO} systemctl restart apache2"
+    else
+      echo "Skipping apache2 restart (SKIP_RESTART=1)"
+    fi
+  else
+    echo "Verifying Module.php locally..."
+    test -f "${REMOTE_PATH}/Module.php" || { echo "ERROR: Module.php not found locally"; exit 2; }
+
+    echo "Setting ownership (www-data:www-data) on ${REMOTE_PATH}..."
+    ${REMOTE_SUDO} chown -R 'www-data:www-data' "${REMOTE_PATH}"
+
+    echo "Setting permissions (dirs ${DIR_MODE}, files ${FILE_MODE})..."
+    find "${REMOTE_PATH}" -type d -exec ${REMOTE_SUDO} chmod ${DIR_MODE} {} +
+    find "${REMOTE_PATH}" -type f -exec ${REMOTE_SUDO} chmod ${FILE_MODE} {} +
+
+    if [[ "${SKIP_RESTART:-0}" != "1" ]]; then
+      echo "Restarting apache2 locally..."
+      ${REMOTE_SUDO} systemctl restart apache2
+    else
+      echo "Skipping apache2 restart (SKIP_RESTART=1)"
+    fi
+  fi
+fi
+
+
+echo "Deploy complete."
+
