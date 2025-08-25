@@ -12,31 +12,10 @@
     const FONT_CONFIG = {
         timeout: 3000, // 3 seconds timeout
         families: [
-            'Roboto:300,400,500,600,700,800',
-            'Open Sans:300,400,500,600,700,800',
-            'Lato:300,400,700',
-            'Montserrat:300,400,500,600,700,800',
-            'Source Sans Pro:300,400,600,700',
-            'Nunito:300,400,500,600,700,800',
-            'Poppins:300,400,500,600,700,800',
-            'Inter:300,400,500,600,700,800',
-            'Work Sans:300,400,500,600,700,800',
-            'Fira Sans:300,400,500,600,700,800',
-            'Merriweather:300,400,700',
-            'Playfair Display:400,600,700',
-            'Crimson Text:400,600',
-            'Libre Baskerville:400,700',
-            'Lora:400,500,600,700',
-            'PT Serif:400,700',
-            'Source Serif Pro:400,600,700',
-            'Oswald:300,400,500,600,700',
-            'Raleway:300,400,500,600,700,800',
-            'Bebas Neue:400',
-            'Anton:400',
-            'Dancing Script:400,500,600,700',
-            'Pacifico:400',
-            'Fira Code:300,400,500,600,700',
-            'Source Code Pro:300,400,500,600,700'
+            // Keep aligned with theme presets and CSS fallbacks
+            'Cormorant Garamond:400,600,700',
+            'Merriweather:400,700',
+            'Playfair Display:400,600,700'
         ]
     };
     
