@@ -112,8 +112,12 @@ body .site-tagline,
 }
 
 /* Force inheritance for all child elements */
-.omeka-s * {
+.omeka-s :not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(i[class^="fa-"]):not(svg):not(code):not(pre):not(kbd):not(samp) {
     font-family: inherit !important;
+}
+
+code, pre, kbd, samp {
+    font-family: var(--code-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace) !important;
 }
 
 /* Specific overrides for common Omeka S elements */
