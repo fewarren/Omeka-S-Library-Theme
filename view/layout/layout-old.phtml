@@ -1599,15 +1599,15 @@ echo $this->headScript();
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', fixVerticalBar);
-               } else {
+        } else {
             fixVerticalBar();
+        }
+
     <?php if (method_exists($this, 'identity') && $this->identity()): ?>
       <div style="text-align:center;margin:8px 0;">
         <a href="#" data-action="open-preset-preview" class="admin-preview-trigger">Preview current preset</a>
       </div>
     <?php endif; ?>
-
-        }
 
         // Also apply with delays to catch any late-loading content
         setTimeout(fixVerticalBar, 100);
