@@ -64,7 +64,7 @@ $resourceTypesToClasses = [
         $body = $body ? $body->asHtml() : $escape($resource->displayDescription(null, $lang));
     ?>
 
-    <li class="<?= $resourceType . ' ' . $resourceTypesToClasses[$resourceType] ?? '' ?> resource <?= $gridListMode === 'list_only' ? 'media-object' : '' ?>">
+    <li class="<?= $escapeAttr(trim($resourceType . ' ' . ($resourceTypesToClasses[$resourceType] ?? ''))) ?> resource <?= $gridListMode === 'list_only' ? 'media-object' : '' ?>">
         <div class="resource-meta <?= $gridListMode === 'list_only' ? 'media-object-section' : '' ?>">
             <input form="contact-us" class="contact-us-resource" type="checkbox" name="fields[id][]" value="<?= $resource->id() ?>" title="<?= $labelContactUs ?>"/>
             <?= $resource->linkPretty('medium', $heading) ?>
