@@ -1,8 +1,9 @@
 /* Library polish: palette + buttons/links/zone backgrounds (renamed from sufism-polish.css) */
 :root {
-  --color-primary: var(--color-primary, #1F3A5F);
-  --color-accent: var(--color-accent, #7A1E3A);
-  --zone-bg: var(--zone-bg, #fffaf7);
+:root {
+  --color-primary: #1F3A5F;
+  --color-accent: #7A1E3A;
+  --zone-bg: #fffaf7;
 }
 
 /* Buttons and links */
