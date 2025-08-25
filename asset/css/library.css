@@ -11,7 +11,7 @@
 .breadcrumbs li a,
 .breadcrumbs li.active,
 .breadcrumbs li {
-  font-family: var(--theme-body-font, var(--body-font-family, 'Helvetica Neue, Arial, sans-serif')) !important;
+  font-family: var(--theme-body-font, var(--body-font-family, "Helvetica Neue", Arial, sans-serif)) !important;
   color: var(--body-font-color, #4a5568) !important;
 }
 
