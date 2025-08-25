@@ -143,8 +143,38 @@ $colors = $themeSetting('colors_rights');
 <button type="button" class="browse-toggle closed"><?php echo $translate('Options'); ?></button>
 </div>
 <div class="browse-controls top closed">
-    <?php if (!$this->themeSetting('enable_pagination', 1)) { echo '<style>.browse-controls.top,.browse-controls.bottom{display:none !important;}</style>'; } ?>
+    <?php if ($this->themeSetting('enable_pagination', 1)): ?>
+        <?php echo $this->pagination(); ?>
+        <?php if (strpos($layoutSetting, 'toggle') !== false): ?>
+            <div class="layout-toggle">
+                <button type="button"
+                        aria-label="<?php echo $translate('Grid'); ?>"
+                        class="tiny button grid o-icon-grid"
+                        <?php echo $gridState; ?>></button>
+                <button type="button"
+                        aria-label="<?php echo $translate('List'); ?>"
+                        class="tiny button list o-icon-list"
+                        <?php echo $listState; ?>></button>
+            </div>
+        <?php endif; ?>
+        <?php echo $this->hyperlink(
+            $translate('Advanced search'),
+            $this->url(
+                'site/resource',
+                ['controller' => 'item', 'action' => 'search'],
+                ['query' => $query],
+                true
+            ),
+            ['class' => 'advanced-search']
+        ); ?>
+        <?php echo $this->browse()->renderSortSelector('items'); ?>
+    <?php endif; ?>
 
+    <?php if ($this->themeSetting('enable_pagination', 1)): ?>
+    <div class="browse-controls bottom">
+        <?php echo $this->pagination(); ?>
+    </div>
+    <?php endif; ?>
     <?php echo $this->pagination(); ?>
     <?php if (strpos($layoutSetting, 'toggle') !== false): ?>
     <div class="layout-toggle">
