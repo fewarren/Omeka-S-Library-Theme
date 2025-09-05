@@ -1,0 +1,269 @@
+<?php
+// Clean, simple layout following Omeka S best practices
+$escape = $this->plugin('escapeHtml');
+$siteTitle = $site->title();
+
+// Get theme settings directly (no complex helpers)
+$stylePreset = $this->themeSetting('style_preset', 'traditional');
+$presetMode = $this->themeSetting('preset_mode', 'baseline');
+
+// Define preset values
+$presets = [
+    'traditional' => [
+        'h1_font' => 'Georgia, serif',
+        'h1_size' => '2rem',
+        'h1_color' => '#2c4a6b',
+        'h1_weight' => '600',
+        'h2_font' => 'Georgia, serif', 
+        'h2_size' => '1.5rem',
+        'h2_color' => '#2c4a6b',
+        'h2_weight' => '600',
+        'h3_font' => 'Georgia, serif',
+        'h3_size' => '1.25rem', 
+        'h3_color' => '#2c4a6b',
+        'h3_weight' => '500',
+        'body_font' => 'Helvetica Neue, Arial, sans-serif',
+        'body_size' => '1rem',
+        'body_color' => '#333333',
+        'body_weight' => '400',
+        'tagline_font' => 'Georgia, serif',
+        'tagline_color' => '#666666',
+        'tagline_weight' => '400',
+        'tagline_style' => 'italic',
+        'primary_color' => '#2C4A6B',
+        'accent_color' => '#D4AF37',
+        'toc_bg' => '#ffffff',
+        'toc_border' => '#D4AF37',
+        'toc_text' => '#2c4a6b'
+    ],
+    'modern' => [
+        'h1_font' => 'Cormorant Garamond, Georgia, serif',
+        'h1_size' => '2.5rem',
+        'h1_color' => '#111111', 
+        'h1_weight' => '600',
+        'h2_font' => 'Cormorant Garamond, Georgia, serif',
+        'h2_size' => '2rem',
+        'h2_color' => '#2c4a6b',
+        'h2_weight' => '600', 
+        'h3_font' => 'Georgia, serif',
+        'h3_size' => '1.5rem',
+        'h3_color' => '#2c4a6b', 
+        'h3_weight' => '500',
+        'body_font' => 'Helvetica Neue, Arial, sans-serif',
+        'body_size' => '1.125rem',
+        'body_color' => '#111111',
+        'body_weight' => '400',
+        'tagline_font' => 'Georgia, serif',
+        'tagline_color' => '#f7c97f',
+        'tagline_weight' => '400', 
+        'tagline_style' => 'normal',
+        'primary_color' => '#2C4A6B',
+        'accent_color' => '#D4AF37',
+        'toc_bg' => '#ffffff',
+        'toc_border' => '#D4AF37', 
+        'toc_text' => '#2c4a6b'
+    ]
+];
+
+// Helper function to resolve setting vs preset
+$resolve = function($key, $settingName, $default = '') use ($presets, $stylePreset, $presetMode) {
+    $presetValue = $presets[$stylePreset][$key] ?? $default;
+    if ($presetMode === 'override_all') {
+        return $presetValue;
+    }
+    // baseline mode: use setting if not empty, else preset
+    $settingValue = $this->themeSetting($settingName, '');
+    return !empty($settingValue) ? $settingValue : $presetValue;
+};
+
+// Resolve all typography and color values
+$h1Font = $resolve('h1_font', 'h1_font_family');
+$h1Size = $resolve('h1_size', 'h1_font_size'); 
+$h1Color = $resolve('h1_color', 'h1_font_color');
+$h1Weight = $resolve('h1_weight', 'h1_font_weight');
+
+$h2Font = $resolve('h2_font', 'h2_font_family');
+$h2Size = $resolve('h2_size', 'h2_font_size');
+$h2Color = $resolve('h2_color', 'h2_font_color'); 
+$h2Weight = $resolve('h2_weight', 'h2_font_weight');
+
+$h3Font = $resolve('h3_font', 'h3_font_family');
+$h3Size = $resolve('h3_size', 'h3_font_size');
+$h3Color = $resolve('h3_color', 'h3_font_color');
+$h3Weight = $resolve('h3_weight', 'h3_font_weight');
+
+$bodyFont = $resolve('body_font', 'body_font_family');
+$bodySize = $resolve('body_size', 'body_font_size');
+$bodyColor = $resolve('body_color', 'body_font_color');
+$bodyWeight = $resolve('body_weight', 'body_font_weight');
+
+$taglineFont = $resolve('tagline_font', 'tagline_font_family');
+$taglineColor = $resolve('tagline_color', 'tagline_font_color');
+$taglineWeight = $resolve('tagline_weight', 'tagline_font_weight');
+$taglineStyle = $resolve('tagline_style', 'tagline_font_style');
+
+$primaryColor = $resolve('primary_color', 'primary_color');
+$accentColor = $resolve('accent_color', 'accent_color');
+$tocBg = $resolve('toc_bg', 'toc_background_color');
+$tocBorder = $resolve('toc_border', 'toc_border_color');
+$tocText = $resolve('toc_text', 'toc_text_color');
+
+// Other settings
+$headerLayout = $this->themeSetting('header_layout', 'logo_with_tagline');
+$tagline = $this->themeSetting('site_tagline', 'Menu');
+$logoHeight = $this->themeSetting('logo_height', '100');
+$headerHeight = $this->themeSetting('header_height', '100');
+
+// Standard Omeka setup
+$this->htmlElement('html')->setAttribute('lang', $this->lang());
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle)->setSeparator(' · ');
+$this->headTitle()->append($this->setting('installation_title', 'Omeka S'));
+
+// Load stylesheets
+$this->headLink()->appendStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+$this->headLink()->appendStylesheet('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Helvetica+Neue:wght@300;400;500;600;700&display=swap');
+$this->headLink()->appendStylesheet($this->assetUrl('css/foundation.css'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/library.css'));
+
+// Load scripts
+$this->headScript()->prependFile($this->assetUrl('vendor/jquery/jquery.min.js', 'Omeka'));
+$this->headScript()->prependFile($this->assetUrl('js/global.js', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('js/library-menu.v2.js'));
+
+$this->trigger('view.layout');
+$this->jsTranslate();
+$userBar = $this->userBar();
+
+if ($userBar) {
+    $this->htmlElement('body')->appendAttribute('class', 'user-bar');
+}
+?>
+<?php echo $this->doctype(); ?>
+<?php echo $this->htmlElement('html'); ?>
+<head>
+    <?php echo $this->headMeta(); ?>
+    <?php echo $this->headTitle(); ?>
+    <?php echo $this->headLink(); ?>
+    
+    <style>
+    /* Dynamic theme styles based on settings and presets */
+    body {
+        font-family: <?php echo $bodyFont; ?>;
+        font-size: <?php echo $bodySize; ?>;
+        color: <?php echo $bodyColor; ?>;
+        font-weight: <?php echo $bodyWeight; ?>;
+    }
+    
+    h1 {
+        font-family: <?php echo $h1Font; ?>;
+        font-size: <?php echo $h1Size; ?>;
+        color: <?php echo $h1Color; ?>;
+        font-weight: <?php echo $h1Weight; ?>;
+    }
+    
+    h2 {
+        font-family: <?php echo $h2Font; ?>;
+        font-size: <?php echo $h2Size; ?>;
+        color: <?php echo $h2Color; ?>;
+        font-weight: <?php echo $h2Weight; ?>;
+    }
+    
+    h3 {
+        font-family: <?php echo $h3Font; ?>;
+        font-size: <?php echo $h3Size; ?>;
+        color: <?php echo $h3Color; ?>;
+        font-weight: <?php echo $h3Weight; ?>;
+    }
+    
+    .site-tagline {
+        font-family: <?php echo $taglineFont; ?>;
+        color: <?php echo $taglineColor; ?>;
+        font-weight: <?php echo $taglineWeight; ?>;
+        font-style: <?php echo $taglineStyle; ?>;
+    }
+    
+    .site-header {
+        min-height: <?php echo $headerHeight; ?>px;
+    }
+    
+    .site-logo img {
+        max-height: <?php echo $logoHeight; ?>px;
+    }
+    
+    /* TOC Styling */
+    .toc, .table-of-contents, .list-of-pages {
+        background-color: <?php echo $tocBg; ?>;
+        border: 2px solid <?php echo $tocBorder; ?>;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .toc a, .table-of-contents a, .list-of-pages a {
+        color: <?php echo $tocText; ?>;
+        text-decoration: none;
+        display: block;
+        padding: 0.5rem 0;
+    }
+    
+    .toc a:hover, .table-of-contents a:hover, .list-of-pages a:hover {
+        color: <?php echo $accentColor; ?>;
+    }
+    
+    /* Primary color applications */
+    .primary-color {
+        color: <?php echo $primaryColor; ?>;
+    }
+    
+    .accent-color {
+        color: <?php echo $accentColor; ?>;
+    }
+    </style>
+    
+    <?php echo $this->headStyle(); ?>
+    <?php echo $this->headScript(); ?>
+</head>
+<body>
+    <?php echo $userBar; ?>
+    
+    <header class="site-header">
+        <div class="container">
+            <div class="row">
+                <div class="columns">
+                    <?php if ($headerLayout === 'logo_with_tagline' || $headerLayout === 'logo_only'): ?>
+                        <div class="site-logo">
+                            <?php if ($logo = $this->themeSettingAssetUrl('site_logo')): ?>
+                                <img src="<?php echo $logo; ?>" alt="<?php echo $escape($siteTitle); ?>">
+                            <?php else: ?>
+                                <h1><?php echo $escape($siteTitle); ?></h1>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($headerLayout === 'logo_with_tagline' || $headerLayout === 'tagline_only'): ?>
+                        <div class="site-tagline">
+                            <?php echo $escape($tagline); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <?php echo $this->content; ?>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="columns">
+                    <?php echo $this->themeSetting('footer_content', 'Powered by Omeka S'); ?>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

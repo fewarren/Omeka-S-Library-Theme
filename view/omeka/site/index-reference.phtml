@@ -1,0 +1,187 @@
+<?php
+/**
+ * Reference UI Homepage Template for Sufism Library Theme
+ * Clean, minimal homepage matching the reference screenshots
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$themeSetting = $this->plugin('themeSetting');
+$api = $this->plugin('api');
+$thumbnail = $this->plugin('thumbnail');
+$url = $this->plugin('url');
+
+// Get site data
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Library';
+$siteDescription = $site ? $site->summary() : '';
+
+// Get featured collections (first 6 item sets)
+$itemSets = [];
+$recentItems = [];
+
+if ($site) {
+    try {
+        $itemSets = $api->search('item_sets', [
+            'site_id' => $site->id(),
+            'limit' => 6,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+
+        // Get recent items for quick access
+        $recentItems = $api->search('items', [
+            'site_id' => $site->id(),
+            'limit' => 8,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+    } catch (Exception $e) {
+        // Fallback if API calls fail
+        $itemSets = [];
+        $recentItems = [];
+    }
+}
+
+// Add custom CSS for homepage
+$this->headLink()->appendStylesheet($this->assetUrl('css/homepage.css'));
+$this->htmlElement('body')->appendAttribute('class', 'homepage library-homepage reference-homepage');
+?>
+
+<!-- Simplified Hero Section -->
+<section class="hero-banner">
+    <div class="hero-content">
+        <?php /* Title/tagline are handled in global header; no duplicate hero text. */ ?>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="search-section">
+    <div class="search-container">
+        <form class="search-form" method="GET" action="<?php echo $url('site/resource', ['controller' => 'item', 'action' => 'browse'], true); ?>">
+            <input type="search" name="fulltext_search" placeholder="<?php echo $translate('Search the collection...'); ?>">
+            <button type="submit" class="search-button"><?php echo $translate('Search'); ?></button>
+        </form>
+    </div>
+</section>
+
+<!-- Main Content Layout -->
+<div class="homepage-content">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="homepage-sidebar">
+        <div class="sidebar-section">
+            <h3><?php echo $translate('Browse'); ?></h3>
+            <ul>
+                <li><a href="<?php echo $url('site/resource', ['controller' => 'item', 'action' => 'browse']); ?>"><?php echo $translate('All Items'); ?></a></li>
+                <li><a href="<?php echo $url('site/resource', ['controller' => 'item-set', 'action' => 'browse']); ?>"><?php echo $translate('Collections'); ?></a></li>
+                <li><a href="<?php echo $url('site/page', ['slug' => 'about']); ?>"><?php echo $translate('About'); ?></a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3><?php echo $translate('Categories'); ?></h3>
+            <ul>
+                <li><a href="#"><?php echo $translate('Manuscripts'); ?></a></li>
+                <li><a href="#"><?php echo $translate('Books'); ?></a></li>
+                <li><a href="#"><?php echo $translate('Articles'); ?></a></li>
+                <li><a href="#"><?php echo $translate('Audio'); ?></a></li>
+                <li><a href="#"><?php echo $translate('Images'); ?></a></li>
+            </ul>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="homepage-main">
+        
+        <!-- Library Statistics -->
+        <?php if ($site): ?>
+        <div class="content-section">
+            <div class="library-stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('items', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Items'); ?></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('item_sets', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Collections'); ?></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('media', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Media'); ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Featured Collections -->
+        <?php if (!empty($itemSets)): ?>
+        <div class="content-section featured-collections">
+            <h2><?php echo $translate('Featured Collections'); ?></h2>
+            <div class="resource-grid">
+                <?php foreach ($itemSets as $itemSet): ?>
+                <div class="resource-item">
+                    <div class="resource-thumbnail">
+                        <?php if ($primaryMedia = $itemSet->primaryMedia()): ?>
+                            <?php echo $thumbnail($primaryMedia, 'medium'); ?>
+                        <?php else: ?>
+                            <?php echo $translate('No image'); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="resource-title">
+                        <a href="<?php echo $escape($itemSet->url()); ?>">
+                            <?php echo $escape($itemSet->displayTitle()); ?>
+                        </a>
+                    </div>
+                    <div class="resource-description">
+                        <?php echo $escape($itemSet->displayDescription()); ?>
+                    </div>
+                    <div class="resource-meta">
+                        <span class="item-count">
+                            <?php echo sprintf($translate('%s items'), $itemSet->itemCount()); ?>
+                        </span>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Recent Items -->
+        <?php if (!empty($recentItems)): ?>
+        <div class="content-section recent-items">
+            <h2><?php echo $translate('Recent Items'); ?></h2>
+            <div class="resource-grid">
+                <?php foreach ($recentItems as $item): ?>
+                <div class="resource-item">
+                    <div class="resource-thumbnail">
+                        <?php if ($primaryMedia = $item->primaryMedia()): ?>
+                            <?php echo $thumbnail($primaryMedia, 'medium'); ?>
+                        <?php else: ?>
+                            <?php echo $translate('No image'); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="resource-title">
+                        <a href="<?php echo $escape($item->url()); ?>">
+                            <?php echo $escape($item->displayTitle()); ?>
+                        </a>
+                    </div>
+                    <div class="resource-description">
+                        <?php echo $escape($item->displayDescription()); ?>
+                    </div>
+                    <div class="resource-meta">
+                        <?php if ($date = $item->value('dcterms:date')): ?>
+                        <span class="item-date"><?php echo $escape($date); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+    </main>
+    
+</div>

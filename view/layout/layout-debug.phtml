@@ -1,0 +1,285 @@
+<?php
+/**
+ * DEBUG VERSION OF LAYOUT.PHTML
+ * This file contains extensive logging to diagnose theme setting issues
+ * Replace the original layout.phtml with this temporarily for debugging
+ */
+
+// =================================================================
+// STEP 1: COMPREHENSIVE DIAGNOSTIC LOGGING
+// =================================================================
+error_log('=== THEME SETTINGS DIAGNOSTIC START ===');
+error_log('Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+error_log('Timestamp: ' . date('Y-m-d H:i:s'));
+
+// Test if themeSetting method exists and works
+error_log('DIAGNOSTIC: Testing themeSetting method availability...');
+try {
+    if (!method_exists($this, 'themeSetting')) {
+        error_log('CRITICAL ERROR: themeSetting method does not exist!');
+        throw new Exception('themeSetting method not available');
+    }
+    error_log('SUCCESS: themeSetting method exists');
+    
+    // Test with a simple setting
+    $testSetting = $this->themeSetting('site_tagline', 'DEFAULT_TEST_VALUE');
+    error_log('TEST: site_tagline = ' . var_export($testSetting, true));
+    
+    // Test with font settings
+    $testH1Font = $this->themeSetting('h1_font_family', 'DEFAULT_H1_FONT');
+    error_log('TEST: h1_font_family = ' . var_export($testH1Font, true));
+    
+    $testBodyFont = $this->themeSetting('body_font_family', 'DEFAULT_BODY_FONT');
+    error_log('TEST: body_font_family = ' . var_export($testBodyFont, true));
+    
+} catch (Exception $e) {
+    error_log('CRITICAL ERROR in themeSetting test: ' . $e->getMessage());
+}
+
+// Test helper functions
+error_log('DIAGNOSTIC: Testing helper functions...');
+try {
+    $themeFunctions = $this->themeFunctions();
+    error_log('SUCCESS: themeFunctions helper loaded');
+    
+    if (method_exists($themeFunctions, 'getFontFamily')) {
+        error_log('SUCCESS: getFontFamily method exists in helper');
+        $testFontMapping = $themeFunctions->getFontFamily('helvetica');
+        error_log('TEST: getFontFamily(helvetica) = ' . var_export($testFontMapping, true));
+    } else {
+        error_log('ERROR: getFontFamily method does not exist in helper');
+    }
+    
+} catch (Exception $e) {
+    error_log('ERROR: themeFunctions helper failed: ' . $e->getMessage());
+}
+
+// Test direct function call (the problematic one)
+error_log('DIAGNOSTIC: Testing direct getFontFamily call...');
+try {
+    if (function_exists('getFontFamily')) {
+        error_log('SUCCESS: getFontFamily function exists globally');
+        $testDirectFont = getFontFamily('helvetica');
+        error_log('TEST: direct getFontFamily(helvetica) = ' . var_export($testDirectFont, true));
+    } else {
+        error_log('ERROR: getFontFamily function does not exist globally');
+    }
+} catch (Exception $e) {
+    error_log('ERROR: Direct getFontFamily call failed: ' . $e->getMessage());
+}
+
+// =================================================================
+// STEP 2: LOAD THEME SETTINGS WITH COMPREHENSIVE ERROR HANDLING
+// =================================================================
+error_log('DIAGNOSTIC: Loading all theme settings...');
+
+$themeSettings = [];
+$settingsToTest = [
+    'site_logo', 'logo_link_page', 'site_tagline', 'tagline_font', 'tagline_color',
+    'logo_height', 'header_height', 'header_layout',
+    'h1_font_family', 'h1_font_size', 'h1_font_color', 'h1_font_weight', 'h1_font_style',
+    'h2_font_family', 'h2_font_size', 'h2_font_color', 'h2_font_weight', 'h2_font_style',
+    'h3_font_family', 'h3_font_size', 'h3_font_color', 'h3_font_weight', 'h3_font_style',
+    'body_font_family', 'body_font_size', 'body_font_color', 'body_font_weight', 'body_font_style',
+    'primary_color', 'sacred_gold'
+];
+
+foreach ($settingsToTest as $setting) {
+    try {
+        $value = $this->themeSetting($setting, "DEFAULT_$setting");
+        $themeSettings[$setting] = $value;
+        error_log("SETTING: $setting = " . var_export($value, true));
+    } catch (Exception $e) {
+        error_log("ERROR loading setting $setting: " . $e->getMessage());
+        $themeSettings[$setting] = "ERROR_$setting";
+    }
+}
+
+// =================================================================
+// STEP 3: SAFE FONT FAMILY MAPPING
+// =================================================================
+error_log('DIAGNOSTIC: Creating safe font family mapping...');
+
+function safeFontFamily($fontKey) {
+    $fontMap = [
+        'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+        'roboto' => 'Roboto, Arial, sans-serif',
+        'open_sans' => 'Open Sans, Arial, sans-serif',
+        'lato' => 'Lato, Arial, sans-serif',
+        'arial' => 'Arial, sans-serif',
+        'georgia' => 'Georgia, serif',
+        'times' => 'Times New Roman, serif',
+        'system' => 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    ];
+    
+    $result = isset($fontMap[$fontKey]) ? $fontMap[$fontKey] : $fontMap['system'];
+    error_log("FONT MAPPING: $fontKey -> $result");
+    return $result;
+}
+
+// =================================================================
+// STEP 4: GENERATE SAFE CSS WITH FALLBACKS
+// =================================================================
+error_log('DIAGNOSTIC: Generating CSS with safe fallbacks...');
+
+$safeCss = "
+/* DIAGNOSTIC CSS - Generated with safe fallbacks */
+/* Timestamp: " . date('Y-m-d H:i:s') . " */
+
+:root {
+    --body-font-family: " . safeFontFamily($themeSettings['body_font_family'] ?? 'helvetica') . ";
+    --h1-font-family: " . safeFontFamily($themeSettings['h1_font_family'] ?? 'helvetica') . ";
+    --h2-font-family: " . safeFontFamily($themeSettings['h2_font_family'] ?? 'helvetica') . ";
+    --h3-font-family: " . safeFontFamily($themeSettings['h3_font_family'] ?? 'helvetica') . ";
+    --tagline-font-family: " . safeFontFamily($themeSettings['tagline_font'] ?? 'georgia') . ";
+    
+    --body-font-size: " . ($themeSettings['body_font_size'] ?? '1rem') . ";
+    --h1-font-size: " . ($themeSettings['h1_font_size'] ?? '2.5rem') . ";
+    --h2-font-size: " . ($themeSettings['h2_font_size'] ?? '2rem') . ";
+    --h3-font-size: " . ($themeSettings['h3_font_size'] ?? '1.5rem') . ";
+    
+    --body-font-color: " . ($themeSettings['body_font_color'] ?? '#4a5568') . ";
+    --h1-font-color: " . ($themeSettings['h1_font_color'] ?? '#2c5aa0') . ";
+    --h2-font-color: " . ($themeSettings['h2_font_color'] ?? '#2c5aa0') . ";
+    --h3-font-color: " . ($themeSettings['h3_font_color'] ?? '#2c5aa0') . ";
+    --tagline-color: " . ($themeSettings['tagline_color'] ?? '#f7c97f') . ";
+    
+    --primary-color: " . ($themeSettings['primary_color'] ?? '#2C4A6B') . ";
+    --sacred-gold: " . ($themeSettings['sacred_gold'] ?? '#D4AF37') . ";
+}
+
+/* High specificity overrides */
+html body {
+    font-family: var(--body-font-family) !important;
+    font-size: var(--body-font-size) !important;
+    color: var(--body-font-color) !important;
+}
+
+html body h1 {
+    font-family: var(--h1-font-family) !important;
+    font-size: var(--h1-font-size) !important;
+    color: var(--h1-font-color) !important;
+}
+
+html body h2 {
+    font-family: var(--h2-font-family) !important;
+    font-size: var(--h2-font-size) !important;
+    color: var(--h2-font-color) !important;
+}
+
+html body h3 {
+    font-family: var(--h3-font-family) !important;
+    font-size: var(--h3-font-size) !important;
+    color: var(--h3-font-color) !important;
+}
+
+.site-tagline {
+    font-family: var(--tagline-font-family) !important;
+    color: var(--tagline-color) !important;
+}
+";
+
+error_log('DIAGNOSTIC: CSS generated successfully');
+
+// =================================================================
+// STEP 5: BASIC HTML STRUCTURE WITH DIAGNOSTIC INFO
+// =================================================================
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Diagnostic Mode';
+
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle);
+
+// Add the diagnostic CSS
+$this->headStyle()->appendStyle($safeCss);
+
+error_log('=== THEME SETTINGS DIAGNOSTIC END ===');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <?php echo $this->headMeta() ?>
+    <?php echo $this->headTitle() ?>
+    <?php echo $this->headLink(); ?>
+    <?php echo $this->headStyle(); ?>
+    <?php echo $this->headScript(); ?>
+    
+    <!-- DIAGNOSTIC INFO -->
+    <style>
+        .diagnostic-info {
+            background: #f0f0f0;
+            border: 2px solid #ccc;
+            padding: 20px;
+            margin: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .diagnostic-info h3 {
+            color: #d00;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- DIAGNOSTIC INFORMATION PANEL -->
+    <div class="diagnostic-info">
+        <h3>🔍 THEME SETTINGS DIAGNOSTIC MODE</h3>
+        <p><strong>Timestamp:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
+        <p><strong>Theme Settings Status:</strong></p>
+        <ul>
+            <?php foreach ($themeSettings as $key => $value): ?>
+            <li><strong><?php echo htmlspecialchars($key); ?>:</strong> <?php echo htmlspecialchars(var_export($value, true)); ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <p><strong>Check server error logs for detailed diagnostic information.</strong></p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="site-header" style="background: #fff; padding: 20px; text-align: center; border-bottom: 3px solid var(--sacred-gold);">
+        <div class="site-logo">
+            <h1 style="font-family: var(--h1-font-family); color: var(--h1-font-color);">DIAGNOSTIC MODE</h1>
+        </div>
+        <div class="site-tagline" style="font-family: var(--tagline-font-family); color: var(--tagline-color);">
+            <?php echo htmlspecialchars($themeSettings['site_tagline'] ?? 'Testing Theme Settings'); ?>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content-wrapper" style="max-width: 900px; margin: 40px auto; padding: 40px; background: #fff;">
+        <main>
+            <h2 style="font-family: var(--h2-font-family); color: var(--h2-font-color);">Theme Settings Test</h2>
+            <h3 style="font-family: var(--h3-font-family); color: var(--h3-font-color);">Typography Test</h3>
+            <p style="font-family: var(--body-font-family); color: var(--body-font-color);">
+                This is a test paragraph to verify that body text styling is working correctly. 
+                The font family, size, and color should reflect the theme settings.
+            </p>
+            
+            <!-- ACTUAL CONTENT -->
+            <?php echo $this->content; ?>
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="background: var(--primary-color); color: #fff; padding: 20px; text-align: center;">
+        <p>Diagnostic Mode - Check server logs for detailed information</p>
+    </footer>
+
+    <!-- DIAGNOSTIC JAVASCRIPT -->
+    <script>
+    console.log('🔍 THEME DIAGNOSTIC MODE ACTIVE');
+    console.log('CSS Variables:', {
+        bodyFont: getComputedStyle(document.documentElement).getPropertyValue('--body-font-family'),
+        h1Font: getComputedStyle(document.documentElement).getPropertyValue('--h1-font-family'),
+        h2Font: getComputedStyle(document.documentElement).getPropertyValue('--h2-font-family'),
+        primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color')
+    });
+    
+    console.log('Computed Styles:', {
+        bodyFontFamily: getComputedStyle(document.body).fontFamily,
+        h1FontFamily: getComputedStyle(document.querySelector('h1')).fontFamily,
+        h2FontFamily: getComputedStyle(document.querySelector('h2')).fontFamily
+    });
+    </script>
+</body>
+</html>

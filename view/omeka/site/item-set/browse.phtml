@@ -1,0 +1,334 @@
+<?php
+/**
+ * Enhanced Collection Browse Template for Sufism Library Theme
+ * Implements faceted browsing and enhanced collection display
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$thumbnail = $this->plugin('thumbnail');
+$themeSetting = $this->plugin('themeSetting');
+$api = $this->plugin('api');
+
+// Load enhanced styles and scripts
+$this->headScript()->appendFile($this->assetUrl('js/browse.js'));
+$this->headScript()->appendFile($this->assetUrl('js/facets.js'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/browse.css'));
+
+// Theme settings
+$layoutSetting = $this->themeSetting('browse_layout', 'grid');
+$gridState = ($layoutSetting == 'togglegrid') ? 'disabled' : '';
+$listState = ($layoutSetting == 'togglelist') ? 'disabled': '';
+$isGrid = (strpos($layoutSetting, 'grid') !== false) ? true : false;
+$enableFacets = $this->themeSetting('library_enable_facets', true);
+
+// Content settings
+$headingTerm = $this->siteSetting('browse_heading_property_term');
+$bodyTerm = $this->siteSetting('browse_body_property_term');
+$bodyTruncate = $this->themeSetting('truncate_body_property');
+
+$filterLocale = (bool) $this->siteSetting('filter_locale_values');
+$lang = $this->lang();
+$valueLang = $filterLocale ? [$lang, ''] : null;
+
+$this->htmlElement('body')->appendAttribute('class', 'item-set resource browse library-browse');
+?>
+
+<!-- Enhanced Browse Header -->
+<div class="library-browse-header">
+    <div class="grid-container">
+        <div class="grid-x grid-margin-x align-middle">
+            <div class="cell auto">
+                <?php echo $this->pageTitle($translate('Collections'), 1); ?>
+                <p class="browse-description"><?php echo $translate('Explore our digital collections and archives'); ?></p>
+            </div>
+            <div class="cell shrink">
+                <div class="browse-stats">
+                    <span class="stat-number"><?php echo number_format(count($itemSets)); ?></span>
+                    <span class="stat-label"><?php echo $translate('Collections'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Search and Filters -->
+<div class="library-search-section">
+    <div class="grid-container">
+        <?php echo $this->searchFilters(); ?>
+    </div>
+</div>
+
+<!-- Main Browse Content -->
+<div class="library-browse-content">
+    <div class="grid-container">
+        <div class="grid-x grid-margin-x">
+
+            <!-- Faceted Sidebar -->
+            <?php if ($enableFacets): ?>
+            <div class="cell large-3 medium-4">
+                <aside class="facet-sidebar">
+                    <h3 class="facet-title"><?php echo $translate('Filter Collections'); ?></h3>
+
+                    <!-- Collection Type Facet -->
+                    <div class="facet-group">
+                        <div class="facet-group-header" data-toggle="collection-type">
+                            <h4 class="facet-group-title"><?php echo $translate('Collection Type'); ?></h4>
+                            <span class="facet-toggle"></span>
+                        </div>
+                        <div class="facet-group-content" id="collection-type">
+                            <ul class="facet-list">
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Manuscripts'); ?></span>
+                                        <span class="facet-count">12</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Photographs'); ?></span>
+                                        <span class="facet-count">8</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Audio Recordings'); ?></span>
+                                        <span class="facet-count">5</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Subject Facet -->
+                    <div class="facet-group">
+                        <div class="facet-group-header" data-toggle="subjects">
+                            <h4 class="facet-group-title"><?php echo $translate('Subjects'); ?></h4>
+                            <span class="facet-toggle"></span>
+                        </div>
+                        <div class="facet-group-content" id="subjects">
+                            <ul class="facet-list">
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Sufism'); ?></span>
+                                        <span class="facet-count">15</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Philosophy'); ?></span>
+                                        <span class="facet-count">7</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('History'); ?></span>
+                                        <span class="facet-count">9</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Date Range Facet -->
+                    <div class="facet-group">
+                        <div class="facet-group-header" data-toggle="date-range">
+                            <h4 class="facet-group-title"><?php echo $translate('Date Range'); ?></h4>
+                            <span class="facet-toggle"></span>
+                        </div>
+                        <div class="facet-group-content" id="date-range">
+                            <ul class="facet-list">
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('Before 1900'); ?></span>
+                                        <span class="facet-count">6</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('1900-1950'); ?></span>
+                                        <span class="facet-count">8</span>
+                                    </a>
+                                </li>
+                                <li class="facet-item">
+                                    <a href="#" class="facet-link">
+                                        <span class="facet-label"><?php echo $translate('1950-2000'); ?></span>
+                                        <span class="facet-count">11</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <?php endif; ?>
+
+            <!-- Results Area -->
+            <div class="cell <?php echo $enableFacets ? 'large-9 medium-8' : 'large-12'; ?>">
+
+                <!-- Results Header -->
+                <div class="results-header">
+                    <div class="results-count">
+                        <?php echo sprintf($translate('%s collections found'), number_format(count($itemSets))); ?>
+                    </div>
+
+                    <div class="results-controls">
+                        <!-- Layout Toggle -->
+                        <?php if (strpos($layoutSetting, 'toggle') !== false): ?>
+                        <div class="view-toggle">
+                            <button type="button" aria-label="<?php echo $translate('Grid'); ?>"
+                                    class="toggle-option grid <?php echo $isGrid ? 'is-active' : ''; ?>"
+                                    <?php echo $gridState; ?>>
+                                <i class="icon-grid"></i>
+                            </button>
+                            <button type="button" aria-label="<?php echo $translate('List'); ?>"
+                                    class="toggle-option list <?php echo !$isGrid ? 'is-active' : ''; ?>"
+                                    <?php echo $listState; ?>>
+                                <i class="icon-list"></i>
+                            </button>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Sorting -->
+                        <div class="results-sorting">
+                            <label for="sort-select"><?php echo $translate('Sort by:'); ?></label>
+                            <select id="sort-select" name="sort">
+                                <option value="title"><?php echo $translate('Title'); ?></option>
+                                <option value="created"><?php echo $translate('Date Created'); ?></option>
+                                <option value="modified"><?php echo $translate('Date Modified'); ?></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination Top -->
+                <div class="pagination-top">
+                    <?php echo $this->pagination(); ?>
+                </div>
+
+                <!-- Collection Grid/List -->
+                <?php $this->trigger('view.browse.before'); ?>
+
+                <div class="library-collections-container">
+                    <?php if ($isGrid): ?>
+                    <!-- Grid Layout -->
+                    <div class="collections-grid">
+                        <div class="grid-x grid-margin-x small-up-1 medium-up-2 large-up-3">
+                            <?php foreach ($itemSets as $itemSet):
+                                $heading = $headingTerm ? $itemSet->value($headingTerm, ['default' => $translate('[Untitled]'), 'lang' => $valueLang]) : $itemSet->displayTitle(null, $valueLang);
+                                $body = $bodyTerm ? $itemSet->value($bodyTerm, ['lang' => $valueLang]) : $itemSet->displayDescription(null, $valueLang);
+                                $itemCount = $itemSet->itemCount();
+                            ?>
+                            <div class="cell">
+                                <div class="collection-card">
+                                    <div class="card-image">
+                                        <?php if ($thumbnail($itemSet, 'medium')): ?>
+                                            <a href="<?php echo $escape($itemSet->url()); ?>">
+                                                <?php echo $thumbnail($itemSet, 'medium'); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <div class="placeholder-image">
+                                                <i class="icon-collection"></i>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <div class="card-overlay">
+                                            <span class="item-count"><?php echo sprintf($translate('%s items'), $itemCount); ?></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-content">
+                                        <h3 class="card-title">
+                                            <a href="<?php echo $escape($itemSet->url()); ?>">
+                                                <?php echo $escape($heading); ?>
+                                            </a>
+                                        </h3>
+
+                                        <?php if ($body): ?>
+                                        <p class="card-description">
+                                            <?php echo $bodyTruncate ? $this->truncate($escape($body), $bodyTruncate) : $escape($body); ?>
+                                        </p>
+                                        <?php endif; ?>
+
+                                        <div class="card-actions">
+                                            <a href="<?php echo $escape($itemSet->url()); ?>" class="button primary">
+                                                <?php echo $translate('View Collection'); ?>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <?php else: ?>
+                    <!-- List Layout -->
+                    <div class="collections-list">
+                        <?php foreach ($itemSets as $itemSet):
+                            $heading = $headingTerm ? $itemSet->value($headingTerm, ['default' => $translate('[Untitled]'), 'lang' => $valueLang]) : $itemSet->displayTitle(null, $valueLang);
+                            $body = $bodyTerm ? $itemSet->value($bodyTerm, ['lang' => $valueLang]) : $itemSet->displayDescription(null, $valueLang);
+                            $itemCount = $itemSet->itemCount();
+                        ?>
+                        <div class="collection-list-item">
+                            <div class="grid-x grid-margin-x">
+                                <div class="cell medium-3">
+                                    <div class="list-image">
+                                        <?php if ($thumbnail($itemSet, 'medium')): ?>
+                                            <a href="<?php echo $escape($itemSet->url()); ?>">
+                                                <?php echo $thumbnail($itemSet, 'medium'); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <div class="placeholder-image">
+                                                <i class="icon-collection"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="cell medium-9">
+                                    <div class="list-content">
+                                        <h3 class="list-title">
+                                            <a href="<?php echo $escape($itemSet->url()); ?>">
+                                                <?php echo $escape($heading); ?>
+                                            </a>
+                                        </h3>
+
+                                        <?php if ($body): ?>
+                                        <p class="list-description">
+                                            <?php echo $bodyTruncate ? $this->truncate($escape($body), $bodyTruncate) : $escape($body); ?>
+                                        </p>
+                                        <?php endif; ?>
+
+                                        <div class="list-meta">
+                                            <span class="item-count"><?php echo sprintf($translate('%s items'), $itemCount); ?></span>
+                                            <a href="<?php echo $escape($itemSet->url()); ?>" class="view-link">
+                                                <?php echo $translate('View Collection →'); ?>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php $this->trigger('view.browse.after'); ?>
+
+                <!-- Pagination Bottom -->
+                <div class="pagination-bottom">
+                    <?php echo $this->pagination(); ?>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Facet Toggle -->
+<?php if ($enableFacets): ?>
+<button class="facet-toggle-mobile" aria-label="<?php echo $translate('Show Filters'); ?>"></button>
+<div class="facet-overlay"></div>
+<?php endif; ?>

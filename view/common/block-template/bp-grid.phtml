@@ -1,0 +1,16 @@
+<?php 
+// Add defensive defaults to prevent PHP 8 TypeError
+$components = $this->components ?? [];
+$resourceType = $this->resourceType ?? 'items';
+
+echo $this->partial('common/block-template/browse-preview-base.phtml', [
+        'layoutSetting' => 'grid',
+        'controller' => $resourceType,
+        'showThumbnail' => in_array('thumbnail', $components),
+        'showHeading' => in_array('resource-heading', $components),
+        'showBody' => in_array('resource-body', $components),
+        'resources' => $this->resources,
+        'previewTitle' => $this->heading,
+        'linkText' => $this->linkText
+    ]);
+?>

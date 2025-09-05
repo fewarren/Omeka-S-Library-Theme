@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+    // CORRECTED LAYOUT - Fixes design issues to match Library Theme style
+
+    $escape = $this->plugin('escapeHtml');
+    $siteTitle = $site->title();
+    echo $this->headTitle($siteTitle)->setSeparator(' · ');
+
+    // Prepare CSS includes with cache-busting BEFORE rendering headLink
+    // Use theme directory path instead of hardcoded relative paths
+    $themeDir = dirname(dirname(__DIR__));
+    $cssFiles = [
+        'library.css',
+        'library-polish.css', 
+        'library-reoriented-design.css',
+        'font-overrides.css' // Load last for maximum specificity
+    ];
+    
+    foreach ($cssFiles as $cssFile) {
+        $cssPath = $themeDir . '/asset/css/' . $cssFile;
+        $cssUrl = $this->assetUrl('css/' . $cssFile);
+        if (file_exists($cssPath)) {
+            $this->headLink()->appendStylesheet($cssUrl . '?v=' . filemtime($cssPath));
+        } else {
+            $this->headLink()->appendStylesheet($cssUrl);
+        }
+    }
+
+
+
+
+    /* Using Omeka S helpers only: $this->themeSetting() and $this->themeSettingAssetUrl() */
+
+    // Read theme settings (helpers only)
+    $builtinH1Size = $this->themeSetting('h1_font_size');
+    $builtinLogo = $this->themeSetting('logo');
+
+    // Get current preset
+    $currentPreset = $this->themeSetting('style_preset', 'traditional');
+
+    // Preset definitions - synchronized with enhanced-preset-system.js
+    $presetDefinitions = [
+        'traditional' => [
+            // Typography
+            'h1_font_family' => 'georgia',
+            'h1_font_size' => '2rem',
+            'h1_font_color' => '#2c4a6b',
+            'h1_font_weight' => '600',
+            'h2_font_family' => 'georgia',
+            'h2_font_size' => '1.5rem',
+            'h2_font_color' => '#2c4a6b',
+            'h2_font_weight' => '600',
+            'h3_font_family' => 'georgia',
+            'h3_font_size' => '1.25rem',
+            'h3_font_color' => '#2c4a6b',
+            'h3_font_weight' => '500',
+            'body_font_family' => 'helvetica',
+            'body_font_size' => '1rem',
+            'body_font_color' => '#333333',
+            'body_font_weight' => '400',
+            'tagline_font_family' => 'georgia',
+            'tagline_font_color' => '#666666',
+            'tagline_font_weight' => '400',
+            'tagline_font_style' => 'italic',
+            
+            // Page title
+            'page_title_font_family' => 'georgia',
+            'page_title_font_size' => '2.5rem',
+            'page_title_font_color' => '#2c4a6b',
+            'page_title_font_weight' => '600',
+            
+            // Colors
+            'primary_color' => '#2C4A6B',
+            'accent_color' => '#D4AF37',
+            
+            // TOC
+            'toc_background_color' => '#ffffff',
+            'toc_border_color' => '#D4AF37',
+            'toc_text_color' => '#2c4a6b',
+            
+            // Pagination
+            'pagination_background_color' => '#2c4a6b',
+            'pagination_font_color' => '#ffffff',
+            'pagination_hover_color' => '#1a365d',
+            'pagination_button_size' => 'medium',
+            'zone_background_color' => '#fffaf7'
+        ],
+        'modern' => [
+            // Typography
+            'h1_font_family' => 'cormorant',
+            'h1_font_size' => '2.5rem',
+            'h1_font_color' => '#111111',
+            'h1_font_weight' => '600',
+            'h2_font_family' => 'cormorant',
+            'h2_font_size' => '2rem',
+            'h2_font_color' => '#2c4a6b',
+            'h2_font_weight' => '600',
+            'h3_font_family' => 'georgia',
+            'h3_font_size' => '1.5rem',
+            'h3_font_color' => '#2c4a6b',
+            'h3_font_weight' => '500',
+            'body_font_family' => 'helvetica',
+            'body_font_size' => '1.125rem',
+            'body_font_color' => '#111111',
+            'body_font_weight' => '400',
+            'tagline_font_family' => 'georgia',
+            'tagline_font_color' => '#f7c97f',
+            'tagline_font_weight' => '400',
+            'tagline_font_style' => 'normal',
+            
+            // Page title
+            'page_title_font_family' => 'cormorant',
+            'page_title_font_size' => '3rem',
+            'page_title_font_color' => '#111111',
+            'page_title_font_weight' => '700',
+            
+            // Colors
+            'primary_color' => '#2C4A6B',
+            'accent_color' => '#D4AF37',
+            
+            // TOC
+            'toc_background_color' => '#ffffff',
+            'toc_border_color' => '#D4AF37',
+            'toc_text_color' => '#2c4a6b',
+            
+            // Pagination
+            'pagination_background_color' => '#2c4a6b',
+            'pagination_font_color' => '#ffffff',
+            'pagination_hover_color' => '#f7c97f',
+            'pagination_button_size' => 'large',
+            'zone_background_color' => '#fffaf7'
+        ]
+    ];
+
+    // Build settings using saved values with preset fallback
+    $settings = [];
+    if (isset($presetDefinitions[$currentPreset])) {
+        $presetValues = $presetDefinitions[$currentPreset];
+        foreach ($presetValues as $key => $presetValue) {
+            $savedValue = $this->themeSetting($key, null);
+            $settings[$key] = ($savedValue !== null && $savedValue !== '') ? $savedValue : $presetValue;
+        }
+    } else {
+        $settings = $presetDefinitions['traditional'];
+    }
+
+    // Add non-preset settings (these are not overridden by presets)
+    $settings['style_preset'] = $currentPreset;
+    $settings['site_tagline'] = $this->themeSetting('site_tagline', '');
+    $settings['footer_content'] = $this->themeSetting('footer_content', 'Powered by Omeka S');
+
+    // Ensure font sizes are included from preset (fix font size override issue)
+    if (!isset($settings['h1_font_size'])) {
+        $settings['h1_font_size'] = $presetDefinitions[$currentPreset]['h1_font_size'] ?? '2.2rem';
+    }
+    if (!isset($settings['h2_font_size'])) {
+        $settings['h2_font_size'] = $presetDefinitions[$currentPreset]['h2_font_size'] ?? '1.8rem';
+    }
+    if (!isset($settings['h3_font_size'])) {
+        $settings['h3_font_size'] = $presetDefinitions[$currentPreset]['h3_font_size'] ?? '1.4rem';
+    }
+
+    // Font mapping
+    $fontMapping = [
+        'georgia' => 'Georgia, serif',
+        'cormorant' => 'Cormorant Garamond, serif',
+        'helvetica' => 'Helvetica Neue, Arial, sans-serif',
+        'arial' => 'Arial, sans-serif',
+        'verdana' => 'Verdana, sans-serif'
+    ];
+
+    // Apply font mapping
+    foreach ($settings as $key => $value) {
+        if (strpos($key, 'font_family') !== false && isset($fontMapping[$value])) {
+            $settings[$key] = $fontMapping[$value];
+        }
+    }
+
+    ?>
+    <?php echo $this->headMeta(); ?>
+    <?php echo $this->headLink(); ?>
+
+    <style>
+    /* CORRECTED SUFISM LIBRARY THEME - Following sufismreoriented.org design */
+
+    /* Reset and base styles */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: <?php echo $escape($settings['body_font_family']); ?> !important;
+        color: <?php echo $escape($settings['body_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['body_font_size']); ?> !important;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    /* Heavy use of white backgrounds with zone backgrounds (sufismreoriented.org style) */
+    main, .content, .resource {
+        background: #ffffff;
+    }
+
+    /* Zone backgrounds for content areas (#fffaf7) */
+    .content-zone, .item-showcase, .resource-list, .browse-controls {
+        background: <?php echo $escape($settings['zone_background_color'] ?? '#fffaf7'); ?>;
+        padding: 25px;
+        margin: 20px 0;
+        border-radius: 8px;
+        border: 1px solid rgba(218, 165, 32, 0.2);
+    }
+
+    /* Site title fallback styling */
+    .site-title-fallback {
+        font-family: <?php echo $escape($settings['h1_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h1_font_color']); ?> !important;
+        font-size: 2.2rem !important;
+        margin: 0 0 12px 0;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Header structure - following sufismreoriented.org pattern */
+    header {
+        background: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 30px 20px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+    }
+
+    /* Logo area - centered following sufismreoriented.org */
+    .logo-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
+        gap: 12px; /* space between logo and tagline without relying on image margin */
+    }
+
+    .site-logo {
+        display: block !important; /* eliminate inline baseline gap */
+        max-height: 100px;
+        width: auto;
+        margin: 0 !important; /* no extra space that could show hover effects */
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        vertical-align: middle !important;
+        pointer-events: none !important; /* ensure not clickable even if JS tries */
+    }
+
+    /* Remove any hover/box/border on logo link */
+    .logo-link, .logo-link:hover, .logo-link:focus, .logo-link:active {
+        display: contents !important; /* remove box completely; children remain clickable */
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 0 !important;  /* kill underline baseline space */
+        font-size: 0 !important;    /* prevent stray underline width calc */
+        background: transparent !important;
+        background-image: none !important;
+        border: 0 !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
+        text-decoration: none !important;
+        color: inherit !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* Fallback for browsers not supporting display: contents */
+    @supports not (display: contents) {
+      .logo-link, .logo-link:hover, .logo-link:focus, .logo-link:active {
+        display: inline-block !important;
+      }
+    }
+
+    /* Ensure no hover transform on logo image */
+    .site-logo:hover { transform: none !important; }
+
+    /* Site tagline - smaller text centered below logo (sufismreoriented.org style) */
+    .site-tagline {
+        /* Let dynamic theme CSS control family/color/size/style/weight; keep this minimal */
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+    .site-tagline a.tagline-link { color: inherit !important; text-decoration: none; }
+    .site-tagline a.tagline-link:hover { text-decoration: underline; }
+
+    /* Hide redundant site title */
+    .site-title {
+        display: none !important;
+    }
+
+    /* Navigation - centered horizontal layout (sufismreoriented.org style) */
+    nav {
+        width: 100%;
+    }
+    :root {
+        --color-primary: <?php echo $escape($settings['primary_color']); ?>;
+        --color-accent: <?php echo $escape($settings['accent_color']); ?>;
+        --zone-bg: <?php echo $escape($settings['zone_background_color'] ?? '#fffaf7'); ?>;
+    }
+
+
+    /* Scope nav styling to header only so breadcrumbs/sub-menus aren’t affected */
+    header nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+    }
+
+    header nav li {
+        margin: 0;
+    }
+
+    header nav a {
+        color: var(--color-primary) !important;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1rem;
+        padding: 12px 20px;
+        border: 1px solid var(--color-primary);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.9);
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    /* Never treat the logo link like a nav button */
+    .logo-area .logo-link { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+
+    header nav a:hover {
+        color: var(--color-accent) !important;
+        border-color: var(--color-accent);
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+
+    /* Hide unwanted "Home" link in header nav only */
+    header nav a[href="/"], header nav a[href="#home"] {
+        display: none !important;
+    }
+
+    /* Main content area */
+    main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 30px;
+        min-height: 500px;
+    }
+
+    /* Typography - NUCLEAR OPTION - Override everything */
+    * h1, *[class*="h1"], *[id*="h1"],
+    html body main h1, html body .content h1, html body .resource h1,
+    html body h1, html body .h1, html body main h1.page-title,
+    html body main h1:not(.site-title-fallback),
+    html body div h1, html body section h1, html body article h1 {
+        font-family: <?php echo $escape($settings['h1_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h1_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h1_font_size']); ?> !important;
+        margin: 0 0 25px 0 !important;
+        line-height: 1.3 !important;
+        font-weight: 600 !important;
+    }
+
+    h2, .h2, main h2, .content h2, .resource h2, body h2 {
+        font-family: <?php echo $escape($settings['h2_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h2_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h2_font_size']); ?> !important;
+        margin: 30px 0 20px 0 !important;
+        line-height: 1.4 !important;
+        font-weight: 500 !important;
+    }
+
+    h3, .h3, main h3, .content h3, .resource h3, body h3 {
+        font-family: <?php echo $escape($settings['h3_font_family']); ?> !important;
+        color: <?php echo $escape($settings['h3_font_color']); ?> !important;
+        font-size: <?php echo $escape($settings['h3_font_size']); ?> !important;
+        margin: 25px 0 15px 0 !important;
+        line-height: 1.4 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Links - sufismreoriented.org style with gold borders */
+    a {
+        color: <?php echo $escape($settings['primary_color']); ?>;
+        text-decoration: none;
+    }
+
+    /* Disable hover decoration on the logo link specifically */
+    .logo-link:hover {
+        text-decoration: none !important;
+    }
+
+    a:hover {
+        color: <?php echo $escape($settings['accent_color']); ?>;
+        text-decoration: underline;
+    }
+
+    /* Content links in boxes (sufismreoriented.org style) - DISABLED globally; handled by themed components (TOC, breadcrumbs, pagination) */
+    /* main a, .content a, .resource a { }
+    */
+    /* Ensure the logo link never picks up these box styles */
+    .logo-area .logo-link { border: 0 !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+    .logo-area .logo-link:hover { border: 0 !important; background: transparent !important; }
+
+
+    /* Table of Contents - styling now entirely handled by common/theme-setting-css.phtml */
+    /* Intentionally left minimal to avoid overriding user settings */
+    .toc h2, .toc h3 { margin-top: 0; }
+
+    /* Prevent accidental inheritance for the logo link only */
+    .logo-area .logo-link { border: 0 !important; background: transparent !important; }
+    .logo-area .logo-link:hover { border: 0 !important; background: transparent !important; }
+
+    /* TOC hover states are controlled by user settings in theme-setting-css.phtml */
+
+    /* Pagination */
+    .pagination, .browse-controls {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    /* Pagination - FORCE preset values */
+    .pagination a, .pagination span, .browse-controls a, .browse-controls span,
+    .pagination li a, .pagination li span, .browse-controls li a, .browse-controls li span {
+        background-color: <?php echo $escape($settings['pagination_background_color']); ?> !important;
+        color: <?php echo $escape($settings['pagination_font_color']); ?> !important;
+        padding: 12px 18px !important;
+        margin: 0 4px !important;
+        text-decoration: none !important;
+        border-radius: 6px !important;
+        border: 1px solid <?php echo $escape($settings['primary_color']); ?> !important;
+        display: inline-block !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .pagination a:hover, .browse-controls a:hover,
+    .pagination li a:hover, .browse-controls li a:hover {
+        border-color: <?php echo $escape($settings['pagination_hover_color']); ?> !important;
+        color: <?php echo $escape($settings['pagination_hover_color']); ?> !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }
+
+    .pagination .current, .browse-controls .current,
+    .pagination li.current a, .browse-controls li.current a {
+        background-color: <?php echo $escape($settings['accent_color']); ?> !important;
+        color: #FFFFFF !important;
+        border-color: <?php echo $escape($settings['accent_color']); ?> !important;
+    }
+
+    /* Footer */
+    footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        padding: 30px 0;
+        margin-top: 60px;
+        text-align: center;
+        color: <?php echo $escape($settings['primary_color']); ?>;
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 30px;
+    }
+
+    /* User bar */
+    #user-bar {
+        background: rgba(0,0,0,0.85);
+        color: white;
+        padding: 10px 30px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        font-size: 14px;
+    }
+
+    #user-bar a {
+        color: white !important;
+        text-decoration: none;
+        margin-right: 20px;
+        padding: 5px 10px;
+        border-radius: 3px;
+    }
+
+    #user-bar a:hover {
+        background: rgba(255,255,255,0.2);
+        text-decoration: none;
+    }
+
+    /* Responsive design - maintaining centered layout */
+    @media (max-width: 768px) {
+        .header-container {
+            padding: 25px 20px 20px 20px;
+        }
+
+        .logo-area {
+            margin-bottom: 20px;
+        }
+
+        nav ul {
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        main {
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+        }
+
+        /* Adjust link boxes for mobile */
+        main a, .content a, .resource a {
+            padding: 8px 12px;
+            margin: 3px;
+        }
+    }
+
+    /* Tagline duplication is resolved by rendering it only in the header.
+       Do not hide main content elements here to preserve hero images and TOC. */
+
+    /* Text box highlighting - Gold borders for links */
+    .browse-controls a, .pagination a, .item-set-browse a,
+    .resource-link, .item-link, .media-link,
+    main a[href*="item-sets"], main a[href*="items"], main a[href*="browse"] {
+        border: 2px solid <?php echo $escape($settings['accent_color']); ?> !important;
+        border-radius: 6px !important;
+    }
+    </style>
+
+
+    <style>
+
+    .browse-controls a:hover, .pagination a:hover, .item-set-browse a:hover,
+    main a[href*="item-sets"]:hover, main a[href*="items"]:hover, main a[href*="browse"]:hover {
+        background: <?php echo $escape($settings['accent_color']); ?> !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Use JavaScript to remove text nodes containing "The Library" */
+    </style>
+
+    <script>
+    // TARGETED fixes for specific issues
+    document.addEventListener('DOMContentLoaded', function() {
+        function targetedFixes() {
+            // Keep JS minimal. Header/tagline is controlled in templates and CSS only.
+            // No DOM overrides required.
+
+            // No JS DOM massaging needed for links.
+        }
+        // Run targeted fixes
+        targetedFixes();
+        setTimeout(targetedFixes, 500);
+    });
+    </script>
+
+    <style>
+
+    /* Content styling - removed border-left that was causing gray bar */
+    .resource {
+        margin: 30px 0;
+        padding: 25px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid rgba(218, 165, 32, 0.2);
+    }
+
+    .resource h3 {
+        margin-top: 0;
+    }
+
+    /* Remove any default border-left from TOC and other elements */
+    .toc, .table-of-contents, #toc, .content-zone {
+        border-left: none !important;
+    }
+    </style>
+
+    <?php echo $this->partial('common/theme-setting-css'); ?>
+
+    <?php echo $this->headStyle(); ?>
+
+    <script>
+    // Quick check to ensure font-overrides.css is last and tagline anchor inherits style
+    (function(){
+      function moveFontOverridesLast(){
+        var links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+        var idx = links.findIndex(function(l){ return l.href && l.href.indexOf('font-overrides.css') !== -1; });
+        if (idx === -1) return; // not present
+        if (idx !== links.length - 1) {
+          var link = links[idx];
+          link.parentNode.removeChild(link);
+          document.head.appendChild(link);
+          console.warn('[Theme] Moved font-overrides.css to end of stylesheet list for maximum specificity');
+        }
+      }
+      function enforceTaglineLinkTypography(){
+        var root = getComputedStyle(document.documentElement);
+        var expected = {
+          style: (root.getPropertyValue('--tagline-font-style')||'normal').trim(),
+          family: (root.getPropertyValue('--tagline-font-family')||'inherit').trim(),
+          weight: (root.getPropertyValue('--tagline-font-weight')||'400').trim(),
+          color: (root.getPropertyValue('--tagline-color')||'inherit').trim(),
+          size: (root.getPropertyValue('--tagline-font-size')||'inherit').trim()
+        };
+        var a = document.querySelector('.site-tagline a, .site-tagline .tagline-link');
+        if (!a) return;
+        var cs = getComputedStyle(a);
+        if (cs.fontStyle !== expected.style) {
+          console.warn('[Theme] Tagline anchor font-style mismatch', cs.fontStyle, '!=', expected.style, 'Applying emergency fix.');
+          var s = document.createElement('style');
+          s.textContent = 'html body .site-tagline a, html body .site-tagline .tagline-link{ font-style:'+expected.style+' !important; font-family:'+expected.family+' !important; font-weight:'+expected.weight+' !important; color:'+expected.color+' !important; font-size:'+expected.size+' !important; }';
+          document.head.appendChild(s);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function(){
+          moveFontOverridesLast();
+          enforceTaglineLinkTypography();
+        });
+      } else {
+        moveFontOverridesLast();
+        enforceTaglineLinkTypography();
+      }
+    })();
+    </script>
+
+</head>
+<?php $submenuEnabled = ((string)$this->themeSetting('render_submenu_by_default', '0') === '1'); ?>
+<body class="<?php echo $submenuEnabled ? 'submenu-enabled' : 'submenu-disabled'; ?>">
+    <?php
+    // User bar
+    try {
+        $userIsAllowed = $this->userIsAllowed('Omeka\Entity\Site', 'update');
+        $showUserBar = $this->siteSetting('show_user_bar', 1) && $this->identity();
+
+        if ($showUserBar): ?>
+        <div id="user-bar">
+            <nav class="user-bar-nav">
+                <?php if ($userIsAllowed): ?>
+                <a href="<?php echo $escape($this->url('admin')); ?>">Admin</a>
+                <?php endif; ?>
+                <a href="<?php echo $escape($this->url('logout')); ?>">Logout</a>
+            </nav>
+        </div>
+        <?php endif;
+    } catch (Exception $e) {
+        // Silent fallback
+    }
+    ?>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-area">
+                <?php
+                // Logo display (helpers only) with fallback and enable switch
+                $logoEnabled = (string)$this->themeSetting('logo_enabled', '1') === '1';
+                $logoUrl = $this->themeSettingAssetUrl('logo') ?: $this->themeSettingAssetUrl('site_logo');
+                $logoFound = !empty($logoUrl);
+
+                if ($logoEnabled && $logoFound): ?>
+                        <img src="<?php echo $escape($logoUrl); ?>" alt="<?php echo $escape($siteTitle); ?>" class="site-logo" style="height: <?php echo (int)$this->themeSetting('logo_height', '100'); ?>px;" data-logo-click-disabled="true">
+
+                <?php else: ?>
+                    <h1 class="site-title-fallback"><?php echo $escape($siteTitle); ?></h1>
+                <?php endif; ?>
+
+                <?php if ($this->themeSetting('site_tagline')): ?>
+                <?php $tagline = $this->themeSetting('site_tagline'); $logoTarget = $this->themeSetting('logo_link_page', '/'); ?>
+                <div class="site-tagline"><a class="tagline-link" href="<?php echo $escape($logoTarget); ?>"><?php echo $escape($tagline); ?></a></div>
+                <?php endif; ?>
+            </div>
+
+            <nav>
+                <ul>
+                    <?php if ($this->themeSetting('show_browse_button', '1')): ?>
+                        <li><a href="<?php echo $escape($this->themeSetting('browse_button_target', '/browse')); ?>">Browse</a></li>
+                    <?php endif; ?>
+                    <?php if ($this->themeSetting('show_search_button', '1')): ?>
+                        <li><a href="<?php echo $escape($this->themeSetting('search_button_target', '/search')); ?>">Search</a></li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- DEBUGGING: Built-in vs Custom theme setting methods -->
+        <!-- DEPLOYMENT TEST: <?php echo date('Y-m-d H:i:s'); ?> - Files deployed correctly! -->
+
+
+        <?php echo $this->content; ?>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <?php echo $escape($settings['footer_content']); ?>
+        </div>
+    </footer>
+
+    <?php echo $this->headScript(); ?>
+</body>
+</html>

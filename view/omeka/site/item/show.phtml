@@ -1,0 +1,259 @@
+<?php
+/**
+ * Enhanced Item Show Template for Sufism Library Theme
+ * Implements emphasized metadata panels and full-width image display with lightbox
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$themeSetting = $this->plugin('themeSetting');
+$thumbnail = $this->plugin('thumbnail');
+
+// Load enhanced styles and scripts
+$this->headLink()->appendStylesheet($this->assetUrl('css/resource-page-blocks.css', 'Omeka'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/item-show.css'));
+$this->headScript()->appendFile($this->assetUrl('js/lightbox.js'));
+
+$this->htmlElement('body')->appendAttribute('class', 'item resource show library-item-show reference-item');
+
+// Theme settings
+$embedMedia = $this->siteSetting('item_media_embed', false);
+$itemMedia = $item->media();
+$showLayout = $this->themeSetting('show_layout');
+$mediaDisplay = $this->themeSetting('media_display', 'topgallery');
+$metadataEmphasis = $this->themeSetting('library_metadata_emphasis', 'enhanced');
+
+$fullWidthMainBlockContent = $this->resourcePageBlocks($item, 'full_width_main');
+$fullWidthMainHasBlocks = $fullWidthMainBlockContent->hasBlocks();
+$mainWithSidebarBlockContent = $this->resourcePageBlocks($item);
+$mainWithSidebarHasBlocks= $mainWithSidebarBlockContent->hasBlocks();
+$leftSidebarBlockContent = $this->resourcePageBlocks($item, 'left');
+$leftSidebarHasBlocks = $leftSidebarBlockContent->hasBlocks();
+$rightSidebarBlockContent = $this->resourcePageBlocks($item, 'right');
+$rightSidebarHasBlocks = $rightSidebarBlockContent->hasBlocks();
+
+$filterLocale = (bool) $this->siteSetting('filter_locale_values');
+$lang = $this->lang();
+$valueLang = $filterLocale ? [$lang, ''] : null;
+
+// Get item metadata for enhanced display
+$itemTitle = $item->displayTitle(null, $valueLang);
+$itemDescription = $item->displayDescription();
+$creator = $item->value('dcterms:creator', ['lang' => $valueLang]);
+$date = $item->value('dcterms:date', ['lang' => $valueLang]);
+$subject = $item->values('dcterms:subject', ['lang' => $valueLang]);
+$rights = $item->value('dcterms:rights', ['lang' => $valueLang]);
+$itemSets = $item->itemSets();
+?>
+
+<!-- Enhanced Item Header -->
+<div class="library-item-header">
+    <div class="grid-container">
+        <div class="grid-x grid-margin-x">
+            <div class="cell">
+                <!-- Breadcrumb Navigation -->
+                <nav class="breadcrumbs" aria-label="<?= $translate('Breadcrumb') ?>">
+                    <ul>
+                        <li><a href="<?= $this->url('site', [], true) ?>"><?= $translate('Home') ?></a></li>
+                        <li><a href="<?= $this->url('site/resource', ['controller' => 'item', 'action' => 'browse']) ?>"><?= $translate('Items') ?></a></li>
+                        <?php if (!empty($itemSets)): ?>
+                            <?php foreach ($itemSets as $itemSet): ?>
+                            <li><a href="<?= $escape($itemSet->url()) ?>"><?= $escape($itemSet->displayTitle()) ?></a></li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        <li class="current"><?= $escape($itemTitle) ?></li>
+                    </ul>
+                </nav>
+
+                <!-- Item Title and Type -->
+                <div class="item-title-section">
+                    <?php echo $this->pageTitle($itemTitle, 1); ?>
+                    <div class="item-meta-badges">
+                        <span class="item-type-badge"><?php echo $translate('Item'); ?></span>
+                        <?php if ($item->resourceClass()): ?>
+                        <span class="resource-class-badge"><?php echo $escape($item->resourceClass()->label()); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Media Gallery -->
+<?php if (!empty($itemMedia) && $mediaDisplay === 'topgallery'): ?>
+<div class="library-media-gallery">
+    <div class="grid-container">
+        <div class="media-viewer">
+            <div class="main-media">
+                <?php $primaryMedia = $itemMedia[0]; ?>
+                <div class="media-container" data-media-id="<?= $primaryMedia->id() ?>">
+                    <?php if ($primaryMedia->hasOriginal()): ?>
+                    <a href="<?= $escape($primaryMedia->originalUrl()) ?>"
+                       class="lightbox-trigger"
+                       data-lightbox="item-gallery"
+                       data-title="<?= $escape($primaryMedia->displayTitle() ?: $itemTitle) ?>">
+                        <?= $primaryMedia->render(['style' => 'width: 100%; height: auto; max-height: 600px; object-fit: contain;']) ?>
+                    </a>
+                    <?php else: ?>
+                        <?= $primaryMedia->render(['style' => 'width: 100%; height: auto; max-height: 600px; object-fit: contain;']) ?>
+                    <?php endif; ?>
+                </div>
+
+                <?php if ($primaryMedia->displayTitle() || $primaryMedia->displayDescription()): ?>
+                <div class="media-caption">
+                    <?php if ($primaryMedia->displayTitle()): ?>
+                    <h4><?= $escape($primaryMedia->displayTitle()) ?></h4>
+                    <?php endif; ?>
+                    <?php if ($primaryMedia->displayDescription()): ?>
+                    <p><?= $escape($primaryMedia->displayDescription()) ?></p>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if (count($itemMedia) > 1): ?>
+            <div class="media-thumbnails">
+                <h4><?= $translate('Additional Media') ?></h4>
+                <div class="thumbnail-grid">
+                    <?php foreach ($itemMedia as $index => $media): ?>
+                    <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>"
+                         data-media-id="<?= $media->id() ?>">
+                        <?php if ($media->hasOriginal()): ?>
+                        <a href="<?= $escape($media->originalUrl()) ?>"
+                           class="lightbox-trigger"
+                           data-lightbox="item-gallery"
+                           data-title="<?= $escape($media->displayTitle() ?: $itemTitle) ?>">
+                            <?= $thumbnail($media, 'medium') ?>
+                        </a>
+                        <?php else: ?>
+                            <?= $thumbnail($media, 'medium') ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="library-item-content">
+    <div class="grid-container">
+        <div class="<?php echo ($showLayout == 'inline') ? 'inline' : 'stack'; ?>">
+            <?php $this->trigger('view.show.before'); ?>
+
+            <?php if ($fullWidthMainHasBlocks): ?>
+            <div class="full-width-main">
+                <?php echo $fullWidthMainBlockContent->getBlocks(); ?>
+            </div>
+            <?php endif; ?>
+
+    <!-- Resource Regions Layout (Cumulus-style) -->
+    <?php
+        // Compute responsive widths based on which sidebars are populated
+        if ($leftSidebarHasBlocks && $rightSidebarHasBlocks) {
+            $sidebarWidth = '3';
+            $mainWidth = '6';
+        } else {
+            $sidebarWidth = '4';
+            $mainWidth = '8';
+        }
+    ?>
+    <div class="grid-x grid-margin-x">
+        <?php if ($leftSidebarHasBlocks): ?>
+        <div class="left-sidebar cell medium-<?= $sidebarWidth; ?>">
+            <?= $leftSidebarBlockContent->getBlocks(); ?>
+        </div>
+        <?php endif; ?>
+
+        <div class="main-with-sidebar cell medium-<?= $mainWidth; ?>">
+            <?php if ($itemDescription): ?>
+            <div class="item-description">
+                <h3><?= $translate('Description') ?></h3>
+                <div class="description-content">
+                    <?= $this->truncate($escape($itemDescription), 500, '...', false) ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($mainWithSidebarHasBlocks): ?>
+            <div class="resource-blocks">
+                <?= $mainWithSidebarBlockContent->getBlocks(); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($rightSidebarHasBlocks): ?>
+        <div class="right-sidebar cell medium-<?= $sidebarWidth; ?>">
+            <!-- Optional theme-specific details panel lives at top of right sidebar -->
+            <div class="metadata-panel">
+                <h3><?= $translate('Details') ?></h3>
+                <div class="metadata-groups">
+                    <?php if ($creator || $date): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Creation') ?></h4>
+                        <dl class="metadata-list">
+                            <?php if ($creator): ?>
+                            <dt><?= $translate('Creator') ?></dt>
+                            <dd><?= $escape($creator) ?></dd>
+                            <?php endif; ?>
+                            <?php if ($date): ?>
+                            <dt><?= $translate('Date') ?></dt>
+                            <dd><?= $escape($date) ?></dd>
+                            <?php endif; ?>
+                        </dl>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($subject)): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Subjects') ?></h4>
+                        <div class="subject-tags">
+                            <?php foreach ($subject as $subjectValue): ?>
+                            <span class="subject-tag"><?= $escape($subjectValue) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($itemSets)): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Collections') ?></h4>
+                        <ul class="collection-list">
+                            <?php foreach ($itemSets as $itemSet): ?>
+                            <li><a href="<?= $escape($itemSet->url()) ?>"><?= $escape($itemSet->displayTitle()) ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($rights): ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Rights') ?></h4>
+                        <p class="rights-statement"><?= $escape($rights) ?></p>
+                    </div>
+                    <?php endif; ?>
+                    <div class="metadata-group">
+                        <h4><?= $translate('Technical') ?></h4>
+                        <dl class="metadata-list">
+                            <dt><?= $translate('Item ID') ?></dt>
+                            <dd><?= $item->id() ?></dd>
+                            <?php if ($item->resourceClass()): ?>
+                            <dt><?= $translate('Resource Class') ?></dt>
+                            <dd><?= $escape($item->resourceClass()->label()) ?></dd>
+                            <?php endif; ?>
+                            <dt><?= $translate('Media Count') ?></dt>
+                            <dd><?= count($itemMedia) ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <?= $rightSidebarBlockContent->getBlocks(); ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <?php $this->trigger('view.show.after'); ?>
+        </div>
+    </div>
+</div>

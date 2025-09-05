@@ -1,0 +1,50 @@
+/* Library polish: palette + buttons/links/zone backgrounds (renamed from sufism-polish.css) */
+:root {
+  --color-primary: var(--color-primary, #1F3A5F);
+  --color-accent: var(--color-accent, #7A1E3A);
+  --zone-bg: var(--zone-bg, #fffaf7);
+}
+
+/* Buttons and links - FIXED: Removed broad selectors */
+/* Specific targeting for UI controls only:
+ * - .button, a.button: Explicit button classes
+ * - .browse-controls a: Browse control links  
+ * - .pagination a: Pagination links
+ * - .btn-link: Semantic class for content links that need button styling
+ * REMOVED: main a, .content a, .resource a (were too broad)
+ */
+.button, a.button, .browse-controls a, .pagination a, .btn-link {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.95);
+  transition: all .25s ease;
+}
+/* Ensure the logo link never inherits these button/box styles */
+body .logo-area .logo-link,
+body .logo-area .logo-link:hover { border: 0; background: transparent; box-shadow: none; }
+/* Hover states - FIXED: Removed broad selectors */
+/* Specific hover targeting for UI controls only */
+.button:hover, a.button:hover, .browse-controls a:hover, .pagination a:hover, .btn-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+/* But not for the logo link */
+body .logo-area .logo-link:hover { border-color: transparent; background: transparent; box-shadow: none; }
+
+/* Zone panels (exclude TOC containers so pill links define the look) */
+.content-zone, .item-showcase, .resource-list, .browse-controls {
+  background: var(--zone-bg);
+  border: 1px solid rgba(122, 30, 58, .25);
+  border-radius: 8px;
+}
+/* Intentionally exclude .toc and .table-of-contents from zone background */
+
+/* Headings */
+h1, .page-title { letter-spacing:.2px; }
+
+/* Tagline */
+.site-tagline { opacity: .95; }
+

@@ -1,0 +1,261 @@
+/**
+ * Font Overrides CSS - Maximum Priority
+ * 
+ * This file contains high-specificity CSS rules designed to override
+ * Omeka S default font styles. It should be loaded AFTER all other CSS.
+ */
+
+/* CSS Variables for Dynamic Font Settings - FIXED VARIABLE NAMES */
+:root {
+    /* Use direct variable names that match JavaScript settings */
+    --theme-body-font: var(--body-font-family, "Helvetica Neue", Arial, sans-serif);
+    --theme-h1-font: var(--h1-font-family, "Helvetica Neue", Arial, sans-serif);
+    --theme-h2-font: var(--h2-font-family, "Helvetica Neue", Arial, sans-serif);
+    --theme-h3-font: var(--h3-font-family, "Helvetica Neue", Arial, sans-serif);
+    --theme-tagline-font: var(--tagline-font-family, Georgia, serif);
+}
+
+/* Maximum Specificity Body Font Override */
+html body,
+body.omeka-s,
+.omeka-s body,
+#content body,
+.content body,
+body[class],
+body {
+    font-family: var(--theme-body-font) !important;
+    font-size: var(--body-font-size, 1rem) !important;
+    color: var(--body-font-color, #4a5568) !important;
+    font-weight: var(--body-font-weight, 400) !important;
+    font-style: var(--body-font-style, normal) !important;
+}
+
+/* Maximum Specificity Heading Overrides */
+html h1,
+body h1,
+.omeka-s h1,
+#content h1,
+.content h1,
+h1[class],
+h1 {
+    font-family: var(--theme-h1-font) !important;
+    font-size: var(--h1-font-size, 2.5rem) !important;
+    color: var(--h1-font-color, #333333) !important;
+    font-weight: var(--h1-font-weight, 600) !important;
+    font-style: var(--h1-font-style, normal) !important;
+}
+
+html h2,
+body h2,
+.omeka-s h2,
+#content h2,
+.content h2,
+h2[class],
+h2 {
+    font-family: var(--theme-h2-font) !important;
+    font-size: var(--h2-font-size, 2rem) !important;
+    color: var(--h2-font-color, #333333) !important;
+    font-weight: var(--h2-font-weight, 600) !important;
+    font-style: var(--h2-font-style, normal) !important;
+}
+
+html h3,
+body h3,
+.omeka-s h3,
+#content h3,
+.content h3,
+h3[class],
+h3 {
+    font-family: var(--theme-h3-font) !important;
+    font-size: var(--h3-font-size, 1.5rem) !important;
+    color: var(--h3-font-color, #333333) !important;
+    font-weight: var(--h3-font-weight, 500) !important;
+    font-style: var(--h3-font-style, normal) !important;
+}
+
+/* Tagline Maximum Specificity */
+html .site-tagline,
+body .site-tagline,
+.omeka-s .site-tagline,
+#content .site-tagline,
+.content .site-tagline,
+.site-tagline[class],
+.site-tagline {
+    font-family: var(--tagline-font-family, var(--theme-tagline-font, Georgia, serif)) !important;
+    font-weight: var(--tagline-font-weight, 400) !important;
+    font-style: var(--tagline-font-style, normal) !important;
+    color: var(--tagline-color, #666666) !important;
+}
+
+/* Override Omeka S specific selectors */
+.omeka-s .site-title,
+.omeka-s .site-title a,
+.omeka-s .site-title a:link,
+.omeka-s .site-title a:visited {
+    font-family: var(--theme-h1-font) !important;
+}
+
+.omeka-s .navigation,
+.omeka-s .navigation a,
+.omeka-s .navigation li {
+    font-family: var(--theme-body-font) !important;
+}
+
+.omeka-s .resource-list .resource-name,
+.omeka-s .resource-list .resource-name a {
+    font-family: var(--theme-h2-font) !important;
+}
+
+.omeka-s .property h4,
+.omeka-s .property .property-label {
+    font-family: var(--theme-h3-font) !important;
+}
+
+/* Force inheritance for all child elements */
+.omeka-s * {
+    font-family: inherit !important;
+}
+
+/* Specific overrides for common Omeka S elements */
+.omeka-s .item-showcase .resource-name,
+.omeka-s .item-showcase .resource-name a {
+    font-family: var(--theme-h2-font) !important;
+}
+
+.omeka-s .browse .resource-list .resource-name {
+    font-family: var(--theme-h2-font) !important;
+}
+
+.omeka-s .show .property .values {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Navigation overrides */
+.omeka-s .site-nav,
+.omeka-s .site-nav a,
+.omeka-s .site-nav li {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Form elements */
+.omeka-s input,
+.omeka-s textarea,
+.omeka-s select,
+.omeka-s button {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Pagination */
+.omeka-s .pagination,
+.omeka-s .pagination a,
+.omeka-s .pagination span {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Footer */
+.omeka-s footer,
+.omeka-s footer * {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Breadcrumbs */
+.omeka-s .breadcrumbs,
+.omeka-s .breadcrumbs a {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Search results */
+.omeka-s .search-results .result-title,
+.omeka-s .search-results .result-title a {
+    font-family: var(--theme-h2-font) !important;
+}
+
+/* Media viewer */
+.omeka-s .media-render,
+.omeka-s .media-render * {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Admin bar override (if present) */
+.omeka-s .admin-bar,
+.omeka-s .admin-bar * {
+    font-family: var(--theme-body-font) !important;
+}
+
+/* Fallback font loading */
+@supports not (font-display: swap) {
+    /* Fallback for older browsers */
+    body {
+        font-family: Arial, sans-serif !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-family: Arial, sans-serif !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    html body,
+    body {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        font-size: 12pt !important;
+        color: #000 !important;
+    }
+    
+    html h1, html h2, html h3, html h4, html h5, html h6,
+    h1, h2, h3, h4, h5, h6 {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        color: #000 !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    html body,
+    body {
+        font-weight: 500 !important;
+    }
+    
+    html h1, html h2, html h3, html h4, html h5, html h6,
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700 !important;
+    }
+}
+
+/* Debug styles - remove in production */
+.font-debug body::before {
+    content: "Font Debug: Body font applied";
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: red;
+    color: white;
+    padding: 5px;
+    z-index: 9999;
+    font-size: 12px;
+}
+
+.font-debug h1::before {
+    content: "H1 font applied";
+    background: blue;
+    color: white;
+    padding: 2px;
+    font-size: 10px;
+}
+
+.font-debug h2::before {
+    content: "H2 font applied";
+    background: green;
+    color: white;
+    padding: 2px;
+    font-size: 10px;
+}
+
+.font-debug h3::before {
+    content: "H3 font applied";
+    background: orange;
+    color: white;
+    padding: 2px;
+    font-size: 10px;
+}
