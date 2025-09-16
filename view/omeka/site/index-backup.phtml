@@ -1,0 +1,229 @@
+<?php
+/**
+ * Custom Homepage Template for Sufism Library Theme
+ * Implements hero banner, featured collections, and quick access links
+ * Based on design mockups and requirements
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$themeSetting = $this->plugin('themeSetting');
+$api = $this->plugin('api');
+$thumbnail = $this->plugin('thumbnail');
+$url = $this->plugin('url');
+
+// Get theme settings
+$homepageLayout = $this->themeSetting('library_homepage_layout', 'hero_banner');
+$enableFacets = $this->themeSetting('library_enable_facets', true);
+
+// Get site data
+$site = $this->vars()->site ?? null;
+$siteTitle = $site ? $site->title() : 'Library';
+$siteDescription = $site ? $site->summary() : '';
+
+// Get featured collections (first 6 item sets)
+$itemSets = [];
+$recentItems = [];
+
+if ($site) {
+    try {
+        $itemSets = $api->search('item_sets', [
+            'site_id' => $site->id(),
+            'limit' => 6,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+
+        // Get recent items for quick access
+        $recentItems = $api->search('items', [
+            'site_id' => $site->id(),
+            'limit' => 8,
+            'sort_by' => 'created',
+            'sort_order' => 'desc'
+        ])->getContent();
+    } catch (Exception $e) {
+        // Fallback if API calls fail
+        $itemSets = [];
+        $recentItems = [];
+    }
+}
+
+// Add custom CSS for homepage
+$this->headLink()->appendStylesheet($this->assetUrl('css/homepage.css'));
+$this->htmlElement('body')->appendAttribute('class', 'homepage library-homepage reference-homepage');
+?>
+
+<div class="library-homepage-container">
+    
+    <?php if ($homepageLayout === 'hero_banner'): ?>
+    <!-- Hero Banner Section -->
+    <section class="hero-banner">
+        <div class="hero-content">
+            <div class="grid-container">
+                <div class="grid-x grid-margin-x align-center">
+                    <div class="cell large-8 text-center">
+                        <h1 class="hero-title"><?php echo $escape($siteTitle); ?></h1>
+                        <?php if ($siteDescription): ?>
+                        <p class="hero-description"><?php echo $escape($siteDescription); ?></p>
+                        <?php endif; ?>
+                        
+                        <!-- Search Form -->
+                        <div class="hero-search">
+                            <?php echo $this->partial('common/search-form'); ?>
+                        </div>
+                        
+                        <!-- Quick Access Links -->
+                        <div class="hero-actions">
+                            <a href="<?php echo $url('site/resource', ['controller' => 'item', 'action' => 'browse']); ?>" 
+                               class="button primary"><?php echo $translate('Browse Items'); ?></a>
+                            <a href="<?php echo $url('site/resource', ['controller' => 'item-set', 'action' => 'browse']); ?>" 
+                               class="button secondary"><?php echo $translate('View Collections'); ?></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-overlay"></div>
+    </section>
+    <?php endif; ?>
+    
+    <!-- Featured Collections Section -->
+    <?php if (!empty($itemSets)): ?>
+    <section class="featured-collections">
+        <div class="grid-container">
+            <div class="section-header">
+                <h2><?php echo $translate('Featured Collections'); ?></h2>
+                <p><?php echo $translate('Explore our curated digital collections'); ?></p>
+            </div>
+            
+            <div class="grid-x grid-margin-x small-up-1 medium-up-2 large-up-3">
+                <?php foreach ($itemSets as $itemSet): ?>
+                <div class="cell">
+                    <div class="collection-card">
+                        <div class="card-image">
+                            <?php if ($thumbnail($itemSet, 'medium')): ?>
+                                <a href="<?php echo $escape($itemSet->url()); ?>">
+                                    <?php echo $thumbnail($itemSet, 'medium'); ?>
+                                </a>
+                            <?php else: ?>
+                                <div class="placeholder-image">
+                                    <i class="icon-collection"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="card-content">
+                            <h3 class="card-title">
+                                <a href="<?php echo $escape($itemSet->url()); ?>">
+                                    <?php echo $escape($itemSet->displayTitle()); ?>
+                                </a>
+                            </h3>
+                            
+                            <?php if ($description = $itemSet->displayDescription()): ?>
+                            <p class="card-description"><?php echo $this->truncate($escape($description), 120); ?></p>
+                            <?php endif; ?>
+                            
+                            <div class="card-meta">
+                                <?php $itemCount = $itemSet->itemCount(); ?>
+                                <span class="item-count">
+                                    <?php echo sprintf($translate('%s items'), $itemCount); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <div class="section-footer text-center">
+                <a href="<?php echo $url('site/resource', ['controller' => 'item-set', 'action' => 'browse']); ?>" 
+                   class="button outline"><?php echo $translate('View All Collections'); ?></a>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+    
+    <!-- Recent Items Section -->
+    <?php if (!empty($recentItems)): ?>
+    <section class="recent-items">
+        <div class="grid-container">
+            <div class="section-header">
+                <h2><?php echo $translate('Recently Added'); ?></h2>
+                <p><?php echo $translate('Discover our latest additions to the digital library'); ?></p>
+            </div>
+            
+            <div class="grid-x grid-margin-x small-up-1 medium-up-2 large-up-4">
+                <?php foreach ($recentItems as $item): ?>
+                <div class="cell">
+                    <div class="item-card">
+                        <div class="card-image">
+                            <?php if ($thumbnail($item, 'medium')): ?>
+                                <a href="<?php echo $escape($item->url()); ?>">
+                                    <?php echo $thumbnail($item, 'medium'); ?>
+                                </a>
+                            <?php else: ?>
+                                <div class="placeholder-image">
+                                    <i class="icon-item"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="card-content">
+                            <h4 class="card-title">
+                                <a href="<?php echo $escape($item->url()); ?>">
+                                    <?php echo $escape($item->displayTitle()); ?>
+                                </a>
+                            </h4>
+                            
+                            <?php if ($creator = $item->value('dcterms:creator')): ?>
+                            <p class="card-creator"><?php echo $escape($creator); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <div class="section-footer text-center">
+                <a href="<?php echo $url('site/resource', ['controller' => 'item', 'action' => 'browse']); ?>" 
+                   class="button outline"><?php echo $translate('Browse All Items'); ?></a>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+    
+    <!-- Statistics Section -->
+    <section class="library-stats">
+        <div class="grid-container">
+            <div class="grid-x grid-margin-x text-center">
+                <div class="cell large-3 medium-6">
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('items', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Items'); ?></span>
+                    </div>
+                </div>
+                <div class="cell large-3 medium-6">
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('item_sets', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Collections'); ?></span>
+                    </div>
+                </div>
+                <div class="cell large-3 medium-6">
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo number_format($api->search('media', ['site_id' => $site->id()])->getTotalResults()); ?></span>
+                        <span class="stat-label"><?php echo $translate('Media Files'); ?></span>
+                    </div>
+                </div>
+                <div class="cell large-3 medium-6">
+                    <div class="stat-item">
+                        <span class="stat-number"><?php echo date('Y'); ?></span>
+                        <span class="stat-label"><?php echo $translate('Established'); ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+</div>
+
+<?php $this->trigger('view.show.after'); ?>

@@ -1,0 +1,82 @@
+/* PAGINATION STYLES - DYNAMIC THEME INTEGRATION */
+/* This file uses CSS variables that are set by the theme settings */
+
+/* Pagination Container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 4px;
+}
+
+/* Pagination Links - USES DYNAMIC THEME COLORS */
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: var(--pagination-button-padding, 8px 16px);
+    margin: 0 2px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: var(--pagination-button-font-size, 1rem);
+    /* USES DYNAMIC THEME COLORS FROM CSS VARIABLES */
+    color: var(--pagination-font-color, #ffffff) !important;
+    background-color: var(--pagination-background-color, #2C4A6B) !important;
+    border: 2px solid var(--pagination-background-color, #2C4A6B) !important;
+}
+
+/* Current page indicator */
+.pagination .current,
+.pagination span.current {
+    background-color: var(--pagination-background-color, #2C4A6B) !important;
+    color: var(--pagination-font-color, #ffffff) !important;
+    font-weight: bold;
+}
+
+/* Pagination Hover Effects - USES DYNAMIC THEME COLORS */
+.pagination a:hover,
+.pagination a:focus {
+    background-color: var(--pagination-hover-color, #1a365d) !important;
+    color: var(--pagination-font-color, #ffffff) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Disabled pagination links */
+.pagination .disabled,
+.pagination span.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* First/Last/Previous/Next buttons */
+.pagination .first,
+.pagination .previous,
+.pagination .next,
+.pagination .last {
+    font-weight: 500;
+}
+
+/* Enhanced specificity for Omeka S core overrides */
+body .pagination a,
+.site-content .pagination a,
+body nav .pagination a,
+.site-content nav .pagination a,
+main .pagination a {
+    color: var(--pagination-font-color, #ffffff) !important;
+    background-color: var(--pagination-background-color, #2C4A6B) !important;
+    border-color: var(--pagination-background-color, #2C4A6B) !important;
+}
+
+body .pagination a:hover,
+.site-content .pagination a:hover,
+body nav .pagination a:hover,
+.site-content nav .pagination a:hover,
+main .pagination a:hover {
+    background-color: var(--pagination-hover-color, #1a365d) !important;
+    color: var(--pagination-font-color, #ffffff) !important;
+}
+
+/* Pagination CSS File - Created for Dynamic Theme Integration: 2025-08-08 */
