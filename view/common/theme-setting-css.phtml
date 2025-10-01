@@ -77,8 +77,37 @@ if ($tocHoverTextColor === '' || $tocHoverTextColor === null) {
 $tocHoverBgColor = $this->themeSetting('toc_hover_background_color', '#D4AF37');
 $tocBackgroundColor = $this->themeSetting('toc_background_color', '#ffffff');
 $tocBorderColor = $this->themeSetting('toc_border_color', '#D4AF37');
-$boxBorderWidth = $this->themeSetting('box_border_width', '1px');
-$boxBorderRadius = $this->themeSetting('box_border_radius', '8px');
+$tocBorderWidth = $this->themeSetting('toc_border_width', '1px');
+
+// Get Breadcrumbs font settings with debug logging
+$breadcrumbsFontFamily = $this->themeSetting('breadcrumbs_font_family', 'helvetica');
+$breadcrumbsFontSizeRem = $this->themeSetting('breadcrumbs_font_size_rem', '1rem');
+$breadcrumbsFontWeight = $this->themeSetting('breadcrumbs_font_weight', '400');
+$breadcrumbsFontStyle = $this->themeSetting('breadcrumbs_font_style', 'normal');
+$breadcrumbsTextColor = $this->themeSetting('breadcrumbs_text_color', '#b37c05');
+$breadcrumbsBackgroundColor = $this->themeSetting('breadcrumbs_background_color', '#ffffff');
+$breadcrumbsBorderColor = $this->themeSetting('breadcrumbs_border_color', '#D4AF37');
+$breadcrumbsBorderWidth = $this->themeSetting('breadcrumbs_border_width', '1px');
+$breadcrumbsHoverTextColor = $this->themeSetting('breadcrumbs_hover_text_color', '#ffffff');
+$breadcrumbsHoverBackgroundColor = $this->themeSetting('breadcrumbs_hover_background_color', '#D4AF37');
+
+echo "<script>console.log('Breadcrumbs Settings:', " . json_encode([
+    'fontFamily' => $breadcrumbsFontFamily,
+    'fontSizeRem' => $breadcrumbsFontSizeRem,
+    'fontWeight' => $breadcrumbsFontWeight,
+    'fontStyle' => $breadcrumbsFontStyle,
+    'textColor' => $breadcrumbsTextColor,
+    'backgroundColor' => $breadcrumbsBackgroundColor,
+    'borderColor' => $breadcrumbsBorderColor,
+    'hoverText' => $breadcrumbsHoverTextColor,
+    'hoverBg' => $breadcrumbsHoverBackgroundColor
+]) . ");</script>";
+
+$paginationBorderWidth = $this->themeSetting('pagination_border_width', '1px');
+
+// Get Page Title settings
+$pageTitlePillStyle = $this->themeSetting('page_title_pill_style', '1');
+$pageTitleBorderWidth = $this->themeSetting('page_title_border_width', '1px');
 
 echo "<script>console.log('TOC Settings:', " . json_encode([
     'fontFamily' => $tocFontFamily,
@@ -319,8 +348,25 @@ $tocHoverTextColor = $resolve('toc_hover_text_color', $tocHoverTextColor);
 $tocHoverBgColor = $resolve('toc_hover_background_color', $tocHoverBgColor);
 $tocBackgroundColor = $resolve('toc_background_color', $tocBackgroundColor);
 $tocBorderColor = $resolve('toc_border_color', $tocBorderColor);
-$boxBorderWidth = $resolve('box_border_width', $boxBorderWidth);
-$boxBorderRadius = $resolve('box_border_radius', $boxBorderRadius);
+$tocBorderWidth = $resolve('toc_border_width', $tocBorderWidth);
+
+// Resolve breadcrumb settings
+$breadcrumbsFontFamily = $resolve('breadcrumbs_font_family', $breadcrumbsFontFamily);
+$breadcrumbsFontSizeRem = $resolve('breadcrumbs_font_size_rem', $breadcrumbsFontSizeRem);
+$breadcrumbsFontWeight = $resolve('breadcrumbs_font_weight', $breadcrumbsFontWeight);
+$breadcrumbsFontStyle = $resolve('breadcrumbs_font_style', $breadcrumbsFontStyle);
+$breadcrumbsTextColor = $resolve('breadcrumbs_text_color', $breadcrumbsTextColor);
+$breadcrumbsBackgroundColor = $resolve('breadcrumbs_background_color', $breadcrumbsBackgroundColor);
+$breadcrumbsBorderColor = $resolve('breadcrumbs_border_color', $breadcrumbsBorderColor);
+$breadcrumbsBorderWidth = $resolve('breadcrumbs_border_width', $breadcrumbsBorderWidth);
+$breadcrumbsHoverTextColor = $resolve('breadcrumbs_hover_text_color', $breadcrumbsHoverTextColor);
+$breadcrumbsHoverBackgroundColor = $resolve('breadcrumbs_hover_background_color', $breadcrumbsHoverBackgroundColor);
+
+$paginationBorderWidth = $resolve('pagination_border_width', $paginationBorderWidth);
+
+// Resolve page title settings
+$pageTitlePillStyle = $resolve('page_title_pill_style', $pageTitlePillStyle);
+$pageTitleBorderWidth = $resolve('page_title_border_width', $pageTitleBorderWidth);
 
 $paginationFontColor = $resolve('pagination_font_color', $paginationFontColor);
 // CRITICAL FIX: Pass the actual user setting to resolve, not the preset-overridden variable
@@ -655,8 +701,10 @@ echo "console.log('  h1_font_family: \"" . addslashes($h1FontFamily ?? 'NULL') .
 echo "console.log('  h2_font_family: \"" . addslashes($h2FontFamily ?? 'NULL') . "\"');\n";
     echo "console.log('  toc_background_color: \"" . addslashes($tocBackgroundColor ?? 'NULL') . "\"');\n";
     echo "console.log('  toc_border_color: \"" . addslashes($tocBorderColor ?? 'NULL') . "\"');\n";
-    echo "console.log('  box_border_width: \"" . addslashes($boxBorderWidth ?? 'NULL') . "\"');\n";
-    echo "console.log('  box_border_radius: \"" . addslashes($boxBorderRadius ?? 'NULL') . "\"');\n";
+    echo "console.log('  toc_border_width: \"" . addslashes($tocBorderWidth ?? 'NULL') . "\"');\n";
+    echo "console.log('  breadcrumbs_border_width: \"" . addslashes($breadcrumbsBorderWidth ?? 'NULL') . "\"');\n";
+    echo "console.log('  pagination_border_width: \"" . addslashes($paginationBorderWidth ?? 'NULL') . "\"');\n";
+    echo "console.log('  page_title_border_width: \"" . addslashes($pageTitleBorderWidth ?? 'NULL') . "\"');\n";
 
 echo "console.log('  h3_font_family: \"" . addslashes($h3FontFamily ?? 'NULL') . "\"');\n";
 echo "console.log('  body_font_family: \"" . addslashes($bodyFontFamily ?? 'NULL') . "\"');\n";
@@ -804,7 +852,7 @@ html body.omeka-s p.site-tagline {
     color: <?php echo $taglineFontColor; ?> !important;
     font-size: <?php echo $normalizeSize($taglineFontSize, '0.9rem'); ?> !important;
     display: inline-block !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.2rem) !important; /* Dynamic: adapts to font size + padding */
     padding: 0.1rem 0.45rem !important;
     background: <?php echo $tocBackgroundColor; ?> !important;
     border: none !important;
@@ -888,7 +936,7 @@ html body .site-tagline a:hover,
 html body .site-tagline:hover a {
     color: <?php echo $taglineHoverTextColor; ?> !important;
     background: <?php echo $taglineHoverBgColor; ?> !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.2rem) !important; /* Dynamic: adapts to font size + padding */
     padding: 0.1rem 0.45rem !important;
     border: none !important;
     box-shadow: none !important;
@@ -977,6 +1025,9 @@ html body.omeka-s .block ul.list-of-pages {
     background-color: transparent !important; /* let link pills stand out */
     border-radius: 0 !important;
 }
+/* TOC STYLING: Conditional pill styling and centering based on settings */
+<?php $tocPills = (string)($this->themeSetting('toc_pill_style', '1') ?? '1') === '1'; ?>
+<?php if ($tocPills): ?>
 /* Center TOC entries and size to content width: apply to inner lists */
 html body .table-of-contents ul,
 html body .toc ul,
@@ -987,8 +1038,10 @@ html body main ul.navigation {
     gap: 8px 12px !important;
     justify-content: center !important;
 }
+<?php endif; ?>
 
-/* TOC LINKS - MAXIMUM SPECIFICITY */
+<?php if ($tocPills): ?>
+/* TOC LINKS - PILL STYLE - MAXIMUM SPECIFICITY */
 html body main ul.navigation li a,
 html body main ul.navigation a,
 html body .list-of-pages a,
@@ -1018,15 +1071,51 @@ html body .page-list a:visited {
     font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
     font-family: <?php echo $fontFamilyMap[$tocFontFamily] ?? $fontFamilyMap['system']; ?> !important;
     font-size: var(--toc-font-size) !important;
-    /* Pill shape: fully rounded ends with visible outline */
-    border-radius: 999px !important;
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
+    /* Pill shape: dynamically rounded ends that adapt to font size */
+    border-radius: calc(1em + 1rem) !important; /* Dynamic: adapts to font size + padding */
+    border: <?php echo $tocBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
     background: <?php echo $tocBackgroundColor; ?> !important; /* visible pill */
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
     transition: color 0.3s ease, background-color 0.3s ease !important;
 }
+<?php else: ?>
+/* TOC LINKS - OMEKA S DEFAULT STYLE */
+html body main ul.navigation li a,
+html body main ul.navigation a,
+html body .list-of-pages a,
+html body .toc a,
+html body .table-of-contents a,
+html body .page-list a,
+html body .block-listOfPages ul a,
+html body .block ul.list-of-pages a,
+html body.omeka-s main ul.navigation li a,
+html body.omeka-s main ul.navigation a,
+html body.omeka-s .list-of-pages a,
+html body.omeka-s .toc a,
+html body.omeka-s .table-of-contents a,
+html body.omeka-s .page-list a,
+html body.omeka-s .block-listOfPages ul a,
+html body.omeka-s .block ul.list-of-pages a,
+html body .table-of-contents a:visited,
+html body .toc a:visited,
+html body .list-of-pages a:visited,
+html body .page-list a:visited {
+    color: <?php echo $tocTextColor; ?> !important;
+    text-decoration: underline !important; /* Omeka S default */
+    font-weight: <?php echo $tocFontWeight; ?> !important;
+    font-style: <?php echo $tocFontStyle ?? 'normal'; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$tocFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: var(--toc-font-size) !important;
+    /* No pill styling - use Omeka S defaults */
+    border-radius: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+<?php endif; ?>
 
-/* TOC HOVER STATES - MAXIMUM SPECIFICITY */
+<?php if ($tocPills): ?>
+/* TOC HOVER STATES - PILL STYLE - MAXIMUM SPECIFICITY */
 html body main ul.navigation li a:hover,
 html body main ul.navigation a:hover,
 html body .list-of-pages a:hover,
@@ -1047,9 +1136,34 @@ html body.omeka-s .block ul.list-of-pages a:hover {
     background: <?php echo $tocHoverBgColor; ?> !important;
     border-color: <?php echo $tocHoverBgColor; ?> !important;
 }
+<?php else: ?>
+/* TOC HOVER STATES - OMEKA S DEFAULT STYLE */
+html body main ul.navigation li a:hover,
+html body main ul.navigation a:hover,
+html body .list-of-pages a:hover,
+html body .toc a:hover,
+html body .table-of-contents a:hover,
+html body .page-list a:hover,
+html body .block-listOfPages ul a:hover,
+html body .block ul.list-of-pages a:hover,
+html body.omeka-s main ul.navigation li a:hover,
+html body.omeka-s main ul.navigation a:hover,
+html body.omeka-s .list-of-pages a:hover,
+html body.omeka-s .toc a:hover,
+html body.omeka-s .table-of-contents a:hover,
+html body.omeka-s .page-list a:hover,
+html body.omeka-s .block-listOfPages ul a:hover,
+html body.omeka-s .block ul.list-of-pages a:hover {
+    color: <?php echo $tocHoverTextColor; ?> !important;
+    background: <?php echo $tocHoverBgColor; ?> !important;
+    /* No border changes for default style */
+}
+<?php endif; ?>
 
 
-/* PAGE TITLE BLOCK: Make h2 behave like TOC pill with TOC hover colors */
+/* PAGE TITLE BLOCK: Conditional pill styling based on settings */
+<?php $pageTitlePills = (string)($pageTitlePillStyle ?? '1') === '1'; ?>
+<?php if ($pageTitlePills): ?>
 html body .block.block-pageTitle h2,
 html body.omeka-s .block.block-pageTitle h2,
 html body .block.block-pageTitle h2 a,
@@ -1057,10 +1171,10 @@ html body.omeka-s .block.block-pageTitle h2 a {
     display: inline-block !important; /* shrink background to content */
     padding: 0.5rem 0.75rem !important;
     margin: 0.25rem 0 !important;
-    border-radius: 999px !important; /* pill shape */
+    border-radius: calc(1em + 1rem) !important; /* Dynamic pill shape: adapts to font size + padding */
     color: <?php echo $tocTextColor; ?> !important; /* align with TOC text */
     background: <?php echo $tocBackgroundColor; ?> !important; /* align with TOC base */
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important; /* TOC outline */
+    border: <?php echo $pageTitleBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important; /* page title outline */
     text-decoration: none !important;
 }
 
@@ -1073,6 +1187,7 @@ html body.omeka-s .block.block-pageTitle h2 a:hover {
     background: <?php echo $tocHoverBgColor; ?> !important;
     border-color: <?php echo $tocHoverBgColor; ?> !important;
 }
+<?php endif; ?>
 
 /* MENU STYLING */
 .navigation ul {
@@ -1092,7 +1207,7 @@ html body .site-header .navigation a[href*="browse"] {
     color: <?php echo $menuTextColor; ?> !important;
     background: <?php echo $primaryColor; ?> !important;
     border: 1px solid <?php echo $accentColor; ?> !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.7rem) !important; /* Dynamic: adapts to font size + padding */
     padding: 0.35rem 0.75rem !important;
 }
 html body .site-header .navigation a[href*="search"]:hover,
@@ -1108,7 +1223,7 @@ html body .navigation a[href*="browse"] {
     color: <?php echo $bodyFontColor; ?> !important;
     background: transparent !important;
     border: 1px solid <?php echo $bodyFontColor; ?>20 !important; /* subtle */
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.5rem) !important; /* Dynamic: adapts to font size + padding */
     padding: 0.25rem 0.6rem !important;
 }
 html body .navigation a[href*="search"]:hover,
@@ -1240,8 +1355,8 @@ html body .block.block-videoThumbnail figcaption a {
 /* Table of Contents panel - limit rectangular styling to .toc-panel wrappers only */
 .toc-panel {
     background: <?php echo $tocBackgroundColor; ?> !important;
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
-    border-radius: <?php echo $boxBorderRadius; ?> !important;
+    border: <?php echo $tocBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
+    border-radius: calc(1em + 0.5rem) !important; /* Dynamic: adapts to font size + padding */
     padding: 1rem 1.25rem !important;
 }
 
@@ -1291,7 +1406,7 @@ nav.pagination li,
     background: <?php echo $paginationBackgroundColor; ?> !important;
     color: <?php echo $paginationFontColor; ?> !important;
     border: none !important;
-    border-radius: 999px !important; /* pill buttons */
+    border-radius: calc(1em + 0.6rem) !important; /* Dynamic pill buttons: adapt to font size + padding */
     font-family: <?php echo $fontFamilyMap[$paginationFontFamily] ?? $fontFamilyMap['system']; ?> !important;
     font-style: <?php echo $paginationFontStyle; ?> !important;
     font-weight: <?php echo $paginationFontWeight; ?> !important;
@@ -1324,16 +1439,7 @@ nav.pagination li:hover,
     border: none !important;
 }
 
-/* Breadcrumbs: use body font color (gray) for links */
-html body nav[aria-label="breadcrumb"] a,
-html body nav.breadcrumbs a,
-html body .breadcrumbs a,
-html body .breadcrumb a,
-html body .site-breadcrumbs a {
-    color: <?php echo $bodyFontColor; ?> !important;
-}
-
-/* Breadcrumbs: keep text-only; no pill background or borders */
+/* Breadcrumbs: use breadcrumb-specific styling for text-only mode */
 html body nav[aria-label="breadcrumb"] a,
 html body nav.breadcrumbs a,
 html body .breadcrumbs a,
@@ -1342,14 +1448,14 @@ html body .site-breadcrumbs a {
     display: inline !important;
     padding: 0 !important;
     margin: 0 !important;
-    font-weight: <?php echo $bodyFontWeight; ?> !important;
-    font-style: <?php echo $bodyFontStyle; ?> !important;
-    font-family: <?php echo $fontFamilyMap[$bodyFontFamily] ?? $fontFamilyMap['system']; ?> !important;
-    font-size: <?php echo $normalizeSize($bodyFontSize, '1rem'); ?> !important;
+    font-weight: <?php echo $breadcrumbsFontWeight; ?> !important;
+    font-style: <?php echo $breadcrumbsFontStyle; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$breadcrumbsFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $breadcrumbsFontSizeRem ?: '1rem'; ?> !important;
     border-radius: 0 !important;
     border: none !important;
     background: transparent !important;
-    color: <?php echo $bodyFontColor; ?> !important;
+    color: <?php echo $breadcrumbsTextColor; ?> !important;
     text-decoration: none !important;
 }
 html body nav[aria-label="breadcrumb"] a:hover,
@@ -1357,7 +1463,7 @@ html body nav.breadcrumbs a:hover,
 html body .breadcrumbs a:hover,
 html body .breadcrumb a:hover,
 html body .site-breadcrumbs a:hover {
-    color: <?php echo $tocHoverTextColor; ?> !important;
+    color: <?php echo $breadcrumbsHoverTextColor; ?> !important;
     text-decoration: underline !important;
 }
 
@@ -1372,18 +1478,23 @@ html body .breadcrumb a,
 html body .site-breadcrumbs a {
     display: inline-block !important;
     padding: 0.5rem 0.75rem !important;
-    border-radius: 999px !important;
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
-    background: <?php echo $tocBackgroundColor; ?> !important;
+    border-radius: calc(1em + 1rem) !important; /* Dynamic: adapts to font size + padding */
+    border: <?php echo $breadcrumbsBorderWidth; ?> solid <?php echo $breadcrumbsBorderColor; ?> !important;
+    background: <?php echo $breadcrumbsBackgroundColor; ?> !important;
+    color: <?php echo $breadcrumbsTextColor; ?> !important;
+    font-weight: <?php echo $breadcrumbsFontWeight; ?> !important;
+    font-style: <?php echo $breadcrumbsFontStyle; ?> !important;
+    font-family: <?php echo $fontFamilyMap[$breadcrumbsFontFamily] ?? $fontFamilyMap['system']; ?> !important;
+    font-size: <?php echo $breadcrumbsFontSizeRem ?: '1rem'; ?> !important;
 }
 html body nav[aria-label="breadcrumb"] a:hover,
 html body nav.breadcrumbs a:hover,
 html body .breadcrumbs a:hover,
 html body .breadcrumb a:hover,
 html body .site-breadcrumbs a:hover {
-    color: <?php echo $tocHoverTextColor; ?> !important;
-    background: <?php echo $tocHoverBgColor; ?> !important;
-    border-color: <?php echo $tocHoverBgColor; ?> !important;
+    color: <?php echo $breadcrumbsHoverTextColor; ?> !important;
+    background: <?php echo $breadcrumbsHoverBackgroundColor; ?> !important;
+    border-color: <?php echo $breadcrumbsHoverBackgroundColor; ?> !important;
 }
 <?php endif; ?>
 
@@ -1406,8 +1517,8 @@ html body .site-breadcrumbs a:hover {
 /* .toc-panel retains framed look when used */
 .toc-panel {
     background: <?php echo $tocBackgroundColor; ?> !important;
-    border: <?php echo $boxBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
-    border-radius: <?php echo $boxBorderRadius; ?> !important;
+    border: <?php echo $tocBorderWidth; ?> solid <?php echo $tocBorderColor; ?> !important;
+    border-radius: calc(1em + 0.5rem) !important; /* Dynamic: adapts to font size + padding */
 }
 
 
@@ -1420,7 +1531,7 @@ html body .site-breadcrumbs a:hover {
     font-size: <?php echo $paginationFontSize; ?> !important;
     padding: <?php echo $paginationButtonPadding; ?> !important;
     border: none !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.6rem) !important; /* Dynamic: adapts to font size + padding */
     text-decoration: none !important;
 }
 
@@ -1437,7 +1548,7 @@ html body .omeka-pagination .button-group .next {
     background-color: <?php echo $paginationBackgroundColor; ?> !important;
     color: <?php echo $paginationFontColor; ?> !important;
     border: none !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.6rem) !important; /* Dynamic: adapts to font size + padding */
     padding: <?php echo $paginationButtonPadding; ?> !important;
     display: inline-block !important;
     text-decoration: none !important;
@@ -1466,7 +1577,7 @@ html body .site-page-pagination a {
     background-color: <?php echo $paginationBackgroundColor; ?> !important;
     color: <?php echo $paginationFontColor; ?> !important;
     border: none !important;
-    border-radius: 999px !important;
+    border-radius: calc(1em + 0.6rem) !important; /* Dynamic: adapts to font size + padding */
     padding: <?php echo $paginationButtonPadding; ?> !important;
     text-decoration: none !important;
     display: inline-block !important;
