@@ -128,7 +128,10 @@ class ModuleConfig
     ];
     
     /**
-     * Get theme settings key for a specific theme slug
+     * Builds the storage key for theme settings for the given theme slug.
+     *
+     * @param string $themeSlug The theme slug identifier.
+     * @return string The composed theme settings key.
      */
     public static function getThemeSettingsKey(string $themeSlug): string
     {
@@ -136,7 +139,10 @@ class ModuleConfig
     }
     
     /**
-     * Get defaults storage key for a specific preset
+     * Builds the storage key used to save defaults for a given preset.
+     *
+     * @param string $preset The preset identifier (e.g., 'modern').
+     * @return string The storage key for the preset defaults.
      */
     public static function getDefaultsKey(string $preset): string
     {
@@ -144,7 +150,10 @@ class ModuleConfig
     }
     
     /**
-     * Validate if a preset name is valid
+     * Checks whether a preset name is one of the available presets.
+     *
+     * @param string $preset The preset name to check.
+     * @return bool `true` if the preset exists in AVAILABLE_PRESETS, `false` otherwise.
      */
     public static function isValidPreset(string $preset): bool
     {
@@ -152,7 +161,11 @@ class ModuleConfig
     }
     
     /**
-     * Get error message with formatting
+     * Retrieve a formatted error message template by key.
+     *
+     * @param string $key The error message identifier to look up.
+     * @param mixed ...$args Values to interpolate into the message template via `sprintf`.
+     * @return string The formatted error message; returns `'Unknown error'` if no template is found for the provided key.
      */
     public static function getErrorMessage(string $key, ...$args): string
     {
@@ -161,7 +174,11 @@ class ModuleConfig
     }
     
     /**
-     * Get success message with formatting
+     * Retrieve and format a success message template identified by key.
+     *
+     * @param string $key The message key to look up in SUCCESS_MESSAGES.
+     * @param mixed ...$args Values to interpolate into the message template.
+     * @return string The formatted success message; if the key is missing returns "Operation completed".
      */
     public static function getSuccessMessage(string $key, ...$args): string
     {
@@ -170,15 +187,23 @@ class ModuleConfig
     }
     
     /**
-     * Validate color format
-     */
+         * Checks whether a color string matches the module's configured color pattern.
+         *
+         * @param string $color The color value to validate (must conform to the module's color pattern).
+         * @return bool `true` if the color matches the configured pattern, `false` otherwise.
+         */
     public static function isValidColor(string $color): bool
     {
         return preg_match(self::VALIDATION_RULES['color_pattern'], $color) === 1;
     }
     
     /**
-     * Validate font size format
+     * Determine whether a font size string matches the configured font-size pattern.
+     *
+     * Accepts numeric values with optional units commonly used in CSS (for example "14px", "1.2rem", "100%").
+     *
+     * @param string $fontSize The font size string to validate.
+     * @return bool `true` if `$fontSize` matches the module's font-size pattern, `false` otherwise.
      */
     public static function isValidFontSize(string $fontSize): bool
     {

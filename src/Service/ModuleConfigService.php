@@ -20,6 +20,9 @@ class ModuleConfigService
     private ThemeSettingsService $themeSettingsService;
     private ErrorHandler $errorHandler;
 
+    /**
+     * Instantiate the ModuleConfigService with its required dependencies.
+     */
     public function __construct(
         ApiManager $api,
         Settings $settings,
@@ -35,7 +38,16 @@ class ModuleConfigService
     }
 
     /**
-     * Handle configuration form submission
+     * Process a module configuration form submission and dispatch the selected action.
+     *
+     * The $data array may contain the following keys: `action` (string|null) to select the operation,
+     * `target_preset` (string) preset name to use (defaults to ModuleConfig::DEFAULT_PRESET),
+     * `site` (string|null) site slug, and `debug` (truthy) to enable debugging output.
+     * Any errors encountered during processing are converted by the ErrorHandler and added to the provided Messenger.
+     *
+     * @param array $data Form input values and flags (see description for expected keys).
+     * @param Messenger $messenger Messenger used to report success, warning, and error messages to the user.
+     * @return bool `true` if the submission was handled (errors are reported via Messenger), `false` otherwise.
      */
     public function handleConfigFormSubmission(array $data, Messenger $messenger): bool
     {
@@ -54,8 +66,16 @@ class ModuleConfigService
     }
 
     /**
-     * Process specific action
-     */
+         * Dispatches a module configuration action to its dedicated handler and reports the outcome via the Messenger.
+         *
+         * @param string|null $action The action identifier selected from the configuration form (may be null).
+         * @param string $targetPreset The target preset name to use for preset-related actions.
+         * @param string|null $siteSlug The site slug to operate on (may be null).
+         * @param bool $debug When true, handlers may include additional debug information or comparisons.
+         * @param array $data Raw form data; used by actions that require extra inputs (for example, inspect_key).
+         * @param Messenger $messenger Messenger instance used to emit success, warning, or error messages.
+         * @return bool `true` if processing completed (handlers ran or a warning was emitted), `false` if a handler indicates failure.
+         */
     private function processAction(
         ?string $action,
         string $targetPreset,
@@ -93,7 +113,10 @@ class ModuleConfigService
     }
 
     /**
-     * Handle inspect theme settings action
+     * Inspect theme settings for the given site and add a success or error message to the messenger.
+     *
+     * @param string|null $siteSlug Site slug to inspect; `null` selects the default site.
+     * @return bool `true` to indicate the handler finished processing.
      */
     private function handleInspectThemeSettings(?string $siteSlug, Messenger $messenger): bool
     {
@@ -125,7 +148,13 @@ class ModuleConfigService
     }
 
     /**
-     * Handle verify defaults vs settings action
+     * Compare a preset's default values against a site's current theme settings and report the results to the provided Messenger.
+     *
+     * Validates the site slug before performing the comparison and sends a summary or error message to the messenger.
+     *
+     * @param string|null $siteSlug The site slug to target; may be null and will be validated.
+     * @param string $targetPreset The preset identifier to compare against the site's theme settings.
+     * @return bool `true` if processing completed. 
      */
     private function handleVerifyDefaultsVsSettings(?string $siteSlug, string $targetPreset, Messenger $messenger): bool
     {
@@ -157,8 +186,16 @@ class ModuleConfigService
     }
 
     /**
-     * Handle load stored defaults action
-     */
+         * Load stored preset defaults into the theme settings for the given site and report the outcome via the messenger.
+         *
+         * Validates the provided site slug, invokes the theme settings service to load the specified preset's stored defaults,
+         * and adds a success message with the number of keys loaded or an error message if the operation fails.
+         *
+         * @param string|null $siteSlug The site slug to target; may be null if not specified.
+         * @param string $targetPreset The preset identifier whose stored defaults should be loaded.
+         * @param Messenger $messenger Messenger used to report success or error messages to the user.
+         * @return bool `true` to indicate that the form action processing has completed.
+         */
     private function handleLoadStoredDefaults(?string $siteSlug, string $targetPreset, Messenger $messenger): bool
     {
         if ($siteError = $this->errorHandler->validateSiteSlug($siteSlug)) {
@@ -182,8 +219,16 @@ class ModuleConfigService
     }
 
     /**
-     * Handle inspect key action
-     */
+         * Inspect a single theme setting key for a given site and report the value via Messenger.
+         *
+         * Validates the provided site slug and reads the 'inspect_key' entry from `$data`.
+         * On success, adds a success message containing the key and its JSON-encoded value.
+         * On failure, adds appropriate error messages to the messenger.
+         *
+         * @param ?string $siteSlug The site slug to inspect, or null to use the default/current site.
+         * @param array $data Input data array; must contain an 'inspect_key' entry with the key to inspect.
+         * @return bool `true` if processing completed and a messenger message was added.
+         */
     private function handleInspectKey(?string $siteSlug, array $data, Messenger $messenger): bool
     {
         if ($siteError = $this->errorHandler->validateSiteSlug($siteSlug)) {
@@ -213,7 +258,11 @@ class ModuleConfigService
     }
 
     /**
-     * Handle diff vs preset action
+     * Build and send a concise diff summary between the site's current theme settings and the specified preset.
+     *
+     * @param string|null $siteSlug The site slug to operate on; may be null which will be validated.
+     * @param string $targetPreset The name of the preset to compare against.
+     * @return bool `true` if processing completed and a message was sent (method returns after reporting results).
      */
     private function handleDiffVsPreset(?string $siteSlug, string $targetPreset, Messenger $messenger): bool
     {
@@ -243,7 +292,17 @@ class ModuleConfigService
     }
 
     /**
-     * Handle load defaults into settings action
+     * Load a preset's defaults into the site's LibraryTheme settings and report results.
+     *
+     * Validates the site slug, applies the specified preset to the site's theme settings, and
+     * adds success or error messages to the provided Messenger. When `$debug` is true, captures
+     * and reports the theme settings count before and after the operation.
+     *
+     * @param string|null $siteSlug Site identifier (slug) to operate on.
+     * @param string $targetPreset Name of the preset to apply.
+     * @param bool $debug When true, capture and report pre/post operation theme settings counts.
+     * @param \Drupal\Core\Messenger\MessengerInterface $messenger Messenger used to deliver user-facing messages.
+     * @return bool `true` when processing is complete (messages are delivered to the messenger). 
      */
     private function handleLoadDefaultsIntoSettings(?string $siteSlug, string $targetPreset, bool $debug, Messenger $messenger): bool
     {
@@ -285,7 +344,17 @@ class ModuleConfigService
     }
 
     /**
-     * Handle save settings as defaults action
+     * Save current LibraryTheme settings as the specified preset defaults for a site.
+     *
+     * Validates the site slug, attempts to store the current theme settings under the given preset name,
+     * and reports success or error messages via the provided messenger. When $debug is true, a truncated JSON
+     * sample of the stored defaults is added to the messenger.
+     *
+     * @param string|null $siteSlug Site slug to operate on; validation errors are reported through the messenger.
+     * @param string $targetPreset Name of the preset to save settings into.
+     * @param bool $debug If true, include a truncated sample of the stored defaults in the messenger.
+     * @param Messenger $messenger Messenger used to report status, success, and error messages to the user.
+     * @return bool `true` if the action was handled.
      */
     private function handleSaveSettingsAsDefaults(?string $siteSlug, string $targetPreset, bool $debug, Messenger $messenger): bool
     {
@@ -319,7 +388,11 @@ class ModuleConfigService
     }
 
     /**
-     * Inspect a single setting key
+     * Retrieve the value for a single theme setting key for a given site.
+     *
+     * @param string|null $siteSlug The site slug to inspect, or null to use the default site context.
+     * @param string $key The setting key to retrieve.
+     * @return mixed|null The setting value if present, `null` if the key is not found.
      */
     private function inspectSingleKey(?string $siteSlug, string $key)
     {
@@ -328,7 +401,10 @@ class ModuleConfigService
     }
 
     /**
-     * Count theme settings for a site
+     * Get the number of theme settings for the given site.
+     *
+     * @param string|null $siteSlug The site slug to inspect, or null to use the default site.
+     * @return int The count of theme settings for the site.
      */
     private function countThemeSettings(?string $siteSlug): int
     {

@@ -11,11 +11,26 @@ class AdminController extends AbstractActionController
     /** @var ApiManager */
     private $api;
 
+    /**
+     * Create the AdminController and store the API manager for later use.
+     *
+     * @param ApiManager $api API manager used to read site and settings data.
+     */
     public function __construct(ApiManager $api)
     {
         $this->api = $api;
     }
 
+    /**
+     * Handle admin requests to load preset defaults into site theme settings or save current theme settings as preset defaults.
+     *
+     * Processes POST actions `load_defaults_into_settings` and `save_settings_as_defaults`, sets a success message or an error, and returns view data for the admin UI.
+     *
+     * @return \Laminas\View\Model\ViewModel A view model with keys:
+     *     - `message` (string|null): success message when an action completed, or null.
+     *     - `error` (string|null): error message when processing failed or action was unknown, or null.
+     *     - `siteSlug` (string|null): the site slug taken from the query parameters, or null.
+     */
     public function indexAction()
     {
         $request = $this->getRequest();
@@ -55,6 +70,17 @@ class AdminController extends AbstractActionController
         ]);
     }
 
+    /**
+     * Apply a named preset's values into the targeted site's theme settings bucket.
+     *
+     * Writes the preset key/value pairs into the namespaced settings key `theme_settings_<themeSlug>` for the resolved site (or global scope when no site is provided) and returns how many entries were written and the resulting settings.
+     *
+     * @param string|null $siteSlug Optional site slug to target a specific site's settings. If null, global settings scope is used.
+     * @param string $themeKey Theme identifier for context (not used for theme slug resolution in this method).
+     * @param string $preset The preset name to apply (must exist in the preset map).
+     * @return array [int $count, array $resultingSettings] Element 0 is the number of settings written; element 1 is the updated settings array.
+     * @throws \RuntimeException If the provided preset name is not found in the preset map.
+     */
     private function applyPresetToThemeSettings(?string $siteSlug, string $themeKey, string $preset): array
     {
         $presets = $this->getPresetMap();
@@ -93,6 +119,14 @@ class AdminController extends AbstractActionController
         return [$count, $current];
     }
 
+    /**
+     * Save the current theme settings for a given theme as JSON defaults for a named preset.
+     *
+     * @param string|null $siteSlug Optional site slug to target site-specific settings; when null uses global settings.
+     * @param string $themeKey Theme identifier key (used conceptually to identify the theme context).
+     * @param string $preset Name of the preset to store the settings under.
+     * @return array<int, array> An array where index 0 is the number of stored fields and index 1 is the associative array of stored settings. 
+     */
     private function saveSettingsAsPresetDefaults(?string $siteSlug, string $themeKey, string $preset): array
     {
         $site = $siteSlug
@@ -132,6 +166,15 @@ class AdminController extends AbstractActionController
         return [count($stored), $stored];
     }
 
+    /**
+     * Return the available theme presets and their key/value style defaults.
+     *
+     * Each preset is an associative map of theme setting keys (e.g., `h1_font_family`,
+     * `body_font_size`, `primary_color`, etc.) to string values. The returned array
+     * is keyed by preset name (for example, `"modern"` and `"traditional"`).
+     *
+     * @return array<string, array<string, string>> Preset name => (setting key => value) map.
+     */
     private function getPresetMap(): array
     {
         return [

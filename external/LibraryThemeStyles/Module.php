@@ -9,18 +9,32 @@ use Laminas\View\Model\ViewModel;
 
 class Module extends AbstractModule
 {
+    /**
+     * Load and return this module's configuration.
+     *
+     * @return array The module configuration array from config/module.config.php.
+     */
     public function getConfig(): array
     {
         return include __DIR__ . '/config/module.config.php';
     }
 
-    // Explicitly mark module configurable to ensure Configure link appears
+    /**
+     * Indicate that this module exposes a configuration UI in the Omeka admin.
+     *
+     * @return bool `true` if the module should display the Configure link in the admin interface, `false` otherwise.
+     */
     public function isConfigurable(): bool
     {
         return true;
     }
 
-    // Expose a Configure button in Modules list and render our admin form
+    /**
+     * Render the module's admin configuration fragment for the Omeka Modules list.
+     *
+     * @param PhpRenderer $renderer The view renderer used to render the admin fragment.
+     * @return string The rendered HTML fragment for the module configuration form.
+     */
     public function getConfigForm(PhpRenderer $renderer)
     {
         // Render a fragment that Omeka wraps in its own form with CSRF token
@@ -29,7 +43,14 @@ class Module extends AbstractModule
         return $renderer->render($view);
     }
 
-    // Handle form submission from the module's Configure page (Omeka signature)
+    /**
+     * Handle the module Configure page form submission and execute the selected admin action.
+     *
+     * Performs operations against site/theme settings (inspect, compare, load, and save preset defaults),
+     * reports results and errors to the admin messenger, and always returns a boolean completion flag.
+     *
+     * @param AbstractController $controller The controller instance handling the request.
+     * @return bool `true` when processing has completed. */
     public function handleConfigForm(AbstractController $controller)
     {
         $services = $controller->getEvent()->getApplication()->getServiceManager();
@@ -107,6 +128,21 @@ class Module extends AbstractModule
         return true;
     }
 
+    /**
+     * Apply a named preset's theme-setting key/value pairs to a site's theme settings and persist the results.
+     *
+     * Applies all keys from the specified preset into the site's theme settings container and the
+     * namespaced theme_settings_{themeSlug} container, creating or updating entries as needed, then
+     * saves the updated containers back to the site settings.
+     *
+     * @param mixed $api API manager used to look up a site by slug when $siteSlug is provided.
+     * @param mixed $siteSettings Site settings container used to read and persist theme settings.
+     * @param string|null $siteSlug Optional site slug to scope the operation to a particular site; if null the global settings context is used.
+     * @param string $themeKey Logical theme key (unused for storage but indicates which theme group is targeted).
+     * @param string $preset The preset name to apply (must exist in the preset map).
+     * @return array [int $count, array $values] First element is the number of keys applied, second element is the associative array of values applied from the preset.
+     * @throws \RuntimeException If the provided preset name is not defined.
+     */
     private function applyPresetToThemeSettings($api, $siteSettings, ?string $siteSlug, string $themeKey, string $preset): array
     {
         $presets = $this->getPresetMap();
@@ -159,6 +195,19 @@ class Module extends AbstractModule
         return [$count, $values];
     }
 
+    / **
+     * Save the current theme settings for the specified site (or global scope) as JSON defaults under the named preset.
+     *
+     * If a site slug is provided the function targets that site's settings; it prefers namespaced settings
+     * (keyed by `theme_settings_{themeSlug}`) and falls back to the `theme_settings` container (either map
+     * keyed by theme slug or a flat array). The saved defaults are stored in global settings under the key
+     * `LibraryThemeStyles_defaults_{preset}` as a JSON-encoded string.
+     *
+     * @param string|null $siteSlug The slug of the site to target, or null to use the global/siteless context.
+     * @param string $themeKey Unused by this implementation but represents the module theme key.
+     * @param string $preset The preset name under which to save the defaults.
+     * @return array<int, mixed> A two-element array: [numberOfKeysSaved, savedSettingsArray]. Returns [0, []] if no settings were found to save.
+     */
     private function saveSettingsAsPresetDefaults($api, $settings, $siteSettings, ?string $siteSlug, string $themeKey, string $preset): array
     {
         if ($siteSlug) {
@@ -192,6 +241,17 @@ class Module extends AbstractModule
         return [count($current), $current];
     }
 
+    /**
+     * Count theme setting entries for a site and theme.
+     *
+     * Checks the namespaced `theme_settings_{themeSlug}` first, then the
+     * `theme_settings` container (either a map keyed by theme slug or a flat array),
+     * and returns the number of keys found. Returns 0 if no theme settings are present.
+     *
+     * @param string $siteSlug The slug of the site to inspect.
+     * @param string $themeKey The theme configuration key (provided for API consistency).
+     * @return int The number of theme setting entries found (0 if none).
+     */
     private function countThemeSettings($api, $siteSettings, string $siteSlug, string $themeKey): int
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -207,6 +267,17 @@ class Module extends AbstractModule
         return 0;
     }
 
+    /**
+     * Retrieve the stored value for a single theme setting key for a given site.
+     *
+     * Looks up the key first in namespaced theme settings for the site's active theme,
+     * then in the site's theme_settings container (either keyed by theme slug or flat).
+     *
+     * @param string $siteSlug The site slug to query.
+     * @param string $themeKey The theme configuration key/namespace.
+     * @param string $key The specific setting key to inspect.
+     * @return mixed|null The setting value if present, `null` if not found.
+     */
     private function inspectSingleKey($api, $siteSettings, string $siteSlug, string $themeKey, string $key)
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -222,6 +293,16 @@ class Module extends AbstractModule
         return null;
     }
 
+    /**
+     * Compute differences between a theme preset and a site's current theme settings.
+     *
+     * Compares the stored preset values against the site's namespaced theme settings and returns a comma-separated list of up to 15 differences in the form `key:current -> preset`.
+     *
+     * @param string $siteSlug Slug of the target site.
+     * @param string $themeKey Module theme key (used to resolve the theme; may be ignored if theme slug is derived from the site).
+     * @param string $preset Name of the preset to compare against.
+     * @return string A comma-separated list of differences formatted as `key:current -> preset` (empty string if no differences).
+     */
     private function diffVsPreset($api, $siteSettings, string $siteSlug, string $themeKey, string $preset): string
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -240,6 +321,18 @@ class Module extends AbstractModule
         return implode(', ', array_slice($diffs, 0, 15));
     }
 
+    /**
+     * Produce a short summary of a site's theme settings containers and a sample of namespaced keys.
+     *
+     * Retrieves the site's namespaced theme settings (theme_settings_{themeSlug}) and the general
+     * theme_settings container, determines whether the container is a map keyed by theme slug or a flat
+     * array, counts keys in each structure, and returns a formatted summary string including up to 15
+     * sample namespaced keys.
+     *
+     * @param string $siteSlug The slug of the site to inspect.
+     * @param string $themeKey The base theme settings key (unused directly but part of caller convention).
+     * @return string Summary in the form: "Inspect: theme_settings_{slug} has {n} keys; theme_settings ({map|flat|N/A}) has {m} keys. Sample (namespaced): {keys}"
+     */
     private function inspectThemeSettings($api, $siteSettings, string $siteSlug, string $themeKey): string
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -265,6 +358,13 @@ class Module extends AbstractModule
         return sprintf('Inspect: %s has %d keys; theme_settings (%s) has %d keys. Sample (namespaced): %s', $namespacedKey, $namespacedCount, $containerInfo, $containerCount, $sampleKeys);
     }
 
+    /**
+     * Retrieve stored preset defaults from the global settings and decode them.
+     *
+     * @param mixed  $settings Global settings container exposing a `get(string $key)` method.
+     * @param string $preset   Preset name whose stored defaults should be retrieved.
+     * @return array The decoded associative array of defaults for the preset, or an empty array if none exist or decoding fails.
+     */
     private function getStoredDefaults($settings, string $preset): array
     {
         $raw = $settings->get('LibraryThemeStyles_defaults_' . $preset);
@@ -273,6 +373,10 @@ class Module extends AbstractModule
         return is_array($arr) ? $arr : [];
     }
 
+    /**
+     * Compare stored preset defaults against a site's current namespaced theme settings and produce a summary.
+     *
+     * @return string A formatted summary listing counts and sample keys for: current settings, stored defaults, keys missing in defaults, keys missing in settings, and keys with differing values. */
     private function verifyDefaultsVsSettings($api, $settings, $siteSettings, string $siteSlug, string $preset): string
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -301,6 +405,17 @@ class Module extends AbstractModule
         );
     }
 
+    /**
+     * Merges stored preset defaults into a site's theme-specific settings and persists them.
+     *
+     * Loads the stored defaults for the given preset, writes each key/value into the site's
+     * namespaced theme settings container (theme_settings_{themeSlug}), persists the container,
+     * and returns the number of keys applied and a short status message.
+     *
+     * @param string $siteSlug Slug of the target site whose settings will be updated.
+     * @param string $preset Name of the preset whose stored defaults will be loaded.
+     * @return array [int $count, string $message] $count is the number of keys written; $message describes the resulting container key and total keys.
+     */
     private function loadStoredDefaultsIntoSettings($api, $settings, $siteSettings, string $siteSlug, string $preset): array
     {
         $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
@@ -320,6 +435,12 @@ class Module extends AbstractModule
         return [$count, sprintf('theme=%s key=%s now has %d keys', $themeSlug, $key, count($current))];
     }
 
+    /**
+     * Resolve the theme slug from a Site entity or from global site settings.
+     *
+     * @param object|null $site The Site entity to read the theme from; if null or the entity has no theme, the global site setting 'theme' is used.
+     * @return string|null The theme slug when available, or `null` if none can be determined.
+     */
     private function getThemeSlug($site = null): ?string
     {
         if ($site && method_exists($site, 'theme') && $site->theme()) {
@@ -335,6 +456,12 @@ class Module extends AbstractModule
         }
     }
 
+    /**
+     * Predefined theme presets mapping to their theme-setting key/value pairs.
+     *
+     * @return array An associative array where keys are preset names (e.g., 'modern', 'traditional')
+     *               and values are associative arrays of theme setting keys to their default values.
+     */
     private function getPresetMap(): array
     {
         return [
