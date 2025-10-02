@@ -48,7 +48,12 @@ No build steps are required.
 - Menu & Footer typography:
   - Family, weight/style, and colors (footer uses Footer Typography group).
 - Breadcrumbs:
-  - Pill style toggle enabled by default.
+  - Pill style toggle (breadcrumbs_pill_style), enabled by default.
+  - Include current page toggle (breadcrumbs_include_current).
+  - Typography: font family, size (preset or rem override via breadcrumbs_font_size_rem), weight, style.
+  - Colors: text/background and explicit hover text/background colors.
+- Page Title:
+  - Pill style toggle (page_title_pill_style) to enable/disable rounded pill styling.
 
 ## Behavior and Rendering
 
@@ -64,6 +69,14 @@ No build steps are required.
   - Export current site’s saved theme settings as JSON for updating defaults.
   - Usage: `php dev-tools/export-modern-defaults.php <site_id>` (run on the host with access to /var/www/omeka-s/config/database.ini)
   - Keys include modern fields (box_border_width/radius, explicit pagination hover colors, accent_color).
+
+## Companion module: LibraryThemeStyles (presets/save & restore)
+
+- Location: /var/www/omeka-s/modules/LibraryThemeStyles
+- Preset maps updated to use breadcrumbs_* keys and include both breadcrumbs_pill_style and page_title_pill_style.
+- Save defaults: stores all current theme settings (including new keys) as JSON.
+- Load defaults: applies built-in presets or stored defaults, including the new settings.
+- Note: Active theme is LibraryTheme; WorkingLibraryTheme is a backup and not targeted by DEPLOY.sh.
 
 See MAINTENANCE.md for safe operating procedures, annual maintenance (footer year), and lessons learned.
 
